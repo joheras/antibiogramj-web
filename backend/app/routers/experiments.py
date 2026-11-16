@@ -11,7 +11,8 @@ from ..cv import processing as cvp
 from ..db import get_db
 from ..excel import experiment_workbook
 from ..models import Antibiogram, Antibiotic, Breakpoint, Experiment, Family, Measurement, Plate, Standard, User
-from ..schemas import ExperimentDetail, ExperimentIn, ExperimentOut, ExperimentSummary, PlateIn, PlateOut
+from ..schemas import (AntibiogramUpdate, ExperimentDetail, ExperimentIn, ExperimentOut, ExperimentSummary, PlateIn,
+                       PlateOut)
 from ..standards import CATEGORIES, categorise
 from ..templates import learn
 from .analysis import diameter_mm, get_upload, px_per_mm
@@ -117,6 +118,16 @@ def export_experiment(experiment_id: int, db: Session = Depends(get_db), user: U
 
 
 # -------------------------------------------------------------- antibiograms
+@router.patch("/antibiograms/{antibiogram_id}", status_code=204)
+def update_antibiogram(antibiogram_id: int, body: AntibiogramUpdate, db: Session = Depends(get_db),
+                       user: User = Depends(current_user)):
+    """Organism data (the family selects the breakpoints and cannot change) and supplementary tests."""
+    antibiogram = _antibiogram(db, user, antibiogram_id)
+    for field, value in body.model_dump().items():
+        setattr(antibiogram, field, value)
+    db.commit()
+
+
 @router.delete("/antibiograms/{antibiogram_id}", status_code=204)
 def delete_antibiogram(antibiogram_id: int, db: Session = Depends(get_db), user: User = Depends(current_user)):
     antibiogram = _antibiogram(db, user, antibiogram_id)

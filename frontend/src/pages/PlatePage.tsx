@@ -3,10 +3,12 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, download, type Plate } from "../api";
 import { useImageUrl } from "../components/AsyncImage";
 import CategoryBadge from "../components/CategoryBadge";
+import { useSession } from "../session";
 
 export default function PlatePage() {
   const id = Number(useParams().id);
   const navigate = useNavigate();
+  const { catalog } = useSession();
   const [plate, setPlate] = useState<Plate | null>(null);
   const [annotated, setAnnotated] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,7 +66,7 @@ export default function PlatePage() {
                   <td className="num">{m.diameter_mm.toFixed(1)} mm</td>
                   <td className="muted">{m.breakpoint?.available && m.breakpoint.susceptible !== null
                     ? `S ${m.breakpoint.susceptible} / R ${m.breakpoint.resistant}` : "–"}</td>
-                  <td><CategoryBadge category={m.category} /></td>
+                  <td><CategoryBadge category={m.category} standard={catalog.standards.find((s) => s.id === m.standard_id)} /></td>
                   <td>{m.microcolonies ? "Yes" : "No"}</td>
                   <td>{m.interpretation}</td>
                 </tr>

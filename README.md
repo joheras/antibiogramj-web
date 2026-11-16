@@ -29,9 +29,10 @@ It comes in two flavours built from the same React frontend:
 | Template learning in `antibiotics/<id>/` | Bundled templates shared by all + up to 10 learned templates per antibiotic **per user** |
 | Standards EUCAST 6.0 + CLSI 2015 (AntibiogramJXML) | Same files + **EUCAST 16.1** (default for new experiments) |
 | Export experiment to Excel | `.xlsx` with a summary sheet + one sheet per antibiogram |
+| Expert-rules system (stub: intrinsic resistance, exceptional phenotypes, interpretive rules) | **EUCAST expert system** (see below) |
 
 Not yet ported: searches (by antibiotic / strains / antibiograms), editable abbreviations, loading new standards
-from the UI, import/export of experiments as files, the expert-rules system.
+from the UI, import/export of experiments as files.
 
 ### Breakpoint standards
 
@@ -67,11 +68,45 @@ breakpoints are never modified), and new standards are always appended to `SEED_
   templates still recognise them; new agents/disks (cefiderocol, ceftazidime-avibactam, temocillin, ...) have no
   bundled templates yet (the app learns them when you identify them manually).
 
-**S/I/R with EUCAST.** Since 2019 EUCAST defines **I as "Susceptible, increased exposure"**: the organism is
-susceptible when the exposure to the agent is increased (higher dose or concentration at the site of infection),
-not an uncertain result. The app still labels this category **"Intermediate"** (and stores it under that name for
-compatibility with existing data and exports); with EUCAST standards read it as "Susceptible, increased exposure".
+**S/I/R with EUCAST.** Since 2019 (v 9.0) EUCAST defines **I as "Susceptible, increased exposure"**: the organism
+is susceptible when the exposure to the agent is increased (higher dose or concentration at the site of infection),
+not an uncertain result. With EUCAST standards valid from 2019 (EUCAST 16.1) the app shows and exports I as
+**"Susceptible, increased exposure"**; with EUCAST 6.0 and CLSI it is "Intermediate", its meaning in those
+standards. The stored value is still "Intermediate" (compatible with existing data and the desktop application).
 With an off-scale breakpoint (S ≥ 50 mm) wild-type isolates are categorised I and must never be reported S.
+
+### Expert system
+
+`frontend/src/expertRules.ts` applies EUCAST rules to all the results of an isolate (every plate of an
+antibiogram). It runs in the browser in both flavours, is shown under each antibiogram of the experiment page
+(**Expert system** panel and **Reported** column) and is included in the Excel export, which the web interface
+builds in the browser in both flavours (`frontend/src/excel.ts`; the server endpoint
+`/api/experiments/{id}/export.xlsx` remains for API clients, without the expert system).
+
+**Supplementary tests.** Results that cannot be read from the disks are recorded per antibiogram (**Supplementary
+tests** in the panel; only the tests relevant to the organism are offered) and used by the rules: D-test (inducible
+clindamycin resistance → clindamycin R), mecA/mecC or PBP2a (→ MRSA), vanA/vanB (→ vancomycin/teicoplanin),
+ESBL confirmation, carbapenemase (KPC, MBL, OXA-48) and beta-lactamase of *H. influenzae* (→ ampicillin,
+amoxicillin, piperacillin R). **Edit** on an antibiogram changes genus, species, strain, sample and comments
+(the family selects the breakpoints and cannot change); the genus/species fields suggest the organisms the rules
+know.
+
+| Source | What the app does |
+|---|---|
+| [Expected Resistant Phenotypes v1.2](https://www.eucast.org/bacteria/important-additional-information/expected-phenotypes/) (2023), tables 1-5 | Susceptible result for an agent the species is expected to be resistant to → *unexpected susceptible*, report R; untestable (no breakpoint) → report R without testing |
+| [Expected Susceptible Phenotypes v1.1](https://www.eucast.org/bacteria/important-additional-information/expected-phenotypes/) (2022) | Resistant result where resistance is not expected (e.g. linezolid-R *S. aureus*, ampicillin-R *E. faecalis*) → *unexpected resistant*: check identification/test, reference lab |
+| [Expert Rules](https://www.eucast.org/bacteria/important-additional-information/expert-rules/): Enterobacterales v3.3 (2024); *Staphylococcus*, *Enterococcus*, *Streptococcus*, *S. pneumoniae* (Nov 2025); *Haemophilus*, *Moraxella*, *Salmonella*, *Campylobacter*, *Corynebacterium* v3.2 (2019) | Inferences (ampicillin → piperacillin, ciprofloxacin → all fluoroquinolones, cefoxitin screen → MRSA and all beta-lactams, norfloxacin/nalidixic acid/pefloxacin/oxacillin/benzylpenicillin screens, tetracycline → doxycycline/minocycline, ...) and warnings (inducible MLSB/D-test, AmpC derepression, ESBL phenotypes, vanB, high-level aminoglycoside resistance, ...) |
+| [Detection of resistance mechanisms v2.0](https://www.eucast.org/bacteria/important-additional-information/resistance-detection/) (2017) | Enterobacterales: ESBL screening cut-offs (cefotaxime <21, ceftriaxone <23, ceftazidime <22, cefpodoxime <21 mm) and carbapenemase screening (meropenem <28 mm, 25-27 mm exception with piperacillin-tazobactam; temocillin <11 mm → OXA-48) |
+| Breakpoint notes of the standard | Zone diameter inside an Area of Technical Uncertainty (ATU) |
+
+Rules never change the stored measurements: they add messages and a suggested reported category. Rules applied
+"regardless of the test result" (and expected resistances) override the measured category; inferences only fill
+agents that could not be categorised or were not tested (named in the message). Species-specific rules need the
+genus and species of the isolate ("Escherichia" + "coli", or "E. coli" in the species field); with only the family,
+the group rules are applied and the panel asks for them. Rules that need an MIC (the standards only have zone
+diameter breakpoints) are reported as warnings that ask for it. The engine is
+decision support and does not replace the validation of the results by a microbiologist.
+`npm run test:rules` runs the rules on synthetic isolates.
 
 ### Algorithms
 
@@ -113,6 +148,7 @@ cd frontend
 npm run dev:browser     # http://localhost:5173, no backend needed
 npm run build:browser   # static site in dist-browser/ (~11 MB, mostly OpenCV.js)
 npm run validate:cv     # checks the OpenCV.js port against the Python results (tests/images/1.tiff)
+npm run test:rules      # checks the EUCAST expert system on synthetic isolates
 ```
 
 `dist-browser/` can be published on any static host (GitHub Pages, Netlify, a university web server, an

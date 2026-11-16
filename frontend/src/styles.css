@@ -196,3 +196,20 @@ details summary { cursor: pointer; color: var(--muted); font-size: 0.85rem; }
 .ok { color: var(--s-fg); background: var(--s-bg); padding: 8px 12px; border-radius: 8px; }
 .img-placeholder { background: var(--surface-2); min-height: 120px; border-radius: 8px; }
 .plate-thumb .img-placeholder { width: 120px; height: 120px; }
+
+/* ---------------------------------------------------------------- expert system */
+.expert-rules { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+.expert-rules h3 { margin: 0 0 8px; font-size: 1rem; }
+.rules { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
+.rules li { display: grid; gap: 3px; padding: 8px 12px; border-radius: 8px; border-left: 4px solid var(--border); background: var(--surface-2); }
+.rules li.rule-alert { border-left-color: var(--r-fg); }
+.rules li.rule-mechanism { border-left-color: var(--danger); }
+.rules li.rule-warning { border-left-color: var(--i-fg); }
+.rules li.rule-info { border-left-color: var(--accent); }
+.rule-kind { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.reported { white-space: nowrap; }
+.supplementary { margin: 0 0 12px; }
+.supplementary summary { cursor: pointer; font-weight: 600; margin-bottom: 8px; }
+.antibiogram-editor { margin: 12px 0; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); }
+.antibiogram-editor .actions { margin-top: 10px; }
+button.link { border: 0; padding: 0; background: none; color: var(--accent); text-decoration: underline; font: inherit; }

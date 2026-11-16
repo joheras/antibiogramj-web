@@ -3,13 +3,14 @@
 
 import {
   ApiError, categorise, CATEGORIES, type Antibiogram, type Antibiotic, type Api, type Breakpoint, type Circle,
-  type Download, type ExperimentDetail, type ExperimentSummary, type Family, type HaloResult, type Plate,
-  type Standard, type User,
+  type Download, type ExperimentDetail, type ExperimentSummary, type Family, type HaloResult,
+  type Plate, type Standard, type User,
 } from "../api";
 import catalogJson from "./catalog.json";
 import * as db from "./db";
 import type { Annotation, Commands } from "./worker";
-import { workbook, type Cell, type Sheet } from "./xlsx";
+import { experimentWorkbook } from "../excel";
+import { SUPPLEMENTARY_TESTS } from "../expertRules";
 
 // ------------------------------------------------------------------ catalogue
 const catalog = catalogJson as unknown as {
@@ -41,7 +42,15 @@ const newKey = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-$
 interface ExperimentRec { id: number; name: string; comments: string; standard_id: number; created_at: string }
 interface AntibiogramRec {
   id: number; experiment_id: number; family_id: number; genus: string; species: string; strain: string;
-  sample: string; comments: string; created_at: string;
+  sample: string; comments: string; created_at: string; supplementary_tests?: Record<string, string>;
+}
+
+/** Only the known tests and options are stored. */
+function cleanTests(tests: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(SUPPLEMENTARY_TESTS.flatMap((t) => {
+    const v = tests[t.key];
+    return t.options.some((o) => o.value === v) ? [[t.key, v]] : [];
+  }));
 }
 interface MeasurementRec {
   antibiotic_id: number; breakpoint_id: number | null; standard_id: number; disk_cx: number; disk_cy: number;
@@ -73,8 +82,8 @@ async function experimentDetail(id: number): Promise<ExperimentDetail> {
   const result: Antibiogram[] = [];
   for (const a of antibiograms.sort((x, y) => x.id - y.id)) {
     const plates = await db.getAll<PlateRec>("plates", "antibiogram_id", a.id);
-    const { family_id, ...rest } = a;
-    result.push({ ...rest, family: familyById.get(family_id)!, plates: plates.sort((x, y) => x.id - y.id).map(toPlate) });
+    const { family_id, supplementary_tests, ...rest } = a;
+    result.push({ ...rest, supplementary_tests: supplementary_tests ?? {}, family: familyById.get(family_id)!, plates: plates.sort((x, y) => x.id - y.id).map(toPlate) });
   }
   return { ...e, standard: standardById.get(e.standard_id)!, antibiograms: result };
 }
@@ -152,39 +161,6 @@ function loadTemplates(): Promise<number> {
 // Images of the plate being analysed (lost on reload, like an unsaved wizard).
 const uploads = new Map<string, { filename: string; original: string; working?: string }>();
 
-// ---------------------------------------------------------------- Excel
-function experimentSheets(e: ExperimentDetail): Sheet[] {
-  const cat = (c: string): Cell => (c === "Susceptible" ? { v: c, s: "S" } : c === "Intermediate" ? { v: c, s: "I" } : c === "Resistant" ? { v: c, s: "R" } : c);
-  const h = (...xs: string[]): Cell[] => xs.map((v) => ({ v, s: "header" as const }));
-  const summary: Cell[][] = [
-    ["Experiment", e.name], ["Standard", `${e.standard.name} ${e.standard.version}`], ["Comments", e.comments], [],
-    h("Antibiogram", "Family", "Genus", "Species", "Strain", "Sample", "Plate", "Antibiotic", "Code", "Disk content",
-      "Diameter (mm)", "Category", "Microcolonies", "Interpretation", "Breakpoint case", "S limit (mm)", "R limit (mm)"),
-  ];
-  const sheets: Sheet[] = [{ name: "Summary", rows: summary }];
-  e.antibiograms.forEach((a, i) => {
-    const rows: Cell[][] = [
-      [...h("Bacteria information", "", ""), { v: "Date", s: "header" }],
-      [{ v: "Family", s: "bold" }, a.family.name, null, a.created_at.slice(0, 10)],
-      [{ v: "Species", s: "bold" }, a.species], [{ v: "Genus", s: "bold" }, a.genus],
-      [{ v: "Strain number", s: "bold" }, a.strain], [{ v: "Sample", s: "bold" }, a.sample],
-      [{ v: "Comments", s: "bold" }, a.comments], [], [{ v: "Antibiotics", s: "bold" }],
-      h("Antibiotic name", "Category", "Microcolonies", "Interpretation", "Diameter (mm)", "Plate"),
-    ];
-    for (const p of a.plates) {
-      for (const m of p.measurements) {
-        summary.push([a.id, a.family.name, a.genus, a.species, a.strain, a.sample, p.id, m.antibiotic.name, m.antibiotic.code,
-          m.antibiotic.disk_content, m.diameter_mm, cat(m.category), m.microcolonies ? "Yes" : "No", m.interpretation,
-          m.breakpoint?.case ?? "", m.breakpoint?.susceptible ?? null, m.breakpoint?.resistant ?? null]);
-        rows.push([`${m.antibiotic.name} ${m.antibiotic.disk_content}`, cat(m.category), m.microcolonies ? "Yes" : "No",
-          m.interpretation, m.diameter_mm, p.id]);
-      }
-    }
-    sheets.push({ name: `Antibiogram ${i + 1}`, rows });
-  });
-  return sheets;
-}
-
 // ---------------------------------------------------------------- backup
 interface Backup {
   format: "antibiogramj-backup"; version: 1; exported_at: string;
@@ -246,6 +222,18 @@ export const localApi: Api = {
     });
   },
 
+  async updateAntibiogram(id, data) {
+    await db.write(["antibiograms"], async (tx) => {
+      const a = await db.txGet<AntibiogramRec>(tx, "antibiograms", id);
+      if (!a) throw notFound();
+      await db.put(tx, "antibiograms", {
+        ...a, genus: data.genus.slice(0, 100), species: data.species.slice(0, 100), strain: data.strain.slice(0, 100),
+        sample: data.sample.slice(0, 100), comments: data.comments.slice(0, 1000),
+        supplementary_tests: cleanTests(data.supplementary_tests),
+      });
+    });
+  },
+
   async deleteAntibiogram(id) {
     await db.write(["antibiograms", "plates", "blobs"], async (tx) => {
       await deletePlates(tx, await db.txGetAll<PlateRec>(tx, "plates", "antibiogram_id", id));
@@ -278,8 +266,7 @@ export const localApi: Api = {
   },
 
   async exportExperiment(id, name) {
-    const blob = workbook(experimentSheets(await experimentDetail(id)));
-    return { url: URL.createObjectURL(blob), filename: `${name.replace(/[^\w-]+/g, "_") || "experiment"}.xlsx` };
+    return experimentWorkbook(await experimentDetail(id), name);
   },
 
   // ------------------------------------------------------------- analysis

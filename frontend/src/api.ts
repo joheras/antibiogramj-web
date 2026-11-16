@@ -28,6 +28,8 @@ export interface Plate {
 export interface Antibiogram {
   id: number; experiment_id: number; family: Family; genus: string; species: string; strain: string;
   sample: string; comments: string; created_at: string; plates: Plate[];
+  /** Results of supplementary tests used by the expert system (see expertRules.ts), e.g. {"d_test": "positive"}. */
+  supplementary_tests: Record<string, string>;
 }
 export interface ExperimentSummary {
   id: number; name: string; comments: string; standard_id: number; created_at: string;
@@ -43,6 +45,10 @@ export interface HaloResult {
 }
 export interface BacteriaIn {
   family_id: number; genus: string; species: string; strain: string; sample: string; comments: string;
+}
+export interface AntibiogramUpdate {
+  genus: string; species: string; strain: string; sample: string; comments: string;
+  supplementary_tests: Record<string, string>;
 }
 export interface MeasurementIn {
   antibiotic_id: number; breakpoint_id: number | null; disk: Circle; halo_r: number;
@@ -70,6 +76,7 @@ export interface Api {
   createExperiment(data: { name: string; comments: string; standard_id: number | null }): Promise<ExperimentSummary>;
   deleteExperiment(id: number): Promise<void>;
   deleteAntibiogram(id: number): Promise<void>;
+  updateAntibiogram(id: number, data: AntibiogramUpdate): Promise<void>;
   plate(id: number): Promise<Plate>;
   deletePlate(id: number): Promise<void>;
   plateImage(id: number, annotated: boolean): Promise<string>;
@@ -127,6 +134,18 @@ export function categorise(diameter: number, bp: Breakpoint | null | undefined, 
 }
 
 export const CATEGORIES = ["Susceptible", "Intermediate", "Resistant", "Not available"];
+
+/**
+ * Since 2019 (v 9.0) EUCAST defines I as "Susceptible, increased exposure". The category is stored as
+ * "Intermediate" (the value of the desktop application and of CLSI) and shown with the meaning of the standard.
+ */
+export function increasedExposure(standard: Pick<Standard, "name" | "valid_from"> | null | undefined): boolean {
+  return !!standard && standard.name.toUpperCase() === "EUCAST" && (standard.valid_from ?? "") >= "2019-01-01";
+}
+
+export function categoryLabel(category: string, standard: Pick<Standard, "name" | "valid_from"> | null | undefined): string {
+  return category === "Intermediate" && increasedExposure(standard) ? "Susceptible, increased exposure" : category;
+}
 
 export function bacteriaLabel(a: Pick<Antibiogram, "genus" | "species" | "strain" | "sample">): string {
   const name = [a.genus, a.species].filter(Boolean).join(" ") || "Unnamed organism";

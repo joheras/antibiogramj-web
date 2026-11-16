@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select
+from sqlalchemy import inspect, select, text
 
 from .config import BASE_DIR, settings
 from .db import Base, SessionLocal, engine
@@ -24,9 +24,24 @@ FRONTEND_DIST = Path(BASE_DIR.parent / "frontend" / "dist")
 def init_db() -> None:
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     Base.metadata.create_all(engine)
+    add_missing_columns()
     with SessionLocal() as db:
         seed_standards(db)
         analysis.purge_old_uploads(db)
+
+
+# Columns added after the first release: (table, column, DDL type). create_all() does not add columns to
+# existing tables.
+ADDED_COLUMNS = [("antibiograms", "supplementary_tests", "JSON")]
+
+
+def add_missing_columns(bind=None) -> None:
+    bind = bind if bind is not None else engine
+    inspector = inspect(bind)
+    with bind.begin() as conn:
+        for table, column, ddl in ADDED_COLUMNS:
+            if column not in {c["name"] for c in inspector.get_columns(table)}:
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}"))
 
 
 def seed_standards(db) -> None:

@@ -68,6 +68,9 @@ export async function write<T>(stores: StoreName[], fn: (tx: IDBTransaction) => 
 export const put = <K extends IDBValidKey = number>(tx: IDBTransaction, store: StoreName, value: unknown, key?: IDBValidKey) =>
   done(tx.objectStore(store).put(value, key)) as Promise<K>;
 
+export const txGet = <T>(tx: IDBTransaction, store: StoreName, key: IDBValidKey) =>
+  done(tx.objectStore(store).get(key)) as Promise<T | undefined>;
+
 export const del = (tx: IDBTransaction, store: StoreName, key: IDBValidKey) => done(tx.objectStore(store).delete(key));
 
 export const txGetAll = <T>(tx: IDBTransaction, store: StoreName, index: string, value: IDBValidKey) =>

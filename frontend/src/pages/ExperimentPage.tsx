@@ -1,14 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { api, bacteriaLabel, download, type Antibiogram, type ExperimentDetail } from "../api";
+import { api, bacteriaLabel, download, type Antibiogram, type AntibiogramUpdate, type ExperimentDetail } from "../api";
 import AsyncImage from "../components/AsyncImage";
 import CategoryBadge from "../components/CategoryBadge";
+import AntibiogramEditor from "../components/AntibiogramEditor";
+import ExpertRulesPanel from "../components/ExpertRulesPanel";
+import { CATEGORY_NAME, evaluate } from "../expertRules";
 
 export default function ExperimentPage() {
   const id = Number(useParams().id);
   const navigate = useNavigate();
   const [exp, setExp] = useState<ExperimentDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState<number | null>(null);
 
   const load = useCallback(() => {
     api.experiment(id).then(setExp).catch((e) => setError(e.message));
@@ -24,6 +28,12 @@ export default function ExperimentPage() {
   async function removeAntibiogram(a: Antibiogram) {
     if (!confirm(`Delete the antibiogram of ${bacteriaLabel(a)} and its ${a.plates.length} plate(s)? This cannot be undone.`)) return;
     await api.deleteAntibiogram(a.id).catch((e) => setError(e.message));
+    load();
+  }
+
+  async function updateAntibiogram(a: Antibiogram, data: Partial<AntibiogramUpdate>) {
+    const { genus, species, strain, sample, comments, supplementary_tests } = a;
+    await api.updateAntibiogram(a.id, { genus, species, strain, sample, comments, supplementary_tests, ...data });
     load();
   }
 
@@ -54,7 +64,9 @@ export default function ExperimentPage() {
           <p>This experiment has no antibiograms yet.</p>
           <p className="muted">Use <b>Add plate</b> to analyse an antibiogram image.</p>
         </div>
-      ) : exp.antibiograms.map((a) => (
+      ) : exp.antibiograms.map((a) => {
+        const evaluation = evaluate(a, exp.standard);
+        return (
         <section key={a.id} className="card antibiogram">
           <div className="section-head">
             <div>
@@ -67,8 +79,15 @@ export default function ExperimentPage() {
               </p>
               {a.comments && <p>{a.comments}</p>}
             </div>
-            <button className="danger ghost small" onClick={() => removeAntibiogram(a)}>Delete antibiogram</button>
+            <div className="actions">
+              <button className="small" onClick={() => setEditing(a.id)}>Edit</button>
+              <button className="danger ghost small" onClick={() => removeAntibiogram(a)}>Delete antibiogram</button>
+            </div>
           </div>
+          {editing === a.id && (
+            <AntibiogramEditor antibiogram={a} onCancel={() => setEditing(null)}
+              onSave={async (data) => { await updateAntibiogram(a, data); setEditing(null); }} />
+          )}
 
           <div className="plates">
             {a.plates.map((p, i) => (
@@ -82,7 +101,7 @@ export default function ExperimentPage() {
           <div className="table-wrap">
             <table>
               <thead>
-                <tr><th>Antibiotic</th><th>Code</th><th>Plate</th><th className="num">Diameter</th><th>Category</th><th>Microcolonies</th><th>Interpretation</th></tr>
+                <tr><th>Antibiotic</th><th>Code</th><th>Plate</th><th className="num">Diameter</th><th>Category</th><th title="Category to report after applying the expert rules">Reported</th><th>Microcolonies</th><th>Interpretation</th></tr>
               </thead>
               <tbody>
                 {a.plates.flatMap((p, i) => p.measurements.map((m) => (
@@ -91,7 +110,13 @@ export default function ExperimentPage() {
                     <td>{m.antibiotic.code}</td>
                     <td>{i + 1}</td>
                     <td className="num">{m.diameter_mm.toFixed(1)} mm</td>
-                    <td><CategoryBadge category={m.category} /></td>
+                    <td><CategoryBadge category={m.category} standard={exp.standard} /></td>
+                    <td>{(() => {
+                      const r = evaluation.reported.get(m.id);
+                      return r?.category
+                        ? <span className="reported" title={`Changed by ${r.rules.join(", ")}`}><CategoryBadge category={CATEGORY_NAME[r.category]} standard={exp.standard} /> *</span>
+                        : <span className="muted">as tested</span>;
+                    })()}</td>
                     <td>{m.microcolonies ? "Yes" : "No"}</td>
                     <td>{m.interpretation}</td>
                   </tr>
@@ -99,8 +124,14 @@ export default function ExperimentPage() {
               </tbody>
             </table>
           </div>
+          {a.plates.some((p) => p.measurements.length > 0) && (
+            <ExpertRulesPanel antibiogram={a} evaluation={evaluation} standardName={`${exp.standard.name} ${exp.standard.version}`}
+              onEdit={() => setEditing(a.id)}
+              onTests={(supplementary_tests) => updateAntibiogram(a, { supplementary_tests }).catch((e) => setError(e.message))} />
+          )}
         </section>
-      ))}
+        );
+      })}
     </div>
   );
 }

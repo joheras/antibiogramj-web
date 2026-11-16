@@ -1,5 +1,8 @@
 """Excel export of an experiment (workspace/utils/ExcelGeneration.java).
 
+The web interface builds its export in the browser (frontend/src/excel.ts) so that it includes the expert
+system; this endpoint keeps the plain export for API clients.
+
 A summary sheet with one row per measurement, followed by one sheet per
 antibiogram with the same layout as the desktop application.
 """
@@ -33,6 +36,13 @@ def _autosize(ws) -> None:
         ws.column_dimensions[get_column_letter(col[0].column)].width = min(60, width + 2)
 
 
+def _category(category: str, standard) -> str:
+    """Since 2019 EUCAST defines I as "Susceptible, increased exposure" (stored as "Intermediate")."""
+    increased = (standard.name.upper() == "EUCAST" and standard.valid_from is not None
+                 and standard.valid_from.isoformat() >= "2019-01-01")
+    return "Susceptible, increased exposure" if category == "Intermediate" and increased else category
+
+
 def _limit(bp, attr: str):
     return getattr(bp, attr) if bp is not None else None
 
@@ -52,7 +62,8 @@ def experiment_workbook(experiment: Experiment) -> bytes:
         for p in a.plates:
             for m in p.measurements:
                 ws.append([a.id, a.family.name, a.genus, a.species, a.strain, a.sample, p.id, m.antibiotic.name,
-                           m.antibiotic.code, m.antibiotic.disk_content, m.diameter_mm, m.category,
+                           m.antibiotic.code, m.antibiotic.disk_content, m.diameter_mm,
+                           _category(m.category, experiment.standard),
                            "Yes" if m.microcolonies else "No", m.interpretation,
                            m.breakpoint.case if m.breakpoint else "", _limit(m.breakpoint, "susceptible"),
                            _limit(m.breakpoint, "resistant")])
@@ -74,7 +85,7 @@ def experiment_workbook(experiment: Experiment) -> bytes:
         _header(ws, 10, ["Antibiotic name", "Category", "Microcolonies", "Interpretation", "Diameter (mm)", "Plate"])
         for p in a.plates:
             for m in p.measurements:
-                ws.append([f"{m.antibiotic.name} {m.antibiotic.disk_content}", m.category,
+                ws.append([f"{m.antibiotic.name} {m.antibiotic.disk_content}", _category(m.category, experiment.standard),
                            "Yes" if m.microcolonies else "No", m.interpretation, m.diameter_mm, p.id])
                 fill = _CATEGORY_FILL.get(m.category)
                 if fill:

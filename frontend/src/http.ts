@@ -1,5 +1,6 @@
 // Client of the FastAPI backend (server mode). Authentication is an httpOnly cookie.
-import { ApiError, type Api } from "./api";
+import { ApiError, type Api, type ExperimentDetail } from "./api";
+import { experimentWorkbook } from "./excel";
 
 async function request<T>(method: string, url: string, body?: unknown): Promise<T> {
   const init: RequestInit = { method, credentials: "same-origin", headers: {} };
@@ -36,10 +37,12 @@ export const httpApi: Api = {
   createExperiment: (data) => request("POST", "/api/experiments", data),
   deleteExperiment: (id) => request("DELETE", `/api/experiments/${id}`),
   deleteAntibiogram: (id) => request("DELETE", `/api/antibiograms/${id}`),
+  updateAntibiogram: (id, data) => request("PATCH", `/api/antibiograms/${id}`, data),
   plate: (id) => request("GET", `/api/plates/${id}`),
   deletePlate: (id) => request("DELETE", `/api/plates/${id}`),
   plateImage: async (id, annotated) => `/api/plates/${id}/image?annotated=${annotated}`,
-  exportExperiment: async (id, name) => ({ url: `/api/experiments/${id}/export.xlsx`, filename: `${name}.xlsx` }),
+  // Built in the browser so that it includes the expert system (/api/experiments/{id}/export.xlsx has no rules).
+  exportExperiment: async (id, name) => experimentWorkbook(await request<ExperimentDetail>("GET", `/api/experiments/${id}`), name),
 
   upload: (file) => {
     const form = new FormData();

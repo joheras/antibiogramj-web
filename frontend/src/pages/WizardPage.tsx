@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
-  api, bacteriaLabel, categorise, CATEGORIES, type BacteriaIn, type Breakpoint, type Circle,
+  api, bacteriaLabel, categorise, CATEGORIES, categoryLabel, type BacteriaIn, type Breakpoint, type Circle,
   type ExperimentDetail, type UploadResult,
 } from "../api";
 import CategoryBadge from "../components/CategoryBadge";
+import { genusSuggestions, speciesSuggestions } from "../expertRules";
 import { useImageUrl } from "../components/AsyncImage";
 import ImageEditor, { type EditorCircle } from "../components/ImageEditor";
 import { useSession } from "../session";
@@ -308,8 +309,8 @@ function StepOrganism({ exp, target, setTarget, bacteria, setBacteria, file, set
             <label>Strain<input value={bacteria.strain} onChange={set("strain")} maxLength={100} /></label>
             <label>Sample<input value={bacteria.sample} onChange={set("sample")} maxLength={100} /></label>
             <label className="span2">Comments<textarea value={bacteria.comments} onChange={set("comments")} maxLength={1000} /></label>
-            <datalist id="genus-list">{distinct("genus").map((g) => <option key={g} value={g} />)}</datalist>
-            <datalist id="species-list">{distinct("species").map((g) => <option key={g} value={g} />)}</datalist>
+            <datalist id="genus-list">{genusSuggestions(distinct("genus")).map((g) => <option key={g} value={g} />)}</datalist>
+            <datalist id="species-list">{speciesSuggestions(bacteria.genus, distinct("species")).map((g) => <option key={g} value={g} />)}</datalist>
           </div>
         )}
       </section>
@@ -402,7 +403,7 @@ function HaloStep({ src, width, height, disks, antibioticIds, readings, setReadi
               <span className="check-mark">{readings[i].checked ? "✓" : ""}</span>
               <span className="grow">{catalog.antibioticById.get(antibioticIds[i])?.name}</span>
               <span className="num">{diam(readings[i]).toFixed(1)}</span>
-              <CategoryBadge category={category(readings[i])} />
+              <CategoryBadge category={category(readings[i])} standard={exp.standard} compact />
             </button>
           ))}
         </div>
@@ -433,8 +434,8 @@ function HaloStep({ src, width, height, disks, antibioticIds, readings, setReadi
           </label>
           <label>Category
             <select value={reading.categoryOverride ?? ""} onChange={(e) => update({ categoryOverride: e.target.value || null })}>
-              <option value="">Automatic: {categorise(diam(reading), b, exp.standard)}</option>
-              {CATEGORIES.map((c) => <option key={c} value={c}>{c} (manual)</option>)}
+              <option value="">Automatic: {categoryLabel(categorise(diam(reading), b, exp.standard), exp.standard)}</option>
+              {CATEGORIES.map((c) => <option key={c} value={c}>{categoryLabel(c, exp.standard)} (manual)</option>)}
             </select>
           </label>
           <label className="check"><input type="checkbox" checked={reading.microcolonies} onChange={(e) => update({ microcolonies: e.target.checked })} /> Microcolonies</label>

@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 class ORM(BaseModel):
@@ -128,6 +128,17 @@ class PlateOut(ORM):
     measurements: list[MeasurementOut]
 
 
+# Supplementary tests and their allowed results (same as SUPPLEMENTARY_TESTS in frontend/src/expertRules.ts).
+SUPPLEMENTARY_TESTS: dict[str, set[str]] = {
+    "inducible_clindamycin": {"positive", "negative"},
+    "mec": {"positive", "negative"},
+    "van": {"vanA", "vanB", "negative"},
+    "esbl": {"positive", "negative"},
+    "carbapenemase": {"KPC", "MBL", "OXA-48", "positive", "negative"},
+    "beta_lactamase": {"positive", "negative"},
+}
+
+
 class AntibiogramOut(ORM):
     id: int
     experiment_id: int
@@ -138,7 +149,30 @@ class AntibiogramOut(ORM):
     sample: str
     comments: str
     created_at: datetime
+    supplementary_tests: dict[str, str] = Field(default_factory=dict)
     plates: list[PlateOut]
+
+    @field_validator("supplementary_tests", mode="before")
+    @classmethod
+    def _none_is_empty(cls, value):  # rows created before the column existed
+        return value or {}
+
+
+class AntibiogramUpdate(BaseModel):
+    genus: str = Field(default="", max_length=100)
+    species: str = Field(default="", max_length=100)
+    strain: str = Field(default="", max_length=100)
+    sample: str = Field(default="", max_length=100)
+    comments: str = Field(default="", max_length=1000)
+    supplementary_tests: dict[str, str] = Field(default_factory=dict)
+
+    @field_validator("supplementary_tests")
+    @classmethod
+    def _known_tests(cls, value: dict[str, str]) -> dict[str, str]:
+        for key, result in value.items():
+            if result not in SUPPLEMENTARY_TESTS.get(key, set()):
+                raise ValueError(f"Unknown supplementary test result: {key}={result}")
+        return value
 
 
 class ExperimentDetail(ExperimentOut):

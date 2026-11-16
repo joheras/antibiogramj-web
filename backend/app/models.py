@@ -8,7 +8,7 @@ reached through it. Bacteria data is stored inline in the antibiogram.
 
 from datetime import date, datetime, timezone
 
-from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .db import Base
@@ -110,6 +110,8 @@ class Antibiogram(Base):
     strain: Mapped[str] = mapped_column(String(100), default="")
     sample: Mapped[str] = mapped_column(String(100), default="")
     comments: Mapped[str] = mapped_column(String(1000), default="")
+    # Results of supplementary tests used by the expert system (frontend/src/expertRules.ts), e.g. {"mec": "positive"}
+    supplementary_tests: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     experiment: Mapped[Experiment] = relationship(back_populates="antibiograms")

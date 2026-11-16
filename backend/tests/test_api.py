@@ -146,6 +146,17 @@ def test_full_analysis_flow(alice, bob):
 
     detail = alice.get(f"/api/experiments/{exp['id']}").json()
     assert len(detail["antibiograms"]) == 1 and detail["antibiograms"][0]["species"] == "coli"
+    assert detail["antibiograms"][0]["supplementary_tests"] == {}
+
+    # Organism data and supplementary tests of the expert system
+    ab_id = detail["antibiograms"][0]["id"]
+    update = {"genus": "Escherichia", "species": "coli", "strain": "7825", "sample": "1", "comments": "edited",
+              "supplementary_tests": {"esbl": "positive", "carbapenemase": "OXA-48"}}
+    assert bob.patch(f"/api/antibiograms/{ab_id}", json=update).status_code == 404
+    assert alice.patch(f"/api/antibiograms/{ab_id}", json={**update, "supplementary_tests": {"esbl": "maybe"}}).status_code == 422
+    assert alice.patch(f"/api/antibiograms/{ab_id}", json=update).status_code == 204
+    edited = alice.get(f"/api/experiments/{exp['id']}").json()["antibiograms"][0]
+    assert edited["comments"] == "edited" and edited["supplementary_tests"] == update["supplementary_tests"]
     summary = alice.get("/api/experiments").json()[0]
     assert summary["antibiogram_count"] == 1 and summary["plate_count"] == 1
 
@@ -155,6 +166,7 @@ def test_full_analysis_flow(alice, bob):
     wb = load_workbook(BytesIO(r.content))
     assert wb.sheetnames == ["Summary", "Antibiogram 1"]
     assert wb["Summary"].max_row == 5 + 7
+    assert "Susceptible, increased exposure" not in {c.value for c in wb["Summary"]["L"]}  # EUCAST 6.0: I = Intermediate
 
     # Learned templates for Alice only
     from app.db import SessionLocal
@@ -211,3 +223,20 @@ def test_eucast_16_standard():
         assert categorise(22, bp, new) == "Susceptible"
         assert categorise(20, bp, new) == "Intermediate"
         assert categorise(18, bp, new) == "Resistant"
+
+
+def test_add_missing_columns():
+    """Databases created before the expert system get the supplementary_tests column."""
+    from sqlalchemy import create_engine, inspect, text
+
+    from app.main import add_missing_columns
+
+    engine = create_engine("sqlite://")
+    with engine.begin() as conn:
+        conn.execute(text("CREATE TABLE antibiograms (id INTEGER PRIMARY KEY, genus VARCHAR(100))"))
+        conn.execute(text("INSERT INTO antibiograms (id, genus) VALUES (1, 'Escherichia')"))
+    add_missing_columns(engine)
+    add_missing_columns(engine)  # idempotent
+    assert "supplementary_tests" in {c["name"] for c in inspect(engine).get_columns("antibiograms")}
+    with engine.connect() as conn:
+        assert conn.execute(text("SELECT supplementary_tests FROM antibiograms")).scalar() is None
