@@ -5,6 +5,7 @@ import { type Catalog, SessionContext } from "./session";
 import AuthPage from "./pages/AuthPage";
 import ExperimentsPage from "./pages/ExperimentsPage";
 import ExperimentPage from "./pages/ExperimentPage";
+import HelpPage from "./pages/HelpPage";
 import PlatePage from "./pages/PlatePage";
 import WizardPage from "./pages/WizardPage";
 
@@ -51,12 +52,14 @@ export default function App() {
         <Link to="/" className="brand"><span className="logo" aria-hidden>◉</span> AntibiogramJ</Link>
         {MODE === "server" ? (
           <div className="topbar-user">
+            <Link to="/help" className="topbar-link">Help</Link>
             <span title={user.email}>{user.name || user.email}{user.lab && <span className="muted"> · {user.lab}</span>}</span>
             <button className="ghost" onClick={logout}>Sign out</button>
           </div>
         ) : (
           <div className="topbar-user">
-            <span className="tag" title="Images and results are stored only in this browser; nothing is uploaded.">Offline · data stays in this browser</span>
+            <Link to="/help" className="topbar-link">Help</Link>
+            <span className="tag topbar-offline" title="Images and results are stored only in this browser; nothing is uploaded.">Offline · data stays in this browser</span>
           </div>
         )}
       </header>
@@ -66,6 +69,7 @@ export default function App() {
           <Route path="/experiments/:id" element={<ExperimentPage />} />
           <Route path="/experiments/:id/add-plate" element={<WizardPage />} />
           <Route path="/plates/:id" element={<PlatePage />} />
+          <Route path="/help" element={<HelpPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, download, MODE, type ExperimentSummary } from "../api";
+import { startExample } from "../example";
 import { useSession } from "../session";
 
 export default function ExperimentsPage() {
@@ -24,6 +25,15 @@ export default function ExperimentsPage() {
       const n = await api.importBackup(file);
       setNotice(`${n} experiment(s) restored from ${file.name}.`);
       load();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  async function tryExample() {
+    setError(null);
+    try {
+      navigate(await startExample(catalog));
     } catch (e) {
       setError((e as Error).message);
     }
@@ -88,6 +98,10 @@ export default function ExperimentsPage() {
         <div className="empty card">
           <p>You have no experiments yet.</p>
           <p className="muted">An experiment groups antibiograms; every antibiogram collects the plates inoculated with the same organism.</p>
+          <div className="actions empty-actions">
+            <button className="primary" onClick={tryExample}>Try it with an example plate</button>
+            <Link className="button" to="/help">How to use AntibiogramJ</Link>
+          </div>
         </div>
       ) : (
         <div className="cards">

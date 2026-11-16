@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   api, bacteriaLabel, categorise, CATEGORIES, categoryLabel, type BacteriaIn, type Breakpoint, type Circle,
   type ExperimentDetail, type UploadResult,
 } from "../api";
 import CategoryBadge from "../components/CategoryBadge";
+import { exampleBacteria, exampleFile } from "../example";
 import { genusSuggestions, speciesSuggestions } from "../expertRules";
 import { useImageUrl } from "../components/AsyncImage";
 import ImageEditor, { type EditorCircle } from "../components/ImageEditor";
@@ -32,6 +33,7 @@ export default function WizardPage() {
   const experimentId = Number(useParams().id);
   const navigate = useNavigate();
   const { catalog } = useSession();
+  const isExample = useSearchParams()[0].get("example") === "1";
 
   const [exp, setExp] = useState<ExperimentDetail | null>(null);
   const [step, setStep] = useState(0);
@@ -65,6 +67,14 @@ export default function WizardPage() {
       if (e.antibiograms.length) setTarget(e.antibiograms[e.antibiograms.length - 1].id);
     }).catch((e) => setError(e.message));
   }, [experimentId]);
+
+  // "Try it with an example plate": fill in the organism and load the bundled image.
+  const loadExample = () => {
+    setTarget("new");
+    setBacteria(exampleBacteria(catalog));
+    exampleFile().then(setFile).catch((e) => setError(e.message));
+  };
+  useEffect(() => { if (isExample) loadExample(); }, [isExample]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const familyId = target === "new" ? bacteria.family_id : exp?.antibiograms.find((a) => a.id === target)?.family.id ?? 0;
 
@@ -157,13 +167,19 @@ export default function WizardPage() {
       <ol className="stepper">
         {STEPS.map((s, i) => <li key={s} className={i === step ? "current" : i < step ? "done" : ""}><span>{i + 1}</span>{s}</li>)}
       </ol>
+      {isExample && (
+        <p className="note">
+          <b>Example plate.</b> The organism and the image are already filled in: press <b>Next</b> at every step and
+          compare with the worked example in <Link to="/help#example">Help</Link>.
+        </p>
+      )}
       {error && <p className="error">{error}</p>}
       {busy && <div className="busy"><div className="spinner" />{busy}</div>}
 
       {step === 0 && (
         <StepOrganism
           exp={exp} target={target} setTarget={setTarget} bacteria={bacteria} setBacteria={setBacteria}
-          file={file} setFile={setFile} onNext={toPreprocessing}
+          file={file} setFile={setFile} onNext={toPreprocessing} onExample={loadExample}
         />
       )}
 
@@ -269,10 +285,10 @@ export default function WizardPage() {
 }
 
 // ------------------------------------------------------------------ step 0
-function StepOrganism({ exp, target, setTarget, bacteria, setBacteria, file, setFile, onNext }: {
+function StepOrganism({ exp, target, setTarget, bacteria, setBacteria, file, setFile, onNext, onExample }: {
   exp: ExperimentDetail; target: "new" | number; setTarget: (t: "new" | number) => void;
   bacteria: BacteriaIn; setBacteria: (b: BacteriaIn) => void; file: File | null; setFile: (f: File | null) => void;
-  onNext: () => void;
+  onNext: () => void; onExample: () => void;
 }) {
   const { catalog } = useSession();
   const set = (k: keyof BacteriaIn) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -320,6 +336,10 @@ function StepOrganism({ exp, target, setTarget, bacteria, setBacteria, file, set
           <input type="file" accept="image/*,.tif,.tiff" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
           {preview ? <img src={preview} alt="" /> : <span>{file ? file.name : "Choose or drop an image (JPEG, PNG, TIFF…)"}</span>}
         </label>
+        <p className="muted small">
+          No photo at hand? <button className="link" onClick={onExample}>Use the example plate</button> (E. coli, 7 disks).
+          See <Link to="/help#photos">how to take good photos</Link>.
+        </p>
         <div className="nav"><span /><button className="primary" onClick={onNext}>Next</button></div>
       </section>
     </div>
