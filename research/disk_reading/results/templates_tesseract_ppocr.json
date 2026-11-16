@@ -1,0 +1,1982 @@
+[
+ {
+  "plate": "0",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "templates",
+  "name": "Amikacin",
+  "score": 440.0,
+  "info": "id35 score=440"
+ },
+ {
+  "plate": "0",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "tesseract",
+  "name": "Amikacin",
+  "score": 0.498572579,
+  "info": "'AX 36' @195° -> AK 30 (0.50) [(0.44, 'AXO 30'), (0.318, 'OFX 5')]"
+ },
+ {
+  "plate": "0",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "ppocr",
+  "name": "Chloramphenicol",
+  "score": -7.497237102820648,
+  "info": "' 30' @200° -> C 30 (logp=-7.5) [(-7.8, 'W 5'), (-9.2, 'F 100')]"
+ },
+ {
+  "plate": "0",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "templates",
+  "name": "Gentamicin",
+  "score": 421.0,
+  "info": "id36 score=421"
+ },
+ {
+  "plate": "0",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "tesseract",
+  "name": "Gentamicin",
+  "score": 0.9298431225,
+  "info": "'CN 10' @270° -> CN 10 (0.93) [(0.435, 'W 5'), (0.4, 'C 30')]"
+ },
+ {
+  "plate": "0",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "ppocr",
+  "name": "Gentamicin",
+  "score": 0.0,
+  "info": "'CN 10' @240° -> CN 10 (logp=0.0) [(-4.1, 'CC 2'), (-4.8, 'C 30')]"
+ },
+ {
+  "plate": "0",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "templates",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 500.0,
+  "info": "id43 score=500"
+ },
+ {
+  "plate": "0",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "tesseract",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 0.4113372132,
+  "info": "'SX 23' @90° -> SXT 25 (0.41) [(0.35, 'W 5'), (0.294, 'GM 10')]"
+ },
+ {
+  "plate": "0",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "ppocr",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 0.0,
+  "info": "'SXT 25' @100° -> SXT 25 (logp=0.0) [(-5.0, 'LE 5'), (-5.6, 'P 1')]"
+ },
+ {
+  "plate": "0",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "templates",
+  "name": "Nalidixic acid",
+  "score": 324.0,
+  "info": "id66 score=324"
+ },
+ {
+  "plate": "0",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "tesseract",
+  "name": "Nalidixic acid",
+  "score": 0.6846805315,
+  "info": "'NA' @285° -> NA 30 (0.68) [(0.391, 'DA 2'), (0.391, 'RA 5')]"
+ },
+ {
+  "plate": "0",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "ppocr",
+  "name": "Nalidixic acid",
+  "score": -1.2702150986425822,
+  "info": "'NA 0' @287° -> NA 30 (logp=-1.3) [(-5.3, 'AM 2'), (-5.6, 'LE 5')]"
+ },
+ {
+  "plate": "0",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "templates",
+  "name": "Tobramycin",
+  "score": 200.0,
+  "info": "id38 score=200"
+ },
+ {
+  "plate": "0",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "tesseract",
+  "name": "Tobramycin",
+  "score": 0.3382607660133333,
+  "info": "'TO8 7 3' @315° -> TOB 10 (0.34) [(0.333, 'PG 1'), (0.3, 'AM 2')]"
+ },
+ {
+  "plate": "0",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "ppocr",
+  "name": "Tobramycin",
+  "score": -2.495669272752518,
+  "info": "'T0B 0' @320° -> TOB 10 (logp=-2.5) [(-7.0, 'P 10'), (-7.6, 'C 30')]"
+ },
+ {
+  "plate": "0",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "templates",
+  "name": "Ciprofloxacin",
+  "score": 408.0,
+  "info": "id29 score=408"
+ },
+ {
+  "plate": "0",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "tesseract",
+  "name": "Ciprofloxacin",
+  "score": 0.668642535875,
+  "info": "'CIP 2' @345° -> CIP 5 (0.67) [(0.626, 'AN 30'), (0.573, 'AM 2')]"
+ },
+ {
+  "plate": "0",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "ppocr",
+  "name": "Ciprofloxacin",
+  "score": 0.4704913747218922,
+  "info": "'CIA ' @320° -> CIP 5 (logp=0.5) [(-2.7, 'CC 2'), (-2.7, 'C 30')]"
+ },
+ {
+  "plate": "1",
+  "disk": 0,
+  "truth": "TE 30",
+  "want": "Tetracycline",
+  "engine": "templates",
+  "name": "Tetracycline",
+  "score": 416.0,
+  "info": "id50 score=416"
+ },
+ {
+  "plate": "1",
+  "disk": 0,
+  "truth": "TE 30",
+  "want": "Tetracycline",
+  "engine": "tesseract",
+  "name": "Tetracycline",
+  "score": 0.682457258625,
+  "info": "'TE 36' @60° -> TE 30 (0.68) [(0.503, 'TEC 30'), (0.407, 'TEL 15')]"
+ },
+ {
+  "plate": "1",
+  "disk": 0,
+  "truth": "TE 30",
+  "want": "Tetracycline",
+  "engine": "ppocr",
+  "name": "Tetracycline",
+  "score": -3.0,
+  "info": "'TE 30' @47° -> TE 30 (logp=-3.0) [(-6.5, 'C 30'), (-8.4, 'TEC 30')]"
+ },
+ {
+  "plate": "1",
+  "disk": 1,
+  "truth": "CTX 30",
+  "want": "Cefotaxime",
+  "engine": "templates",
+  "name": "Cefotaxime",
+  "score": 660.0,
+  "info": "id13 score=660"
+ },
+ {
+  "plate": "1",
+  "disk": 1,
+  "truth": "CTX 30",
+  "want": "Cefotaxime",
+  "engine": "tesseract",
+  "name": "Cefotaxime",
+  "score": 0.5042990717333334,
+  "info": "'CTY 30' @120° -> CTX 30 (0.50) [(0.504, 'CTB 30'), (0.423, 'C/T 40')]"
+ },
+ {
+  "plate": "1",
+  "disk": 1,
+  "truth": "CTX 30",
+  "want": "Cefotaxime",
+  "engine": "ppocr",
+  "name": "Cefotaxime",
+  "score": -7.0,
+  "info": "'CTX 30' @127° -> CTX 30 (logp=-7.0) [(-9.8, 'C 30'), (-11.3, 'P 1')]"
+ },
+ {
+  "plate": "1",
+  "disk": 2,
+  "truth": "FOX 30",
+  "want": "Cefoxitin",
+  "engine": "templates",
+  "name": "Cefoxitin",
+  "score": 630.0,
+  "info": "id14 score=630"
+ },
+ {
+  "plate": "1",
+  "disk": 2,
+  "truth": "FOX 30",
+  "want": "Cefoxitin",
+  "engine": "tesseract",
+  "name": "Cefoxitin",
+  "score": 0.8315751246,
+  "info": "'FOX 3Q' @30° -> FOX 30 (0.83) [(0.479, 'OX 1'), (0.478, 'OFX 5')]"
+ },
+ {
+  "plate": "1",
+  "disk": 2,
+  "truth": "FOX 30",
+  "want": "Cefoxitin",
+  "engine": "ppocr",
+  "name": "Cefoxitin",
+  "score": 0.0,
+  "info": "'FOX 30' @20° -> FOX 30 (logp=0.0) [(-3.4, 'F 300'), (-5.8, 'C 30')]"
+ },
+ {
+  "plate": "1",
+  "disk": 3,
+  "truth": "AMC 30",
+  "want": "Amoxicillin-clavulanic acid",
+  "engine": "templates",
+  "name": "Amoxicillin-clavulanic acid",
+  "score": 810.0,
+  "info": "id3 score=810"
+ },
+ {
+  "plate": "1",
+  "disk": 3,
+  "truth": "AMC 30",
+  "want": "Amoxicillin-clavulanic acid",
+  "engine": "tesseract",
+  "name": "Amikacin",
+  "score": 0.4799576957499999,
+  "info": "'A 30' @30° -> AK 30 (0.48) [(0.48, 'NA 30'), (0.373, 'C 30')]"
+ },
+ {
+  "plate": "1",
+  "disk": 3,
+  "truth": "AMC 30",
+  "want": "Amoxicillin-clavulanic acid",
+  "engine": "ppocr",
+  "name": "Amoxicillin-clavulanic acid",
+  "score": -5.3729335531698545,
+  "info": "'AC 30' @33° -> AMC 30 (logp=-5.4) [(-7.0, 'AN 30'), (-9.3, 'C 30')]"
+ },
+ {
+  "plate": "1",
+  "disk": 4,
+  "truth": "C 30",
+  "want": "Chloramphenicol",
+  "engine": "templates",
+  "name": "Chloramphenicol",
+  "score": 405.0,
+  "info": "id40 score=405"
+ },
+ {
+  "plate": "1",
+  "disk": 4,
+  "truth": "C 30",
+  "want": "Chloramphenicol",
+  "engine": "tesseract",
+  "name": "Nitrofurantoin",
+  "score": 0.35579428100000005,
+  "info": "'F 4 B 1 T Y' @75° -> F 100 (0.36) [(0.264, 'LNZ 30'), (0.261, 'S 300')]"
+ },
+ {
+  "plate": "1",
+  "disk": 4,
+  "truth": "C 30",
+  "want": "Chloramphenicol",
+  "engine": "ppocr",
+  "name": "Benzylpenicillin",
+  "score": -6.3768342943176926,
+  "info": "' 0' @313° -> P 10 (logp=-6.4) [(-6.7, 'DA 2'), (-7.2, 'C 30')]"
+ },
+ {
+  "plate": "1",
+  "disk": 5,
+  "truth": "CAZ 30",
+  "want": "Ceftazidime",
+  "engine": "templates",
+  "name": "Ceftazidime",
+  "score": 690.0,
+  "info": "id17 score=690"
+ },
+ {
+  "plate": "1",
+  "disk": 5,
+  "truth": "CAZ 30",
+  "want": "Ceftazidime",
+  "engine": "tesseract",
+  "name": "Ceftazidime",
+  "score": 0.6880844083733333,
+  "info": "'GAZ 20' @150° -> CAZ 10 (0.69) [(0.464, 'CZ 30'), (0.422, 'C 30')]"
+ },
+ {
+  "plate": "1",
+  "disk": 5,
+  "truth": "CAZ 30",
+  "want": "Ceftazidime",
+  "engine": "ppocr",
+  "name": "Ceftazidime",
+  "score": -1.0,
+  "info": "'CAZ 30' @140° -> CAZ 30 (logp=-1.0) [(-2.7, 'C 30'), (-4.2, 'CC 2')]"
+ },
+ {
+  "plate": "1",
+  "disk": 6,
+  "truth": "AMP 10",
+  "want": "Ampicillin",
+  "engine": "templates",
+  "name": "Ampicillin",
+  "score": 580.0,
+  "info": "id1 score=580"
+ },
+ {
+  "plate": "1",
+  "disk": 6,
+  "truth": "AMP 10",
+  "want": "Ampicillin",
+  "engine": "tesseract",
+  "name": "Ampicillin",
+  "score": 0.6309768410000001,
+  "info": "'AMP 18' @270° -> AMP 10 (0.63) [(0.483, 'AN 30'), (0.35, 'P 1')]"
+ },
+ {
+  "plate": "1",
+  "disk": 6,
+  "truth": "AMP 10",
+  "want": "Ampicillin",
+  "engine": "ppocr",
+  "name": "Ampicillin",
+  "score": -2.0,
+  "info": "'AMP 10' @267° -> AMP 10 (logp=-2.0) [(-6.0, 'P 10'), (-7.2, 'TM 10')]"
+ },
+ {
+  "plate": "2",
+  "disk": 0,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "templates",
+  "name": "Tobramycin",
+  "score": 271.0,
+  "info": "id38 score=271"
+ },
+ {
+  "plate": "2",
+  "disk": 0,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "tesseract",
+  "name": "Tobramycin",
+  "score": 0.870056485,
+  "info": "'TOB 10' @330° -> TOB 10 (0.87) [(0.535, 'AN 30'), (0.489, 'AM 2')]"
+ },
+ {
+  "plate": "2",
+  "disk": 0,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "ppocr",
+  "name": "Tobramycin",
+  "score": 0.0,
+  "info": "'TOB 10' @320° -> TOB 10 (logp=0.0) [(-3.2, 'AM 10'), (-3.8, 'F 100')]"
+ },
+ {
+  "plate": "2",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "templates",
+  "name": "Gentamicin",
+  "score": 229.0,
+  "info": "id36 score=229"
+ },
+ {
+  "plate": "2",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "tesseract",
+  "name": "Gentamicin",
+  "score": 0.7787783554999999,
+  "info": "'CN 16' @150° -> CN 10 (0.78) [(0.409, 'OFX 5'), (0.375, 'TM 10')]"
+ },
+ {
+  "plate": "2",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "ppocr",
+  "name": "Gentamicin",
+  "score": 0.1848755835761331,
+  "info": "'CN 410' @180° -> CN 10 (logp=0.2) [(-2.9, 'P 10'), (-4.0, 'C 30')]"
+ },
+ {
+  "plate": "2",
+  "disk": 2,
+  "truth": "TE 30",
+  "want": "Tetracycline",
+  "engine": "templates",
+  "name": "Tetracycline",
+  "score": 373.0,
+  "info": "id50 score=373"
+ },
+ {
+  "plate": "2",
+  "disk": 2,
+  "truth": "TE 30",
+  "want": "Tetracycline",
+  "engine": "tesseract",
+  "name": "Tetracycline",
+  "score": 0.626123130375,
+  "info": "'TE 3' @300° -> TE 30 (0.63) [(0.462, 'TEC 30'), (0.373, 'TEL 15')]"
+ },
+ {
+  "plate": "2",
+  "disk": 2,
+  "truth": "TE 30",
+  "want": "Tetracycline",
+  "engine": "ppocr",
+  "name": "Tetracycline",
+  "score": 0.040606152750184865,
+  "info": "'TE 9' @320° -> TE 30 (logp=0.0) [(-3.5, 'AM 10'), (-3.9, 'CN 10')]"
+ },
+ {
+  "plate": "2",
+  "disk": 3,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "templates",
+  "name": "Tobramycin",
+  "score": 222.0,
+  "info": "id38 score=222"
+ },
+ {
+  "plate": "2",
+  "disk": 3,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "tesseract",
+  "name": "Ciprofloxacin",
+  "score": 0.4923087574666667,
+  "info": "'C1P 5' @75° -> CIP 5 (0.49) [(0.421, 'C 30'), (0.355, 'S 300')]"
+ },
+ {
+  "plate": "2",
+  "disk": 3,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "ppocr",
+  "name": "Ciprofloxacin",
+  "score": 0.6167283129389962,
+  "info": "'CP 5' @53° -> CIP 5 (logp=0.6) [(-2.5, 'P 10'), (-3.4, 'E 15')]"
+ },
+ {
+  "plate": "2",
+  "disk": 4,
+  "truth": "P 10",
+  "want": "Benzylpenicillin",
+  "engine": "templates",
+  "name": null,
+  "score": 0.0,
+  "info": "-"
+ },
+ {
+  "plate": "2",
+  "disk": 4,
+  "truth": "P 10",
+  "want": "Benzylpenicillin",
+  "engine": "tesseract",
+  "name": "Benzylpenicillin",
+  "score": 0.44863880587499994,
+  "info": "'FP 10' @225° -> P 10 (0.45) [(0.449, 'FA 10'), (0.382, 'PEF 5')]"
+ },
+ {
+  "plate": "2",
+  "disk": 4,
+  "truth": "P 10",
+  "want": "Benzylpenicillin",
+  "engine": "ppocr",
+  "name": "Benzylpenicillin",
+  "score": 0.0,
+  "info": "'P 10' @220° -> P 10 (logp=0.0) [(-4.8, 'FA 10'), (-5.1, 'CD 2')]"
+ },
+ {
+  "plate": "2",
+  "disk": 5,
+  "truth": "FOX 30",
+  "want": "Cefoxitin",
+  "engine": "templates",
+  "name": "Tobramycin",
+  "score": 244.0,
+  "info": "id38 score=244"
+ },
+ {
+  "plate": "2",
+  "disk": 5,
+  "truth": "FOX 30",
+  "want": "Cefoxitin",
+  "engine": "tesseract",
+  "name": "Cefoxitin",
+  "score": 0.46786403249999997,
+  "info": "'FOX OJ' @210° -> FOX 30 (0.47) [(0.445, 'S 300'), (0.408, 'CRO 30')]"
+ },
+ {
+  "plate": "2",
+  "disk": 5,
+  "truth": "FOX 30",
+  "want": "Cefoxitin",
+  "engine": "ppocr",
+  "name": "Cefoxitin",
+  "score": -1.0,
+  "info": "'FOX 30' @220° -> FOX 30 (logp=-1.0) [(-6.0, 'OX 1'), (-6.2, 'FC 10')]"
+ },
+ {
+  "plate": "2",
+  "disk": 6,
+  "truth": "DA 2",
+  "want": "Clindamycin",
+  "engine": "templates",
+  "name": "Cefoxitin",
+  "score": 234.0,
+  "info": "id14 score=234"
+ },
+ {
+  "plate": "2",
+  "disk": 6,
+  "truth": "DA 2",
+  "want": "Clindamycin",
+  "engine": "tesseract",
+  "name": "Clindamycin",
+  "score": 0.6939581775,
+  "info": "'DA 2' @90° -> DA 2 (0.69) [(0.415, 'P 1'), (0.278, 'RA 5')]"
+ },
+ {
+  "plate": "2",
+  "disk": 6,
+  "truth": "DA 2",
+  "want": "Clindamycin",
+  "engine": "ppocr",
+  "name": "Clindamycin",
+  "score": 0.0,
+  "info": "'DA 2' @80° -> DA 2 (logp=0.0) [(-2.2, 'P 1'), (-4.4, 'C 30')]"
+ },
+ {
+  "plate": "2",
+  "disk": 7,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "templates",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 299.0,
+  "info": "id43 score=299"
+ },
+ {
+  "plate": "2",
+  "disk": 7,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "tesseract",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 0.5,
+  "info": "'SXT 25' @150° -> SXT 25 (0.50) [(0.366, 'S 300'), (0.35, 'NN 10')]"
+ },
+ {
+  "plate": "2",
+  "disk": 7,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "ppocr",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 0.0,
+  "info": "'SXT 25' @160° -> SXT 25 (logp=0.0) [(-3.8, 'P 10'), (-4.5, 'C 30')]"
+ },
+ {
+  "plate": "3",
+  "disk": 0,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "templates",
+  "name": "Amikacin",
+  "score": 170.0,
+  "info": "id35 score=170"
+ },
+ {
+  "plate": "3",
+  "disk": 0,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "tesseract",
+  "name": "Clindamycin",
+  "score": 0.33333333333333337,
+  "info": "'C CS' @330° -> CC 2 (0.33) [(0.3, 'C 30'), (0.275, 'S 300')]"
+ },
+ {
+  "plate": "3",
+  "disk": 0,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "ppocr",
+  "name": "Trimethoprim",
+  "score": -5.7260957700831465,
+  "info": "'85' @180° -> W 5 (logp=-5.7) [(-5.9, 'C 30'), (-6.2, 'CN 10')]"
+ },
+ {
+  "plate": "3",
+  "disk": 1,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "templates",
+  "name": "Tobramycin",
+  "score": 131.0,
+  "info": "id38 score=131"
+ },
+ {
+  "plate": "3",
+  "disk": 1,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "tesseract",
+  "name": "Benzylpenicillin",
+  "score": 0.35,
+  "info": "'P' @210° -> P 1 (0.35) [(0.284, 'AM 2'), (0.284, 'DA 2')]"
+ },
+ {
+  "plate": "3",
+  "disk": 1,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "ppocr",
+  "name": "Benzylpenicillin",
+  "score": -7.5633150830693685,
+  "info": "' 10' @0° -> P 10 (logp=-7.6) [(-7.9, 'C 30'), (-8.5, 'CN 10')]"
+ },
+ {
+  "plate": "3",
+  "disk": 2,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "templates",
+  "name": "Nalidixic acid",
+  "score": 167.0,
+  "info": "id66 score=167"
+ },
+ {
+  "plate": "3",
+  "disk": 2,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "tesseract",
+  "name": "Rifampicin",
+  "score": 0.6382601085,
+  "info": "'RA 30' @255° -> RA 5 (0.64) [(0.593, 'NA 30'), (0.593, 'VA 30')]"
+ },
+ {
+  "plate": "3",
+  "disk": 2,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "ppocr",
+  "name": "Chloramphenicol",
+  "score": -2.6870049854399713,
+  "info": "'C8' @0° -> C 30 (logp=-2.7) [(-2.8, 'NA 30'), (-3.6, 'P 1')]"
+ },
+ {
+  "plate": "3",
+  "disk": 3,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "templates",
+  "name": "Ceftazidime",
+  "score": 180.0,
+  "info": "id17 score=180"
+ },
+ {
+  "plate": "3",
+  "disk": 3,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "tesseract",
+  "name": "Ampicillin",
+  "score": 0.4183208466666667,
+  "info": "'A MY' @225° -> AM 2 (0.42) [(0.356, 'AMC 3'), (0.35, 'W 5')]"
+ },
+ {
+  "plate": "3",
+  "disk": 3,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "ppocr",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": -1.707885364710183,
+  "info": "'BT 25' @167° -> SXT 25 (logp=-1.7) [(-2.4, 'OX 1'), (-5.4, 'P 1')]"
+ },
+ {
+  "plate": "3",
+  "disk": 4,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "templates",
+  "name": "Amikacin",
+  "score": 200.0,
+  "info": "id35 score=200"
+ },
+ {
+  "plate": "3",
+  "disk": 4,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "tesseract",
+  "name": "Chloramphenicol",
+  "score": 0.37419027900000007,
+  "info": "'C 5' @105° -> C 30 (0.37) [(0.373, 'CC 2'), (0.363, 'S 300')]"
+ },
+ {
+  "plate": "3",
+  "disk": 4,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "ppocr",
+  "name": "Ciprofloxacin",
+  "score": 0.0,
+  "info": "'CIP 5' @107° -> CIP 5 (logp=0.0) [(-2.3, 'E 15'), (-3.8, 'C 30')]"
+ },
+ {
+  "plate": "3",
+  "disk": 5,
+  "truth": "TE 30",
+  "want": "Tetracycline",
+  "engine": "templates",
+  "name": "Tetracycline",
+  "score": 195.0,
+  "info": "id50 score=195"
+ },
+ {
+  "plate": "3",
+  "disk": 5,
+  "truth": "TE 30",
+  "want": "Tetracycline",
+  "engine": "tesseract",
+  "name": "Tetracycline",
+  "score": 0.7803710685,
+  "info": "'TE 37' @300° -> TE 30 (0.78) [(0.575, 'TEC 30'), (0.505, 'FEP 30')]"
+ },
+ {
+  "plate": "3",
+  "disk": 5,
+  "truth": "TE 30",
+  "want": "Tetracycline",
+  "engine": "ppocr",
+  "name": "Tetracycline",
+  "score": -0.27320847055179565,
+  "info": "'TE 0' @307° -> TE 30 (logp=-0.3) [(-3.2, 'W 5'), (-4.4, 'P 1')]"
+ },
+ {
+  "plate": "3",
+  "disk": 6,
+  "truth": "C 30",
+  "want": "Chloramphenicol",
+  "engine": "templates",
+  "name": "Tobramycin",
+  "score": 112.0,
+  "info": "id38 score=112"
+ },
+ {
+  "plate": "3",
+  "disk": 6,
+  "truth": "C 30",
+  "want": "Chloramphenicol",
+  "engine": "tesseract",
+  "name": "Amikacin",
+  "score": 0.577646146,
+  "info": "'AN' @75° -> AN 30 (0.58) [(0.528, 'AM 2'), (0.499, 'C 30')]"
+ },
+ {
+  "plate": "3",
+  "disk": 6,
+  "truth": "C 30",
+  "want": "Chloramphenicol",
+  "engine": "ppocr",
+  "name": "Chloramphenicol",
+  "score": 0.0,
+  "info": "'C 30' @180° -> C 30 (logp=0.0) [(-1.5, 'P 10'), (-4.6, 'NA 30')]"
+ },
+ {
+  "plate": "4",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "templates",
+  "name": "Amikacin",
+  "score": 440.0,
+  "info": "id35 score=440"
+ },
+ {
+  "plate": "4",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "tesseract",
+  "name": "Amikacin",
+  "score": 0.498572579,
+  "info": "'AX 36' @195° -> AK 30 (0.50) [(0.44, 'AXO 30'), (0.318, 'OFX 5')]"
+ },
+ {
+  "plate": "4",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "ppocr",
+  "name": "Chloramphenicol",
+  "score": -7.497237102820648,
+  "info": "' 30' @200° -> C 30 (logp=-7.5) [(-7.8, 'W 5'), (-9.2, 'F 100')]"
+ },
+ {
+  "plate": "4",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "templates",
+  "name": "Gentamicin",
+  "score": 421.0,
+  "info": "id36 score=421"
+ },
+ {
+  "plate": "4",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "tesseract",
+  "name": "Gentamicin",
+  "score": 0.9298431225,
+  "info": "'CN 10' @270° -> CN 10 (0.93) [(0.435, 'W 5'), (0.4, 'C 30')]"
+ },
+ {
+  "plate": "4",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "ppocr",
+  "name": "Gentamicin",
+  "score": 0.0,
+  "info": "'CN 10' @240° -> CN 10 (logp=0.0) [(-4.1, 'CC 2'), (-4.8, 'C 30')]"
+ },
+ {
+  "plate": "4",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "templates",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 500.0,
+  "info": "id43 score=500"
+ },
+ {
+  "plate": "4",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "tesseract",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 0.4113372132,
+  "info": "'SX 23' @90° -> SXT 25 (0.41) [(0.35, 'W 5'), (0.294, 'GM 10')]"
+ },
+ {
+  "plate": "4",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "ppocr",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 0.0,
+  "info": "'SXT 25' @100° -> SXT 25 (logp=0.0) [(-5.0, 'LE 5'), (-5.6, 'P 1')]"
+ },
+ {
+  "plate": "4",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "templates",
+  "name": "Nalidixic acid",
+  "score": 324.0,
+  "info": "id66 score=324"
+ },
+ {
+  "plate": "4",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "tesseract",
+  "name": "Nalidixic acid",
+  "score": 0.6846805315,
+  "info": "'NA' @285° -> NA 30 (0.68) [(0.391, 'DA 2'), (0.391, 'RA 5')]"
+ },
+ {
+  "plate": "4",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "ppocr",
+  "name": "Nalidixic acid",
+  "score": -1.2702150986425822,
+  "info": "'NA 0' @287° -> NA 30 (logp=-1.3) [(-5.3, 'AM 2'), (-5.6, 'LE 5')]"
+ },
+ {
+  "plate": "4",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "templates",
+  "name": "Tobramycin",
+  "score": 200.0,
+  "info": "id38 score=200"
+ },
+ {
+  "plate": "4",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "tesseract",
+  "name": "Tobramycin",
+  "score": 0.3382607660133333,
+  "info": "'TO8 7 3' @315° -> TOB 10 (0.34) [(0.333, 'PG 1'), (0.3, 'AM 2')]"
+ },
+ {
+  "plate": "4",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "ppocr",
+  "name": "Tobramycin",
+  "score": -2.495669272752518,
+  "info": "'T0B 0' @320° -> TOB 10 (logp=-2.5) [(-7.0, 'P 10'), (-7.6, 'C 30')]"
+ },
+ {
+  "plate": "4",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "templates",
+  "name": "Ciprofloxacin",
+  "score": 408.0,
+  "info": "id29 score=408"
+ },
+ {
+  "plate": "4",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "tesseract",
+  "name": "Ciprofloxacin",
+  "score": 0.668642535875,
+  "info": "'CIP 2' @345° -> CIP 5 (0.67) [(0.626, 'AN 30'), (0.573, 'AM 2')]"
+ },
+ {
+  "plate": "4",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "ppocr",
+  "name": "Ciprofloxacin",
+  "score": 0.4704913747218922,
+  "info": "'CIA ' @320° -> CIP 5 (logp=0.5) [(-2.7, 'CC 2'), (-2.7, 'C 30')]"
+ },
+ {
+  "plate": "5",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "templates",
+  "name": "Amikacin",
+  "score": 440.0,
+  "info": "id35 score=440"
+ },
+ {
+  "plate": "5",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "tesseract",
+  "name": "Amikacin",
+  "score": 0.498572579,
+  "info": "'AX 36' @195° -> AK 30 (0.50) [(0.44, 'AXO 30'), (0.318, 'OFX 5')]"
+ },
+ {
+  "plate": "5",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "ppocr",
+  "name": "Chloramphenicol",
+  "score": -7.497237102820648,
+  "info": "' 30' @200° -> C 30 (logp=-7.5) [(-7.8, 'W 5'), (-9.2, 'F 100')]"
+ },
+ {
+  "plate": "5",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "templates",
+  "name": "Gentamicin",
+  "score": 421.0,
+  "info": "id36 score=421"
+ },
+ {
+  "plate": "5",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "tesseract",
+  "name": "Gentamicin",
+  "score": 0.9298431225,
+  "info": "'CN 10' @270° -> CN 10 (0.93) [(0.435, 'W 5'), (0.4, 'C 30')]"
+ },
+ {
+  "plate": "5",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "ppocr",
+  "name": "Gentamicin",
+  "score": 0.0,
+  "info": "'CN 10' @240° -> CN 10 (logp=0.0) [(-4.1, 'CC 2'), (-4.8, 'C 30')]"
+ },
+ {
+  "plate": "5",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "templates",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 500.0,
+  "info": "id43 score=500"
+ },
+ {
+  "plate": "5",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "tesseract",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 0.4113372132,
+  "info": "'SX 23' @90° -> SXT 25 (0.41) [(0.35, 'W 5'), (0.294, 'GM 10')]"
+ },
+ {
+  "plate": "5",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "ppocr",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 0.0,
+  "info": "'SXT 25' @100° -> SXT 25 (logp=0.0) [(-5.0, 'LE 5'), (-5.6, 'P 1')]"
+ },
+ {
+  "plate": "5",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "templates",
+  "name": "Nalidixic acid",
+  "score": 324.0,
+  "info": "id66 score=324"
+ },
+ {
+  "plate": "5",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "tesseract",
+  "name": "Nalidixic acid",
+  "score": 0.6846805315,
+  "info": "'NA' @285° -> NA 30 (0.68) [(0.391, 'DA 2'), (0.391, 'RA 5')]"
+ },
+ {
+  "plate": "5",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "ppocr",
+  "name": "Nalidixic acid",
+  "score": -1.2702150986425822,
+  "info": "'NA 0' @287° -> NA 30 (logp=-1.3) [(-5.3, 'AM 2'), (-5.6, 'LE 5')]"
+ },
+ {
+  "plate": "5",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "templates",
+  "name": "Tobramycin",
+  "score": 200.0,
+  "info": "id38 score=200"
+ },
+ {
+  "plate": "5",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "tesseract",
+  "name": "Tobramycin",
+  "score": 0.3382607660133333,
+  "info": "'TO8 7 3' @315° -> TOB 10 (0.34) [(0.333, 'PG 1'), (0.3, 'AM 2')]"
+ },
+ {
+  "plate": "5",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "ppocr",
+  "name": "Tobramycin",
+  "score": -2.495669272752518,
+  "info": "'T0B 0' @320° -> TOB 10 (logp=-2.5) [(-7.0, 'P 10'), (-7.6, 'C 30')]"
+ },
+ {
+  "plate": "5",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "templates",
+  "name": "Ciprofloxacin",
+  "score": 408.0,
+  "info": "id29 score=408"
+ },
+ {
+  "plate": "5",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "tesseract",
+  "name": "Ciprofloxacin",
+  "score": 0.668642535875,
+  "info": "'CIP 2' @345° -> CIP 5 (0.67) [(0.626, 'AN 30'), (0.573, 'AM 2')]"
+ },
+ {
+  "plate": "5",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "ppocr",
+  "name": "Ciprofloxacin",
+  "score": 0.4704913747218922,
+  "info": "'CIA ' @320° -> CIP 5 (logp=0.5) [(-2.7, 'CC 2'), (-2.7, 'C 30')]"
+ },
+ {
+  "plate": "7",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "templates",
+  "name": "Amikacin",
+  "score": 440.0,
+  "info": "id35 score=440"
+ },
+ {
+  "plate": "7",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "tesseract",
+  "name": "Amikacin",
+  "score": 0.498572579,
+  "info": "'AX 36' @195° -> AK 30 (0.50) [(0.44, 'AXO 30'), (0.318, 'OFX 5')]"
+ },
+ {
+  "plate": "7",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "ppocr",
+  "name": "Chloramphenicol",
+  "score": -7.497237102820648,
+  "info": "' 30' @200° -> C 30 (logp=-7.5) [(-7.8, 'W 5'), (-9.2, 'F 100')]"
+ },
+ {
+  "plate": "7",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "templates",
+  "name": "Gentamicin",
+  "score": 421.0,
+  "info": "id36 score=421"
+ },
+ {
+  "plate": "7",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "tesseract",
+  "name": "Gentamicin",
+  "score": 0.9298431225,
+  "info": "'CN 10' @270° -> CN 10 (0.93) [(0.435, 'W 5'), (0.4, 'C 30')]"
+ },
+ {
+  "plate": "7",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "ppocr",
+  "name": "Gentamicin",
+  "score": 0.0,
+  "info": "'CN 10' @240° -> CN 10 (logp=0.0) [(-4.1, 'CC 2'), (-4.8, 'C 30')]"
+ },
+ {
+  "plate": "7",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "templates",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 500.0,
+  "info": "id43 score=500"
+ },
+ {
+  "plate": "7",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "tesseract",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 0.4113372132,
+  "info": "'SX 23' @90° -> SXT 25 (0.41) [(0.35, 'W 5'), (0.294, 'GM 10')]"
+ },
+ {
+  "plate": "7",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "ppocr",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 0.0,
+  "info": "'SXT 25' @100° -> SXT 25 (logp=0.0) [(-5.0, 'LE 5'), (-5.6, 'P 1')]"
+ },
+ {
+  "plate": "7",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "templates",
+  "name": "Nalidixic acid",
+  "score": 324.0,
+  "info": "id66 score=324"
+ },
+ {
+  "plate": "7",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "tesseract",
+  "name": "Nalidixic acid",
+  "score": 0.6846805315,
+  "info": "'NA' @285° -> NA 30 (0.68) [(0.391, 'DA 2'), (0.391, 'RA 5')]"
+ },
+ {
+  "plate": "7",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "ppocr",
+  "name": "Nalidixic acid",
+  "score": -1.2702150986425822,
+  "info": "'NA 0' @287° -> NA 30 (logp=-1.3) [(-5.3, 'AM 2'), (-5.6, 'LE 5')]"
+ },
+ {
+  "plate": "7",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "templates",
+  "name": "Tobramycin",
+  "score": 200.0,
+  "info": "id38 score=200"
+ },
+ {
+  "plate": "7",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "tesseract",
+  "name": "Tobramycin",
+  "score": 0.3382607660133333,
+  "info": "'TO8 7 3' @315° -> TOB 10 (0.34) [(0.333, 'PG 1'), (0.3, 'AM 2')]"
+ },
+ {
+  "plate": "7",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "ppocr",
+  "name": "Tobramycin",
+  "score": -2.495669272752518,
+  "info": "'T0B 0' @320° -> TOB 10 (logp=-2.5) [(-7.0, 'P 10'), (-7.6, 'C 30')]"
+ },
+ {
+  "plate": "7",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "templates",
+  "name": "Ciprofloxacin",
+  "score": 408.0,
+  "info": "id29 score=408"
+ },
+ {
+  "plate": "7",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "tesseract",
+  "name": "Ciprofloxacin",
+  "score": 0.668642535875,
+  "info": "'CIP 2' @345° -> CIP 5 (0.67) [(0.626, 'AN 30'), (0.573, 'AM 2')]"
+ },
+ {
+  "plate": "7",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "ppocr",
+  "name": "Ciprofloxacin",
+  "score": 0.4704913747218922,
+  "info": "'CIA ' @320° -> CIP 5 (logp=0.5) [(-2.7, 'CC 2'), (-2.7, 'C 30')]"
+ },
+ {
+  "plate": "8",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "templates",
+  "name": "Amikacin",
+  "score": 440.0,
+  "info": "id35 score=440"
+ },
+ {
+  "plate": "8",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "tesseract",
+  "name": "Amikacin",
+  "score": 0.498572579,
+  "info": "'AX 36' @195° -> AK 30 (0.50) [(0.44, 'AXO 30'), (0.318, 'OFX 5')]"
+ },
+ {
+  "plate": "8",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "ppocr",
+  "name": "Chloramphenicol",
+  "score": -7.497237102820648,
+  "info": "' 30' @200° -> C 30 (logp=-7.5) [(-7.8, 'W 5'), (-9.2, 'F 100')]"
+ },
+ {
+  "plate": "8",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "templates",
+  "name": "Gentamicin",
+  "score": 421.0,
+  "info": "id36 score=421"
+ },
+ {
+  "plate": "8",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "tesseract",
+  "name": "Gentamicin",
+  "score": 0.9298431225,
+  "info": "'CN 10' @270° -> CN 10 (0.93) [(0.435, 'W 5'), (0.4, 'C 30')]"
+ },
+ {
+  "plate": "8",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "ppocr",
+  "name": "Gentamicin",
+  "score": 0.0,
+  "info": "'CN 10' @240° -> CN 10 (logp=0.0) [(-4.1, 'CC 2'), (-4.8, 'C 30')]"
+ },
+ {
+  "plate": "8",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "templates",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 500.0,
+  "info": "id43 score=500"
+ },
+ {
+  "plate": "8",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "tesseract",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 0.4113372132,
+  "info": "'SX 23' @90° -> SXT 25 (0.41) [(0.35, 'W 5'), (0.294, 'GM 10')]"
+ },
+ {
+  "plate": "8",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "ppocr",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 0.0,
+  "info": "'SXT 25' @100° -> SXT 25 (logp=0.0) [(-5.0, 'LE 5'), (-5.6, 'P 1')]"
+ },
+ {
+  "plate": "8",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "templates",
+  "name": "Nalidixic acid",
+  "score": 324.0,
+  "info": "id66 score=324"
+ },
+ {
+  "plate": "8",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "tesseract",
+  "name": "Nalidixic acid",
+  "score": 0.6846805315,
+  "info": "'NA' @285° -> NA 30 (0.68) [(0.391, 'DA 2'), (0.391, 'RA 5')]"
+ },
+ {
+  "plate": "8",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "ppocr",
+  "name": "Nalidixic acid",
+  "score": -1.2702150986425822,
+  "info": "'NA 0' @287° -> NA 30 (logp=-1.3) [(-5.3, 'AM 2'), (-5.6, 'LE 5')]"
+ },
+ {
+  "plate": "8",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "templates",
+  "name": "Tobramycin",
+  "score": 200.0,
+  "info": "id38 score=200"
+ },
+ {
+  "plate": "8",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "tesseract",
+  "name": "Tobramycin",
+  "score": 0.3382607660133333,
+  "info": "'TO8 7 3' @315° -> TOB 10 (0.34) [(0.333, 'PG 1'), (0.3, 'AM 2')]"
+ },
+ {
+  "plate": "8",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "ppocr",
+  "name": "Tobramycin",
+  "score": -2.495669272752518,
+  "info": "'T0B 0' @320° -> TOB 10 (logp=-2.5) [(-7.0, 'P 10'), (-7.6, 'C 30')]"
+ },
+ {
+  "plate": "8",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "templates",
+  "name": "Ciprofloxacin",
+  "score": 408.0,
+  "info": "id29 score=408"
+ },
+ {
+  "plate": "8",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "tesseract",
+  "name": "Ciprofloxacin",
+  "score": 0.668642535875,
+  "info": "'CIP 2' @345° -> CIP 5 (0.67) [(0.626, 'AN 30'), (0.573, 'AM 2')]"
+ },
+ {
+  "plate": "8",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "ppocr",
+  "name": "Ciprofloxacin",
+  "score": 0.4704913747218922,
+  "info": "'CIA ' @320° -> CIP 5 (logp=0.5) [(-2.7, 'CC 2'), (-2.7, 'C 30')]"
+ },
+ {
+  "plate": "9",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "templates",
+  "name": "Amikacin",
+  "score": 440.0,
+  "info": "id35 score=440"
+ },
+ {
+  "plate": "9",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "tesseract",
+  "name": "Amikacin",
+  "score": 0.498572579,
+  "info": "'AX 36' @195° -> AK 30 (0.50) [(0.44, 'AXO 30'), (0.318, 'OFX 5')]"
+ },
+ {
+  "plate": "9",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "engine": "ppocr",
+  "name": "Chloramphenicol",
+  "score": -7.497237102820648,
+  "info": "' 30' @200° -> C 30 (logp=-7.5) [(-7.8, 'W 5'), (-9.2, 'F 100')]"
+ },
+ {
+  "plate": "9",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "templates",
+  "name": "Gentamicin",
+  "score": 421.0,
+  "info": "id36 score=421"
+ },
+ {
+  "plate": "9",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "tesseract",
+  "name": "Gentamicin",
+  "score": 0.9298431225,
+  "info": "'CN 10' @270° -> CN 10 (0.93) [(0.435, 'W 5'), (0.4, 'C 30')]"
+ },
+ {
+  "plate": "9",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "ppocr",
+  "name": "Gentamicin",
+  "score": 0.0,
+  "info": "'CN 10' @240° -> CN 10 (logp=0.0) [(-4.1, 'CC 2'), (-4.8, 'C 30')]"
+ },
+ {
+  "plate": "9",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "templates",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 500.0,
+  "info": "id43 score=500"
+ },
+ {
+  "plate": "9",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "tesseract",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 0.4113372132,
+  "info": "'SX 23' @90° -> SXT 25 (0.41) [(0.35, 'W 5'), (0.294, 'GM 10')]"
+ },
+ {
+  "plate": "9",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "ppocr",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 0.0,
+  "info": "'SXT 25' @100° -> SXT 25 (logp=0.0) [(-5.0, 'LE 5'), (-5.6, 'P 1')]"
+ },
+ {
+  "plate": "9",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "templates",
+  "name": "Nalidixic acid",
+  "score": 324.0,
+  "info": "id66 score=324"
+ },
+ {
+  "plate": "9",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "tesseract",
+  "name": "Nalidixic acid",
+  "score": 0.6846805315,
+  "info": "'NA' @285° -> NA 30 (0.68) [(0.391, 'DA 2'), (0.391, 'RA 5')]"
+ },
+ {
+  "plate": "9",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "engine": "ppocr",
+  "name": "Nalidixic acid",
+  "score": -1.2702150986425822,
+  "info": "'NA 0' @287° -> NA 30 (logp=-1.3) [(-5.3, 'AM 2'), (-5.6, 'LE 5')]"
+ },
+ {
+  "plate": "9",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "templates",
+  "name": "Tobramycin",
+  "score": 200.0,
+  "info": "id38 score=200"
+ },
+ {
+  "plate": "9",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "tesseract",
+  "name": "Tobramycin",
+  "score": 0.3382607660133333,
+  "info": "'TO8 7 3' @315° -> TOB 10 (0.34) [(0.333, 'PG 1'), (0.3, 'AM 2')]"
+ },
+ {
+  "plate": "9",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "ppocr",
+  "name": "Tobramycin",
+  "score": -2.495669272752518,
+  "info": "'T0B 0' @320° -> TOB 10 (logp=-2.5) [(-7.0, 'P 10'), (-7.6, 'C 30')]"
+ },
+ {
+  "plate": "9",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "templates",
+  "name": "Ciprofloxacin",
+  "score": 408.0,
+  "info": "id29 score=408"
+ },
+ {
+  "plate": "9",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "tesseract",
+  "name": "Ciprofloxacin",
+  "score": 0.668642535875,
+  "info": "'CIP 2' @345° -> CIP 5 (0.67) [(0.626, 'AN 30'), (0.573, 'AM 2')]"
+ },
+ {
+  "plate": "9",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "ppocr",
+  "name": "Ciprofloxacin",
+  "score": 0.4704913747218922,
+  "info": "'CIA ' @320° -> CIP 5 (logp=0.5) [(-2.7, 'CC 2'), (-2.7, 'C 30')]"
+ },
+ {
+  "plate": "10",
+  "disk": 0,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "templates",
+  "name": "Tobramycin",
+  "score": 271.0,
+  "info": "id38 score=271"
+ },
+ {
+  "plate": "10",
+  "disk": 0,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "tesseract",
+  "name": "Tobramycin",
+  "score": 0.8663474175000001,
+  "info": "'TOB 10' @330° -> TOB 10 (0.87) [(0.427, 'DOR 10'), (0.427, 'NOR 10')]"
+ },
+ {
+  "plate": "10",
+  "disk": 0,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "engine": "ppocr",
+  "name": "Tobramycin",
+  "score": 0.0,
+  "info": "'TOB 10' @320° -> TOB 10 (logp=0.0) [(-3.7, 'AM 10'), (-4.1, 'P 10')]"
+ },
+ {
+  "plate": "10",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "templates",
+  "name": "Gentamicin",
+  "score": 239.0,
+  "info": "id36 score=239"
+ },
+ {
+  "plate": "10",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "tesseract",
+  "name": "Gentamicin",
+  "score": 0.864981555,
+  "info": "'CN 10' @150° -> CN 10 (0.86) [(0.462, 'W 5'), (0.429, 'S 300')]"
+ },
+ {
+  "plate": "10",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "engine": "ppocr",
+  "name": "Gentamicin",
+  "score": 0.2790793276810093,
+  "info": "'N 10' @180° -> CN 10 (logp=0.3) [(-3.3, 'P 10'), (-3.9, 'C 30')]"
+ },
+ {
+  "plate": "10",
+  "disk": 2,
+  "truth": "TE 30",
+  "want": "Tetracycline",
+  "engine": "templates",
+  "name": "Tetracycline",
+  "score": 312.0,
+  "info": "id50 score=312"
+ },
+ {
+  "plate": "10",
+  "disk": 2,
+  "truth": "TE 30",
+  "want": "Tetracycline",
+  "engine": "tesseract",
+  "name": "Tetracycline",
+  "score": 0.6265637215,
+  "info": "'TE 3' @300° -> TE 30 (0.63) [(0.462, 'TEC 30'), (0.373, 'TEL 15')]"
+ },
+ {
+  "plate": "10",
+  "disk": 2,
+  "truth": "TE 30",
+  "want": "Tetracycline",
+  "engine": "ppocr",
+  "name": "Tetracycline",
+  "score": 0.0855417102767464,
+  "info": "'TE 9' @320° -> TE 30 (logp=0.1) [(-3.1, 'P 10'), (-3.2, 'CN 10')]"
+ },
+ {
+  "plate": "10",
+  "disk": 3,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "templates",
+  "name": "Tobramycin",
+  "score": 223.0,
+  "info": "id38 score=223"
+ },
+ {
+  "plate": "10",
+  "disk": 3,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "tesseract",
+  "name": "Trimethoprim",
+  "score": 0.49893263349999994,
+  "info": "'W715' @225° -> W 5 (0.50) [(0.426, 'C 30'), (0.409, 'P 1')]"
+ },
+ {
+  "plate": "10",
+  "disk": 3,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "engine": "ppocr",
+  "name": "Ciprofloxacin",
+  "score": 0.0,
+  "info": "'CIP 5' @60° -> CIP 5 (logp=0.0) [(-2.5, 'P 10'), (-3.7, 'E 15')]"
+ },
+ {
+  "plate": "10",
+  "disk": 4,
+  "truth": "P 10",
+  "want": "Benzylpenicillin",
+  "engine": "templates",
+  "name": null,
+  "score": 0.0,
+  "info": "-"
+ },
+ {
+  "plate": "10",
+  "disk": 4,
+  "truth": "P 10",
+  "want": "Benzylpenicillin",
+  "engine": "tesseract",
+  "name": "Benzylpenicillin",
+  "score": 0.7496426775,
+  "info": "'P 10' @225° -> P 10 (0.75) [(0.366, 'C 30'), (0.327, 'GM 30')]"
+ },
+ {
+  "plate": "10",
+  "disk": 4,
+  "truth": "P 10",
+  "want": "Benzylpenicillin",
+  "engine": "ppocr",
+  "name": "Benzylpenicillin",
+  "score": 0.0,
+  "info": "'P 10' @220° -> P 10 (logp=0.0) [(-4.6, 'FA 10'), (-4.9, 'C 30')]"
+ },
+ {
+  "plate": "10",
+  "disk": 5,
+  "truth": "FOX 30",
+  "want": "Cefoxitin",
+  "engine": "templates",
+  "name": "Tobramycin",
+  "score": 244.0,
+  "info": "id38 score=244"
+ },
+ {
+  "plate": "10",
+  "disk": 5,
+  "truth": "FOX 30",
+  "want": "Cefoxitin",
+  "engine": "tesseract",
+  "name": "Cefoxitin",
+  "score": 0.5417997368999999,
+  "info": "'FOX O' @210° -> FOX 30 (0.54) [(0.37, 'OX 1'), (0.363, 'FD 10')]"
+ },
+ {
+  "plate": "10",
+  "disk": 5,
+  "truth": "FOX 30",
+  "want": "Cefoxitin",
+  "engine": "ppocr",
+  "name": "Cefoxitin",
+  "score": -0.8502089540480828,
+  "info": "'FOX 3' @220° -> FOX 30 (logp=-0.9) [(-7.1, 'OX 1'), (-7.7, 'FC 10')]"
+ },
+ {
+  "plate": "10",
+  "disk": 6,
+  "truth": "DA 2",
+  "want": "Clindamycin",
+  "engine": "templates",
+  "name": "Cefotaxime",
+  "score": 190.0,
+  "info": "id13 score=190"
+ },
+ {
+  "plate": "10",
+  "disk": 6,
+  "truth": "DA 2",
+  "want": "Clindamycin",
+  "engine": "tesseract",
+  "name": "Clindamycin",
+  "score": 0.34803580800000006,
+  "info": "'D4 2' @75° -> DA 2 (0.35) [(0.282, 'CZ 30'), (0.252, 'QD 15')]"
+ },
+ {
+  "plate": "10",
+  "disk": 6,
+  "truth": "DA 2",
+  "want": "Clindamycin",
+  "engine": "ppocr",
+  "name": "Clindamycin",
+  "score": 0.0,
+  "info": "'DA 2' @80° -> DA 2 (logp=0.0) [(-2.1, 'P 1'), (-4.9, 'C 30')]"
+ },
+ {
+  "plate": "10",
+  "disk": 7,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "templates",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 263.0,
+  "info": "id43 score=263"
+ },
+ {
+  "plate": "10",
+  "disk": 7,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "tesseract",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 0.6246275882000001,
+  "info": "'SXT 26' @150° -> SXT 25 (0.62) [(0.368, 'S 300'), (0.321, 'ATM 30')]"
+ },
+ {
+  "plate": "10",
+  "disk": 7,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "engine": "ppocr",
+  "name": "Trimethoprim-sulfamethoxazole",
+  "score": 0.0,
+  "info": "'SXT 25' @160° -> SXT 25 (logp=0.0) [(-3.5, 'P 10'), (-4.2, 'E 15')]"
+ }
+]
