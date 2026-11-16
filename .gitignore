@@ -1,0 +1,12 @@
+.env
+.tools/
+backend/.venv/
+backend/data/
+__pycache__/
+frontend/node_modules/
+frontend/dist/
+frontend/dist-browser/
+.claude/
+.pytest_cache/
+*.pyc
+*.tsbuildinfo

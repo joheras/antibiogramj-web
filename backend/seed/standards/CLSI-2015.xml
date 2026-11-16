@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="standardsHTML.xsl"?>
+<standard>
+    <metadata>
+        <name>CLSI</name>
+        <version>2015</version>
+        <validFrom>2016-01-01</validFrom>
+        <susceptibleGTorG>GT</susceptibleGTorG>
+        <resistentLTorL>LT</resistentLTorL>
+    </metadata>
+    <breakpoints>
+        <familyBreakPoint>
+          <bacteriaFamily>Enterobacteriaceae</bacteriaFamily>
+	   <breakpoint>
+                <antibiotic>
+                    <name>Nalidixic acid</name>
+                    <family>Fluoroquinolones</family>
+                    <diskContent>30</diskContent>
+                </antibiotic>
+                <case>(screen)</case>
+                <available>true</available>
+                <susceptible>19</susceptible>
+                <resistant>13</resistant>
+                <comments/>
+           </breakpoint>
+	</familyBreakPoint>
+    </breakpoints>
+</standard>

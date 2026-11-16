@@ -1,0 +1,28 @@
+{
+  "name": "antibiogramj-web",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:browser": "vite --mode browser",
+    "build": "tsc -b && vite build",
+    "build:browser": "tsc -b && vite build --mode browser",
+    "preview": "vite preview",
+    "validate:cv": "node --experimental-strip-types --no-warnings scripts/validate-cv.mts"
+  },
+  "dependencies": {
+    "@techstark/opencv-js": "4.10.0-release.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.28.0",
+    "utif": "3.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "@types/react-dom": "18.3.1",
+    "@vitejs/plugin-react": "4.3.4",
+    "typescript": "5.6.3",
+    "vite": "5.4.11"
+  }
+}

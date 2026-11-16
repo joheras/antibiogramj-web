@@ -1,0 +1,74 @@
+import { useCallback, useEffect, useState } from "react";
+import { Link, Navigate, Route, Routes } from "react-router-dom";
+import { api, ApiError, MODE, type User } from "./api";
+import { type Catalog, SessionContext } from "./session";
+import AuthPage from "./pages/AuthPage";
+import ExperimentsPage from "./pages/ExperimentsPage";
+import ExperimentPage from "./pages/ExperimentPage";
+import PlatePage from "./pages/PlatePage";
+import WizardPage from "./pages/WizardPage";
+
+async function loadCatalog(): Promise<Catalog> {
+  const [standards, families, antibiotics] = await Promise.all([api.standards(), api.families(), api.antibiotics()]);
+  return { standards, families, antibiotics, antibioticById: new Map(antibiotics.map((a) => [a.id, a])) };
+}
+
+export default function App() {
+  const [user, setUser] = useState<User | null | undefined>(undefined);
+  const [catalog, setCatalog] = useState<Catalog | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const onLogin = useCallback(async (u: User) => {
+    try {
+      setCatalog(await loadCatalog());
+      setUser(u);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }, []);
+
+  useEffect(() => {
+    api.me().then(onLogin).catch((e) => {
+      if (e instanceof ApiError && e.status === 401) setUser(null);
+      else setError((e as Error).message);
+    });
+  }, [onLogin]);
+
+  const logout = useCallback(() => {
+    api.logout().finally(() => {
+      setUser(null);
+      setCatalog(null);
+    });
+  }, []);
+
+  if (error) return <div className="center"><p className="error">Cannot reach the server: {error}</p></div>;
+  if (user === undefined) return <div className="center"><p className="muted">Loading…</p></div>;
+  if (user === null || !catalog) return <AuthPage onLogin={onLogin} />;
+
+  return (
+    <SessionContext.Provider value={{ user, catalog, logout }}>
+      <header className="topbar">
+        <Link to="/" className="brand"><span className="logo" aria-hidden>◉</span> AntibiogramJ</Link>
+        {MODE === "server" ? (
+          <div className="topbar-user">
+            <span title={user.email}>{user.name || user.email}{user.lab && <span className="muted"> · {user.lab}</span>}</span>
+            <button className="ghost" onClick={logout}>Sign out</button>
+          </div>
+        ) : (
+          <div className="topbar-user">
+            <span className="tag" title="Images and results are stored only in this browser; nothing is uploaded.">Offline · data stays in this browser</span>
+          </div>
+        )}
+      </header>
+      <main>
+        <Routes>
+          <Route path="/" element={<ExperimentsPage />} />
+          <Route path="/experiments/:id" element={<ExperimentPage />} />
+          <Route path="/experiments/:id/add-plate" element={<WizardPage />} />
+          <Route path="/plates/:id" element={<PlatePage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+    </SessionContext.Provider>
+  );
+}

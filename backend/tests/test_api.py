@@ -1,0 +1,168 @@
+import os
+import tempfile
+from io import BytesIO
+from pathlib import Path
+
+_tmp = tempfile.mkdtemp()
+os.environ["ABJ_DATA_DIR"] = _tmp
+os.environ["ABJ_DATABASE_URL"] = f"sqlite:///{_tmp}/test.db"
+os.environ["ABJ_SECRET_KEY"] = "test-secret"
+
+import pytest  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
+from openpyxl import load_workbook  # noqa: E402
+
+from app.main import app  # noqa: E402
+
+IMAGES = Path(__file__).parent / "images"
+EXPECTED_PLATE_1 = {"Tetracycline", "Cefotaxime", "Amoxicillin-clavulanic acid", "Cefoxitin", "Chloramphenicol",
+                    "Ceftazidime", "Ampicillin"}
+
+
+def client_for(email: str) -> TestClient:
+    c = TestClient(app)
+    c.__enter__()
+    r = c.post("/api/auth/register", json={"email": email, "password": "secret-pass", "name": "T", "lab": "L"})
+    assert r.status_code == 201, r.text
+    return c
+
+
+@pytest.fixture(scope="module")
+def alice():
+    return client_for("alice@example.org")
+
+
+@pytest.fixture(scope="module")
+def bob():
+    return client_for("bob@example.org")
+
+
+def test_auth_required():
+    with TestClient(app) as c:
+        assert c.get("/api/experiments").status_code == 401
+        assert c.get("/api/catalog/standards").status_code == 401
+
+
+def test_login_logout(alice):
+    with TestClient(app) as c:
+        assert c.post("/api/auth/login", json={"email": "alice@example.org", "password": "nope-nope"}).status_code == 401
+        assert c.post("/api/auth/login", json={"email": "ALICE@example.org", "password": "secret-pass"}).status_code == 200
+        assert c.get("/api/auth/me").json()["email"] == "alice@example.org"
+        c.post("/api/auth/logout")
+        assert c.get("/api/auth/me").status_code == 401
+
+
+def test_duplicate_registration(alice):
+    with TestClient(app) as c:
+        r = c.post("/api/auth/register", json={"email": "alice@example.org", "password": "another-pass"})
+        assert r.status_code == 409
+
+
+def test_categorisation_rules():
+    from app.models import Breakpoint, Standard
+    from app.standards import categorise
+    eucast = Standard(susceptible_op=">=", resistant_op="<")
+    clsi = Standard(susceptible_op=">=", resistant_op="<=")
+    bp = Breakpoint(available=True, susceptible=19, resistant=16)
+    assert categorise(19, bp, eucast) == "Susceptible"
+    assert categorise(16, bp, eucast) == "Intermediate"
+    assert categorise(16, bp, clsi) == "Resistant"
+    assert categorise(15.9, bp, eucast) == "Resistant"
+    assert categorise(20, None, eucast) == "Not available"
+
+
+def test_full_analysis_flow(alice, bob):
+    standards = alice.get("/api/catalog/standards").json()
+    eucast = next(s for s in standards if s["name"] == "EUCAST")
+    assert eucast["is_default"]
+    families = {f["name"]: f["id"] for f in alice.get("/api/catalog/families").json()}
+    antibiotics = {a["id"]: a for a in alice.get("/api/catalog/antibiotics").json()}
+
+    exp = alice.post("/api/experiments", json={"name": "E. coli 7825", "comments": "test"}).json()
+    assert exp["standard_id"] == eucast["id"]
+
+    # 1. upload
+    data = (IMAGES / "1.tiff").read_bytes()
+    r = alice.post("/api/analysis/uploads", files={"file": ("1.tiff", data, "image/tiff")})
+    assert r.status_code == 201, r.text
+    up = r.json()
+    assert up["plate"] is not None
+    uid = up["upload_id"]
+    assert bob.post(f"/api/analysis/uploads/{uid}/disks").status_code == 404  # isolation
+
+    # 2. crop + contrast
+    r = alice.post(f"/api/analysis/uploads/{uid}/process", json={"crop": up["plate"], "auto_contrast": True})
+    assert r.status_code == 200 and max(r.json()["width"], r.json()["height"]) <= 1600
+    assert alice.get(f"/api/analysis/uploads/{uid}/image").headers["content-type"] == "image/png"
+
+    # 3. disks
+    disks = alice.post(f"/api/analysis/uploads/{uid}/disks").json()["disks"]
+    assert len(disks) == 7
+
+    # 4. identification with the bundled templates
+    results = alice.post(f"/api/analysis/uploads/{uid}/identify", json={"disks": disks}).json()["results"]
+    ids = [x["antibiotic_id"] for x in results]
+    assert {antibiotics[i]["name"] for i in ids} == EXPECTED_PLATE_1
+
+    # 5. halos
+    body = {"disks": disks, "antibiotic_ids": ids, "family_id": families["Enterobacteriaceae"],
+            "standard_id": eucast["id"], "disk_mm": 6}
+    halos = alice.post(f"/api/analysis/uploads/{uid}/halos", json=body).json()
+    assert len(halos["results"]) == 7
+    by_name = {antibiotics[i]["name"]: h for i, h in zip(ids, halos["results"])}
+    assert by_name["Cefoxitin"]["diameter_mm"] > 15
+    assert by_name["Cefoxitin"]["category"] == "Resistant"  # EUCAST 6.0 screen: S >= 19 mm
+    assert by_name["Chloramphenicol"]["category"] == "Susceptible"  # ~22.8 mm, S >= 17
+    assert by_name["Ampicillin"]["category"] == "Resistant"  # no zone, S >= 14
+
+    # 6. save the plate (with a manual correction of one halo)
+    measurements = [{"antibiotic_id": i, "breakpoint_id": h["breakpoint_id"], "disk": d, "halo_r": h["halo_r"]}
+                    for i, h, d in zip(ids, halos["results"], disks)]
+    measurements[0]["microcolonies"] = True
+    measurements[0]["interpretation"] = "checked"
+    plate_in = {"upload_id": uid, "experiment_id": exp["id"], "disk_mm": 6, "measurements": measurements,
+                "bacteria": {"family_id": families["Enterobacteriaceae"], "genus": "Escherichia",
+                             "species": "coli", "strain": "7825", "sample": "1"}}
+    assert bob.post("/api/plates", json=plate_in).status_code == 404  # bob cannot use alice's upload
+    r = alice.post("/api/plates", json=plate_in)
+    assert r.status_code == 201, r.text
+    plate = r.json()
+    assert len(plate["measurements"]) == 7
+    assert alice.get(f"/api/plates/{plate['id']}/image?annotated=true").headers["content-type"] == "image/jpeg"
+    assert alice.post(f"/api/analysis/uploads/{uid}/disks").status_code == 404  # upload consumed
+
+    # Bob sees nothing of Alice
+    assert bob.get("/api/experiments").json() == []
+    assert bob.get(f"/api/experiments/{exp['id']}").status_code == 404
+    assert bob.get(f"/api/plates/{plate['id']}").status_code == 404
+    assert bob.get(f"/api/plates/{plate['id']}/image").status_code == 404
+    assert bob.delete(f"/api/plates/{plate['id']}").status_code == 404
+
+    detail = alice.get(f"/api/experiments/{exp['id']}").json()
+    assert len(detail["antibiograms"]) == 1 and detail["antibiograms"][0]["species"] == "coli"
+    summary = alice.get("/api/experiments").json()[0]
+    assert summary["antibiogram_count"] == 1 and summary["plate_count"] == 1
+
+    # Excel export
+    r = alice.get(f"/api/experiments/{exp['id']}/export.xlsx")
+    assert r.status_code == 200
+    wb = load_workbook(BytesIO(r.content))
+    assert wb.sheetnames == ["Summary", "Antibiogram 1"]
+    assert wb["Summary"].max_row == 5 + 7
+
+    # Learned templates for Alice only
+    from app.db import SessionLocal
+    from app.models import LearnedTemplate
+    with SessionLocal() as db:
+        owners = {t.owner_id for t in db.query(LearnedTemplate)}
+    assert len(owners) == 1
+
+    # Deleting the only plate removes the antibiogram
+    assert alice.delete(f"/api/plates/{plate['id']}").status_code == 204
+    assert alice.get(f"/api/experiments/{exp['id']}").json()["antibiograms"] == []
+    assert alice.delete(f"/api/experiments/{exp['id']}").status_code == 204
+
+
+def test_rejects_non_images(alice):
+    r = alice.post("/api/analysis/uploads", files={"file": ("x.png", b"not an image", "image/png")})
+    assert r.status_code == 422

@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:16.6-alpine
+    environment:
+      POSTGRES_DB: antibiogramj
+      POSTGRES_USER: antibiogramj
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  app:
+    build: .
+    depends_on: [db]
+    environment:
+      ABJ_DATABASE_URL: postgresql+psycopg://antibiogramj:${POSTGRES_PASSWORD}@db:5432/antibiogramj
+      ABJ_SECRET_KEY: ${ABJ_SECRET_KEY:?set ABJ_SECRET_KEY in .env}
+      ABJ_COOKIE_SECURE: ${ABJ_COOKIE_SECURE:-true}
+      ABJ_ALLOW_REGISTRATION: ${ABJ_ALLOW_REGISTRATION:-true}
+    volumes:
+      - files:/app/backend/data
+    ports:
+      - "127.0.0.1:8000:8000"  # put an HTTPS reverse proxy (Caddy, nginx) in front
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  files:
