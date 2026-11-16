@@ -120,6 +120,9 @@ Deliberate differences:
   instead of using each disk's own size.
 * After cropping, images are analysed at most at 1600 px (configurable).
 
+[docs/disk-reading.md](docs/disk-reading.md) studies reading disk codes without templates (PP-OCR text
+recognition constrained to a lexicon of disk codes); prototypes in `research/disk_reading/`, not used by the app.
+
 ## Development
 
 ```bash
