@@ -11,11 +11,13 @@ from .config import BASE_DIR, settings
 from .db import Base, SessionLocal, engine
 from .models import Standard
 from .routers import analysis, auth, catalog, experiments
-from .standards import load_standard
+from .standards import load_standard, standard_key
 
 # Loaded on first start, in the same order as the desktop application so the
-# antibiotic ids of the bundled templates (seed/templates/<id>) match.
-SEED_STANDARDS = [("EUCAST-6.0.xml", True), ("CLSI-2015.xml", False)]
+# antibiotic ids of the bundled templates (seed/templates/<id>) match. New standards
+# are appended (never inserted) so existing ids do not change; the flag marks the
+# default standard for new experiments.
+SEED_STANDARDS = [("EUCAST-6.0.xml", False), ("CLSI-2015.xml", False), ("EUCAST-16.1.xml", True)]
 FRONTEND_DIST = Path(BASE_DIR.parent / "frontend" / "dist")
 
 
@@ -23,12 +25,28 @@ def init_db() -> None:
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     Base.metadata.create_all(engine)
     with SessionLocal() as db:
-        if db.scalar(select(Standard.id).limit(1)) is None:
-            legacy_ids: dict = {}
-            for filename, is_default in SEED_STANDARDS:
-                load_standard(db, settings.seed_dir / "standards" / filename, is_default, legacy_ids)
-            db.commit()
+        seed_standards(db)
         analysis.purge_old_uploads(db)
+
+
+def seed_standards(db) -> None:
+    """Load the seed standards: all of them in an empty database, otherwise only the
+    missing ones (existing standards and their breakpoints are left untouched)."""
+    fresh = db.scalar(select(Standard.id).limit(1)) is None
+    legacy_ids: dict | None = {} if fresh else None  # template ids only on a first load
+    loaded = {(s.name, s.version) for s in db.scalars(select(Standard))}
+    added = False
+    for filename, is_default in SEED_STANDARDS:
+        path = settings.seed_dir / "standards" / filename
+        if fresh or standard_key(path) not in loaded:
+            load_standard(db, path, is_default, legacy_ids)
+            added = added or is_default
+    if added:  # a newly seeded default replaces the previous one
+        default = next(f for f, d in SEED_STANDARDS if d)
+        key = standard_key(settings.seed_dir / "standards" / default)
+        for standard in db.scalars(select(Standard)):
+            standard.is_default = (standard.name, standard.version) == key
+    db.commit()
 
 
 @asynccontextmanager

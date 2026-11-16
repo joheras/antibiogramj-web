@@ -61,6 +61,14 @@ def _number(value: str) -> float | None:
         return None
 
 
+def standard_key(path: Path) -> tuple[str, str]:
+    """(name, version) of an AntibiogramJXML file."""
+    meta = ET.parse(path).getroot().find("metadata")
+    if meta is None:
+        raise ValueError("Missing <metadata>")
+    return _text(meta, "name").strip(), _text(meta, "version").strip()
+
+
 def load_standard(db: Session, path: Path, is_default: bool = False,
                   legacy_ids: dict[tuple[str, str, str], int] | None = None) -> Standard:
     """Load an AntibiogramJXML file. Idempotent per (name, version).

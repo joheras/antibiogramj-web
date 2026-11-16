@@ -27,11 +27,51 @@ It comes in two flavours built from the same React frontend:
 | Experiments → antibiograms → plates | Same model; one owner per experiment |
 | Wizard: bacteria data, crop, brightness/contrast, disks, disk size, codes, halos, annotation | Same 5 steps; annotated image generated on save |
 | Template learning in `antibiotics/<id>/` | Bundled templates shared by all + up to 10 learned templates per antibiotic **per user** |
-| Standards EUCAST 6.0 + CLSI 2015 (AntibiogramJXML) | Same files, loaded on first start |
+| Standards EUCAST 6.0 + CLSI 2015 (AntibiogramJXML) | Same files + **EUCAST 16.1** (default for new experiments) |
 | Export experiment to Excel | `.xlsx` with a summary sheet + one sheet per antibiogram |
 
 Not yet ported: searches (by antibiotic / strains / antibiograms), editable abbreviations, loading new standards
 from the UI, import/export of experiments as files, the expert-rules system.
+
+### Breakpoint standards
+
+The standards are AntibiogramJXML files in `backend/seed/standards/` (schema `antibiogramJStandardsSchema.xsd`):
+
+| Standard | Valid from | Notes |
+|---|---|---|
+| **EUCAST 16.1** (default) | 2026-06-24 | Zone diameter breakpoints of the [EUCAST Clinical Breakpoint Tables v. 16.1](https://www.eucast.org/clinical_breakpoints) |
+| EUCAST 6.0 | 2016-01-01 | From the desktop application |
+| CLSI 2015 | 2016-01-01 | From the desktop application (Enterobacteriaceae only) |
+
+New experiments use the default standard; existing experiments keep the standard they were created with. The
+server loads the seed standards that are missing from its database at every start (existing standards and their
+breakpoints are never modified), and new standards are always appended to `SEED_STANDARDS` in
+`backend/app/main.py` so the ids of existing standards, antibiotics and breakpoints do not change.
+
+`EUCAST-16.1.xml` is generated from the official Excel workbook with
+`backend/.venv/bin/python backend/scripts/eucast_xlsx_to_xml.py v_16.1_Breakpoint_Tables.xlsx backend/seed/standards/EUCAST-16.1.xml`:
+
+* Only zone diameter (disk diffusion) breakpoints are used. Agents without one (MIC only, "-", "IE", "IP", "Note")
+  are listed as not available; organism groups with no zone diameter breakpoint at all (*N. gonorrhoeae*,
+  *N. meningitidis*, *H. pylori*, *M. tuberculosis*, *L. pneumophila*, *B. cepacia* complex) are left out.
+* Indications, routes and species (e.g. "iv", "(uncomplicated UTI only)", "(meningitis)", "S. aureus") go to the
+  breakpoint *case*; when there are several, the first one is preselected and the others can be chosen in the
+  wizard. The EUCAST notes for the disk test, the Area of Technical Uncertainty (ATU), screening tests, off-scale
+  breakpoints (S ≥ 50 mm) and breakpoints in brackets are copied to the breakpoint notes.
+* EUCAST renamed the table *Enterobacteriaceae* to **Enterobacterales** (it applies to the whole order). It keeps
+  the existing family name *Enterobacteriaceae* in the app, so the same bacteria family works with every
+  standard. Likewise, the anaerobe tables use the existing *Gram-negative anaerobes* and *Gram-positive anaerobes
+  except Clostridium difficile* families (the species is in the case, e.g. "Bacteroides spp."). New organism
+  groups (Aeromonas, Vibrio, Kingella kingae, Bacillus, Brucella, ...) are new families.
+* Antibiotics with the same name, disk content and class as in EUCAST 6.0 are shared, so the bundled disk code
+  templates still recognise them; new agents/disks (cefiderocol, ceftazidime-avibactam, temocillin, ...) have no
+  bundled templates yet (the app learns them when you identify them manually).
+
+**S/I/R with EUCAST.** Since 2019 EUCAST defines **I as "Susceptible, increased exposure"**: the organism is
+susceptible when the exposure to the agent is increased (higher dose or concentration at the site of infection),
+not an uncertain result. The app still labels this category **"Intermediate"** (and stores it under that name for
+compatibility with existing data and exports); with EUCAST standards read it as "Susceptible, increased exposure".
+With an off-scale breakpoint (S ≥ 50 mm) wild-type isolates are categorised I and must never be reported S.
 
 ### Algorithms
 

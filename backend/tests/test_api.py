@@ -73,12 +73,18 @@ def test_categorisation_rules():
 
 def test_full_analysis_flow(alice, bob):
     standards = alice.get("/api/catalog/standards").json()
-    eucast = next(s for s in standards if s["name"] == "EUCAST")
-    assert eucast["is_default"]
+    default = standards[0]
+    assert default["is_default"] and (default["name"], default["version"]) == ("EUCAST", "16.1")
+    eucast = next(s for s in standards if (s["name"], s["version"]) == ("EUCAST", "6.0"))
     families = {f["name"]: f["id"] for f in alice.get("/api/catalog/families").json()}
     antibiotics = {a["id"]: a for a in alice.get("/api/catalog/antibiotics").json()}
 
-    exp = alice.post("/api/experiments", json={"name": "E. coli 7825", "comments": "test"}).json()
+    new_exp = alice.post("/api/experiments", json={"name": "Default standard"}).json()
+    assert new_exp["standard_id"] == default["id"]
+    assert alice.delete(f"/api/experiments/{new_exp['id']}").status_code == 204
+
+    exp = alice.post("/api/experiments", json={"name": "E. coli 7825", "comments": "test",
+                                               "standard_id": eucast["id"]}).json()
     assert exp["standard_id"] == eucast["id"]
 
     # 1. upload
@@ -166,3 +172,42 @@ def test_full_analysis_flow(alice, bob):
 def test_rejects_non_images(alice):
     r = alice.post("/api/analysis/uploads", files={"file": ("x.png", b"not an image", "image/png")})
     assert r.status_code == 422
+
+
+def test_eucast_16_standard():
+    from sqlalchemy import create_engine, select
+    from sqlalchemy.orm import Session
+
+    from app.config import settings
+    from app.db import Base
+    from app.main import SEED_STANDARDS, seed_standards
+    from app.models import Antibiotic, Breakpoint, Family, Standard
+    from app.standards import categorise, load_standard
+
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+    with Session(engine) as db:
+        # An existing database with only the original standards gets the new one added.
+        legacy_ids: dict = {}
+        for filename, is_default in [("EUCAST-6.0.xml", True), ("CLSI-2015.xml", False)]:
+            load_standard(db, settings.seed_dir / "standards" / filename, is_default, legacy_ids)
+        db.commit()
+        before = {(b.id, b.standard_id, b.susceptible, b.resistant) for b in db.scalars(select(Breakpoint))}
+        seed_standards(db)
+        seed_standards(db)  # idempotent
+        standards = {(s.name, s.version): s for s in db.scalars(select(Standard))}
+        assert len(standards) == len(SEED_STANDARDS)
+        new = standards[("EUCAST", "16.1")]
+        assert new.is_default and not standards[("EUCAST", "6.0")].is_default
+        assert before <= {(b.id, b.standard_id, b.susceptible, b.resistant) for b in db.scalars(select(Breakpoint))}
+
+        # Enterobacterales, ceftazidime 10 µg: S >= 22 mm, R < 19 mm (shared antibiotic and family).
+        family = db.scalar(select(Family).where(Family.name == "Enterobacteriaceae"))
+        caz = db.scalar(select(Antibiotic).where(Antibiotic.name == "Ceftazidime", Antibiotic.disk_content == "10"))
+        assert caz.legacy_id is not None  # same disk as EUCAST 6.0, keeps its templates
+        bp = db.scalar(select(Breakpoint).where(Breakpoint.standard_id == new.id, Breakpoint.family_id == family.id,
+                                                Breakpoint.antibiotic_id == caz.id))
+        assert (bp.susceptible, bp.resistant) == (22, 19)
+        assert categorise(22, bp, new) == "Susceptible"
+        assert categorise(20, bp, new) == "Intermediate"
+        assert categorise(18, bp, new) == "Resistant"
