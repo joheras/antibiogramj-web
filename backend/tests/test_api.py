@@ -127,6 +127,8 @@ def test_full_analysis_flow(alice, bob):
                     for i, h, d in zip(ids, halos["results"], disks)]
     measurements[0]["microcolonies"] = True
     measurements[0]["interpretation"] = "checked"
+    ampicillin = next(i for i, m in enumerate(measurements) if antibiotics[m["antibiotic_id"]]["name"] == "Ampicillin")
+    measurements[ampicillin]["category"] = "Intermediate"  # manual override (computed: Resistant)
     plate_in = {"upload_id": uid, "experiment_id": exp["id"], "disk_mm": 6, "measurements": measurements,
                 "bacteria": {"family_id": families["Enterobacteriaceae"], "genus": "Escherichia",
                              "species": "coli", "strain": "7825", "sample": "1"}}
@@ -177,9 +179,60 @@ def test_full_analysis_flow(alice, bob):
     wb = load_workbook(BytesIO(alice.get(f"/api/experiments/{exp['id']}/export.xlsx").content))
     rows = {r[7]: r for r in wb["Summary"].iter_rows(min_row=7, values_only=True)}
     assert wb["Summary"]["B4"].value.startswith("EUCAST QC Tables v 16.0")
-    assert rows["Chloramphenicol"][17:] == ("ATCC 25922", "21-27", "24", "In range")  # ~22.8 mm
-    assert rows["Ampicillin"][17:] == ("ATCC 25922", "15-22", "18-19", "Out of range (too small)")  # no zone
+    assert rows["Chloramphenicol"][17:21] == ("ATCC 25922", "21-27", "24", "In range")  # ~22.8 mm
+    assert rows["Ampicillin"][17:21] == ("ATCC 25922", "15-22", "18-19", "Out of range (too small)")  # no zone
     assert wb["Antibiogram 1"]["A8"].value == "QC strain"
+
+    # Reinterpretation with another standard: a new experiment, the original is not modified
+    eucast16 = default
+    before = alice.get(f"/api/experiments/{exp['id']}").json()
+    assert bob.post(f"/api/experiments/{exp['id']}/reinterpret", json={"standard_id": eucast16["id"]}).status_code == 404
+    assert alice.post(f"/api/experiments/{exp['id']}/reinterpret", json={"standard_id": eucast["id"]}).status_code == 422
+    r = alice.post(f"/api/experiments/{exp['id']}/reinterpret", json={"standard_id": eucast16["id"]})
+    assert r.status_code == 201, r.text
+    copy = r.json()
+    assert copy["name"] == "E. coli 7825 (EUCAST 16.1)" and copy["reinterpreted_from"] == "E. coli 7825 (EUCAST 6.0)"
+    assert copy["standard_id"] == eucast16["id"]
+    assert alice.get(f"/api/experiments/{exp['id']}").json() == before
+    copied = alice.get(f"/api/experiments/{copy['id']}").json()
+    assert copied["standard"]["version"] == "16.1"
+    [cab] = copied["antibiograms"]
+    assert cab["supplementary_tests"] == update["supplementary_tests"] and cab["species"] == "coli"
+    [cplate] = cab["plates"]
+    old = {m["antibiotic"]["name"]: m for m in before["antibiograms"][0]["plates"][0]["measurements"]}
+    new = {m["antibiotic"]["name"]: m for m in cplate["measurements"]}
+    assert set(new) == set(old)
+    for name, m in new.items():
+        assert m["standard_id"] == eucast16["id"] and m["original_standard_id"] == eucast["id"]
+        assert m["original_category"] == old[name]["category"] and m["diameter_mm"] == old[name]["diameter_mm"]
+        assert m["original_overridden"] == (name == "Ampicillin")
+        assert m["breakpoint"] is None or m["breakpoint"]["standard_id"] == eucast16["id"]
+    assert old["Ampicillin"]["category"] == "Intermediate" and new["Ampicillin"]["category"] == "Resistant"
+    assert new["Chloramphenicol"]["category"] == "Not available"  # no Enterobacterales breakpoint in 16.1
+    caz = new["Ceftazidime"]  # 16.1: S >= 22, R < 19
+    assert caz["breakpoint"]["susceptible"] == 22 and caz["breakpoint"]["resistant"] == 19
+    assert alice.get(f"/api/plates/{cplate['id']}/image?annotated=true").status_code == 200
+
+    # A second reinterpretation keeps the first interpretation; CLSI 2015 has almost no disk breakpoints
+    clsi = next(s for s in standards if s["name"] == "CLSI")
+    copy2 = alice.post(f"/api/experiments/{copy['id']}/reinterpret", json={"standard_id": clsi["id"], "name": "CLSI"}).json()
+    assert copy2["name"] == "CLSI" and copy2["reinterpreted_from"] == "E. coli 7825 (EUCAST 16.1)"
+    ms = alice.get(f"/api/experiments/{copy2['id']}").json()["antibiograms"][0]["plates"][0]["measurements"]
+    assert {m["category"] for m in ms} == {"Not available"}
+    assert {m["original_standard_id"] for m in ms} == {eucast["id"]}
+    assert next(m for m in ms if m["antibiotic"]["name"] == "Ampicillin")["original_overridden"] is True
+
+    wb = load_workbook(BytesIO(alice.get(f"/api/experiments/{copy['id']}/export.xlsx").content))
+    header = [c.value for c in wb["Summary"][6]]
+    row = {h: c.value for h, c in zip(header, wb["Summary"][7])}
+    assert row["Family"] == "Enterobacterales" and row["Standard"] == "EUCAST 16.1"
+    assert row["Original standard"] == "EUCAST 6.0"
+    amp = next(r for r in wb["Summary"].iter_rows(min_row=7, values_only=True) if r[7] == "Ampicillin")
+    assert amp[header.index("Original category")] == "Intermediate (set manually)"
+
+    # The copies have their own image files
+    assert alice.delete(f"/api/experiments/{copy2['id']}").status_code == 204
+    assert alice.get(f"/api/plates/{cplate['id']}/image").status_code == 200
 
     # Learned templates for Alice only
     from app.db import SessionLocal
@@ -192,6 +245,8 @@ def test_full_analysis_flow(alice, bob):
     assert alice.delete(f"/api/plates/{plate['id']}").status_code == 204
     assert alice.get(f"/api/experiments/{exp['id']}").json()["antibiograms"] == []
     assert alice.delete(f"/api/experiments/{exp['id']}").status_code == 204
+    assert alice.get(f"/api/plates/{cplate['id']}/image?annotated=true").status_code == 200
+    assert alice.delete(f"/api/experiments/{copy['id']}").status_code == 204
 
 
 def test_rejects_non_images(alice):
@@ -249,8 +304,15 @@ def test_add_missing_columns():
         conn.execute(text("CREATE TABLE antibiograms (id INTEGER PRIMARY KEY, genus VARCHAR(100))"))
         conn.execute(text("INSERT INTO antibiograms (id, genus) VALUES (1, 'Escherichia')"))
     add_missing_columns(engine)
-    add_missing_columns(engine)  # idempotent
+    add_missing_columns(engine)  # idempotent (and tables that do not exist are skipped)
     assert {"supplementary_tests", "qc_strain"} <= {c["name"] for c in inspect(engine).get_columns("antibiograms")}
+    with engine.begin() as conn:
+        conn.execute(text("CREATE TABLE standards (id INTEGER PRIMARY KEY)"))
+        conn.execute(text("CREATE TABLE measurements (id INTEGER PRIMARY KEY, category VARCHAR(45))"))
+        conn.execute(text("INSERT INTO measurements (id, category) VALUES (1, 'Resistant')"))
+    add_missing_columns(engine)
+    assert {"original_standard_id", "original_category", "original_overridden"} <= {
+        c["name"] for c in inspect(engine).get_columns("measurements")}
     with engine.connect() as conn:
         assert conn.execute(text("SELECT supplementary_tests FROM antibiograms")).scalar() is None
         assert conn.execute(text("SELECT qc_strain FROM antibiograms")).scalar() == ""

@@ -20,6 +20,8 @@ export interface Measurement {
   id: number; antibiotic: Antibiotic; breakpoint: Breakpoint | null; standard_id: number;
   disk_cx: number; disk_cy: number; disk_r: number; halo_r: number; diameter_mm: number;
   category: string; microcolonies: boolean; interpretation: string;
+  /** Set on the measurements of a reinterpretation: the first interpretation (standard, category, set by hand). */
+  original_standard_id?: number | null; original_category?: string | null; original_overridden?: boolean | null;
 }
 export interface Plate {
   id: number; antibiogram_id: number; experiment_id: number; original_filename: string; disk_mm: number; px_per_mm: number;
@@ -35,6 +37,8 @@ export interface Antibiogram {
 }
 export interface ExperimentSummary {
   id: number; name: string; comments: string; standard_id: number; created_at: string;
+  /** "<name> (<standard> <version>)" of the experiment this one reinterprets with another standard. */
+  reinterpreted_from?: string | null;
   antibiogram_count: number; plate_count: number;
 }
 export interface ExperimentDetail extends Omit<ExperimentSummary, "antibiogram_count" | "plate_count"> {
@@ -89,6 +93,8 @@ export interface Api {
   deletePlate(id: number): Promise<void>;
   plateImage(id: number, annotated: boolean): Promise<string>;
   exportExperiment(id: number, name: string): Promise<Download>;
+  /** Copy of the experiment with the measured diameters categorised with another standard (the original is kept). */
+  reinterpretExperiment(id: number, data: { standard_id: number; name: string | null }): Promise<ExperimentSummary>;
 
   upload(file: File): Promise<UploadResult>;
   uploadImage(id: string, stage: "original" | "working", version?: number): Promise<string>;
@@ -153,6 +159,24 @@ export function increasedExposure(standard: Pick<Standard, "name" | "valid_from"
 
 export function categoryLabel(category: string, standard: Pick<Standard, "name" | "valid_from"> | null | undefined): string {
   return category === "Intermediate" && increasedExposure(standard) ? "Susceptible, increased exposure" : category;
+}
+
+// Names the standards adopted later (EUCAST and CLSI since 2019) for groups stored with their original names,
+// which every standard shares. Same as backend/app/standards.py::family_label.
+const RENAMED_FAMILIES: [string, string][] = [["Enterobacteriaceae", "Enterobacterales"], ["Clostridium difficile", "Clostridioides difficile"]];
+
+export function familyLabel(name: string, standard: Pick<Standard, "valid_from"> | null | undefined): string {
+  if ((standard?.valid_from ?? "") < "2019-01-01") return name;
+  return RENAMED_FAMILIES.reduce((n, [old, renamed]) => n.replace(old, renamed), name);
+}
+
+export function standardLabel(standard: Pick<Standard, "name" | "version"> | null | undefined): string {
+  return standard ? `${standard.name} ${standard.version}` : "unknown standard";
+}
+
+/** The breakpoint of the same case (e.g. "Uncomplicated UTI") as before, otherwise the first one. */
+export function pickBreakpoint(candidates: Breakpoint[], previousCase: string | null | undefined): Breakpoint | null {
+  return candidates.find((b) => previousCase && b.case === previousCase) ?? candidates[0] ?? null;
 }
 
 export function bacteriaLabel(a: Pick<Antibiogram, "genus" | "species" | "strain" | "sample">): string {

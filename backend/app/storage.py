@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shutil
 import uuid
 from pathlib import Path
 
@@ -65,3 +66,9 @@ def load_image(rel: str) -> np.ndarray:
 def delete(rel: str | None) -> None:
     if rel:
         abs_path(rel).unlink(missing_ok=True)
+
+
+def copy(src: str, dst: str) -> None:
+    path = abs_path(dst)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(abs_path(src), path)

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { api, download, type Plate } from "../api";
+import { api, download, standardLabel, type Plate } from "../api";
 import { useImageUrl } from "../components/AsyncImage";
 import CategoryBadge from "../components/CategoryBadge";
 import { QcCell } from "../components/Qc";
@@ -36,6 +36,10 @@ export default function PlatePage() {
   if (error) return <div className="page"><p className="error">{error}</p><Link to="/">Back</Link></div>;
   if (!plate) return <div className="page"><p className="muted">Loading…</p></div>;
 
+  const standard = (id: number | null | undefined) => catalog.standards.find((s) => s.id === id);
+  const standards = [...new Set(plate.measurements.map((m) => m.standard_id))].map((id) => standardLabel(standard(id)));
+  const reinterpreted = plate.measurements.some((m) => m.original_standard_id != null);
+
   return (
     <div className="page">
       <nav className="crumbs">
@@ -49,6 +53,7 @@ export default function PlatePage() {
             {plate.original_filename} · {new Date(plate.created_at).toLocaleString()} · disk {plate.disk_mm} mm ·
             {" "}{plate.px_per_mm.toFixed(1)} px/mm
           </p>
+          {standards.length > 0 && <p className="muted">Interpreted with <span className="tag">{standards.join(", ")}</span></p>}
         </div>
         <div className="actions">
           <button onClick={() => api.plateImage(plate.id, true).then((url) => download({ url, filename: `plate-${plate.id}-annotated.jpg` }))}>Download image</button>
@@ -69,7 +74,7 @@ export default function PlatePage() {
         </div>
         <div className="table-wrap">
           <table>
-            <thead><tr><th>Antibiotic</th><th className="num">Diameter</th>{qc && <th>QC range</th>}<th>Breakpoints</th><th>Category</th><th>Microcol.</th><th>Interpretation</th></tr></thead>
+            <thead><tr><th>Antibiotic</th><th className="num">Diameter</th>{qc && <th>QC range</th>}<th>Breakpoints</th><th>Category</th>{reinterpreted && <th>Original</th>}<th>Microcol.</th><th>Interpretation</th></tr></thead>
             <tbody>
               {plate.measurements.map((m) => (
                 <tr key={m.id}>
@@ -79,7 +84,11 @@ export default function PlatePage() {
                   {qc && <td><QcCell strain={qc} measurement={m} /></td>}
                   <td className="muted">{m.breakpoint?.available && m.breakpoint.susceptible !== null
                     ? `S ${m.breakpoint.susceptible} / R ${m.breakpoint.resistant}` : "–"}</td>
-                  <td><CategoryBadge category={m.category} standard={catalog.standards.find((s) => s.id === m.standard_id)} /></td>
+                  <td><CategoryBadge category={m.category} standard={standard(m.standard_id)} /></td>
+                  {reinterpreted && <td>{m.original_category && <span className="original">
+                    <CategoryBadge category={m.original_category} standard={standard(m.original_standard_id)} compact />{" "}
+                    <span className="muted small">{standardLabel(standard(m.original_standard_id))}{m.original_overridden && ", set manually"}</span>
+                  </span>}</td>}
                   <td>{m.microcolonies ? "Yes" : "No"}</td>
                   <td>{m.interpretation}</td>
                 </tr>

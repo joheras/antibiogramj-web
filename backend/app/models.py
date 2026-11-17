@@ -91,6 +91,8 @@ class Experiment(Base):
     comments: Mapped[str] = mapped_column(String(1000), default="")
     standard_id: Mapped[int] = mapped_column(ForeignKey("standards.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    # "<name> (<standard> <version>)" of the experiment this one is a reinterpretation of.
+    reinterpreted_from: Mapped[str | None] = mapped_column(String(250), nullable=True)
 
     standard: Mapped[Standard] = relationship()
     antibiograms: Mapped[list["Antibiogram"]] = relationship(
@@ -160,10 +162,16 @@ class Measurement(Base):
     category: Mapped[str] = mapped_column(String(45))
     microcolonies: Mapped[bool] = mapped_column(Boolean, default=False)
     interpretation: Mapped[str] = mapped_column(String(1000), default="")
+    # First interpretation of a measurement copied by a reinterpretation with another standard (None otherwise):
+    # its standard, its category and whether that category was set by hand.
+    original_standard_id: Mapped[int | None] = mapped_column(ForeignKey("standards.id"), nullable=True)
+    original_category: Mapped[str | None] = mapped_column(String(45), nullable=True)
+    original_overridden: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
     plate: Mapped[Plate] = relationship(back_populates="measurements")
     antibiotic: Mapped[Antibiotic] = relationship()
-    standard: Mapped[Standard] = relationship()
+    standard: Mapped[Standard] = relationship(foreign_keys=[standard_id])
+    original_standard: Mapped[Standard | None] = relationship(foreign_keys=[original_standard_id])
     breakpoint: Mapped[Breakpoint | None] = relationship()
 
 

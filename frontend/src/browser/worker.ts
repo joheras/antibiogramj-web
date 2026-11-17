@@ -181,6 +181,11 @@ const commands = {
     return args.disks.map((d) => Math.round(C.detectHalo(bright, img.width, img.height, d, mean).r * 100) / 100);
   },
 
+  /** Annotated image of a saved plate (reinterpretation with another standard). */
+  async annotate(args: { image: Blob; annotations: Annotation[] }) {
+    return renderAnnotations(await decode(args.image), args.annotations);
+  },
+
   /** Final images of a plate and the letters-only disk images to learn from. */
   async finish(args: { uploadId: string; annotations: Annotation[]; learn: { antibioticId: number; disk: C.Circle }[] }) {
     const { cv } = await loadCv();

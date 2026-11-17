@@ -2,7 +2,7 @@
 // Worker with OpenCV.js. Mirrors backend/app/routers/*.py; nothing leaves the browser.
 
 import {
-  ApiError, categorise, CATEGORIES, type Antibiogram, type Antibiotic, type Api, type Breakpoint, type Circle,
+  ApiError, categorise, CATEGORIES, pickBreakpoint, standardLabel, type Antibiogram, type Antibiotic, type Api, type Breakpoint, type Circle,
   type Download, type ExperimentDetail, type ExperimentSummary, type Family, type HaloResult,
   type Plate, type Standard, type User,
 } from "../api";
@@ -40,7 +40,10 @@ const now = () => new Date().toISOString();
 const newKey = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
 // -------------------------------------------------------------------- records
-interface ExperimentRec { id: number; name: string; comments: string; standard_id: number; created_at: string }
+interface ExperimentRec {
+  id: number; name: string; comments: string; standard_id: number; created_at: string;
+  reinterpreted_from?: string | null; // absent in records saved before reinterpretations existed
+}
 interface AntibiogramRec {
   id: number; experiment_id: number; family_id: number; genus: string; species: string; strain: string;
   sample: string; comments: string; created_at: string; supplementary_tests?: Record<string, string>;
@@ -60,6 +63,8 @@ function cleanTests(tests: Record<string, string>): Record<string, string> {
 interface MeasurementRec {
   antibiotic_id: number; breakpoint_id: number | null; standard_id: number; disk_cx: number; disk_cy: number;
   disk_r: number; halo_r: number; diameter_mm: number; category: string; microcolonies: boolean; interpretation: string;
+  // Only in reinterpretations: the first interpretation of the measurement (see Measurement in ../api.ts).
+  original_standard_id?: number | null; original_category?: string | null; original_overridden?: boolean | null;
 }
 interface PlateRec {
   id: number; antibiogram_id: number; experiment_id: number; original_filename: string; disk_mm: number;
@@ -76,6 +81,8 @@ function toPlate(p: PlateRec): Plate {
       breakpoint: m.breakpoint_id !== null ? breakpointById.get(m.breakpoint_id) ?? null : null,
       standard_id: m.standard_id, disk_cx: m.disk_cx, disk_cy: m.disk_cy, disk_r: m.disk_r, halo_r: m.halo_r,
       diameter_mm: m.diameter_mm, category: m.category, microcolonies: m.microcolonies, interpretation: m.interpretation,
+      original_standard_id: m.original_standard_id ?? null, original_category: m.original_category ?? null,
+      original_overridden: m.original_overridden ?? null,
     })),
   };
 }
@@ -90,7 +97,48 @@ async function experimentDetail(id: number): Promise<ExperimentDetail> {
     const { family_id, supplementary_tests, qc_strain, ...rest } = a;
     result.push({ ...rest, supplementary_tests: supplementary_tests ?? {}, qc_strain: qc_strain ?? "", family: familyById.get(family_id)!, plates: plates.sort((x, y) => x.id - y.id).map(toPlate) });
   }
-  return { ...e, standard: standardById.get(e.standard_id)!, antibiograms: result };
+  return { ...e, reinterpreted_from: e.reinterpreted_from ?? null, standard: standardById.get(e.standard_id)!, antibiograms: result };
+}
+
+// Antibiotics with the same name and disk may be listed under another drug class in each standard.
+const sameDisk = new Map<string, number[]>();
+for (const a of [...catalog.antibiotics].sort((x, y) => x.id - y.id)) {
+  const key = `${a.name.toLowerCase()}|${a.disk_content}`;
+  sameDisk.set(key, [...(sameDisk.get(key) ?? []), a.id]);
+}
+
+/** The measurements of a plate categorised with another standard (same as backend reinterpret_experiment). */
+function reinterpretPlate(p: PlateRec, familyId: number, standard: Standard): { measurements: MeasurementRec[]; annotations: Annotation[] } {
+  const used = new Set(p.measurements.map((m) => m.antibiotic_id));
+  const measurements: MeasurementRec[] = [], annotations: Annotation[] = [];
+  for (const m of p.measurements) {
+    const antibiotic = antibioticById.get(m.antibiotic_id)!;
+    let antibioticId = m.antibiotic_id, candidates = breakpointsFor(standard.id, familyId, antibioticId);
+    if (!candidates.length) {
+      for (const other of sameDisk.get(`${antibiotic.name.toLowerCase()}|${antibiotic.disk_content}`) ?? []) {
+        const found = used.has(other) ? [] : breakpointsFor(standard.id, familyId, other);
+        if (found.length) {
+          used.delete(antibioticId);
+          used.add(other);
+          antibioticId = other;
+          candidates = found;
+          break;
+        }
+      }
+    }
+    const previous = m.breakpoint_id !== null ? breakpointById.get(m.breakpoint_id) ?? null : null;
+    const bp = pickBreakpoint(candidates, previous?.case);
+    const category = categorise(m.diameter_mm, bp, standard);
+    const firstStandard = standardById.get(m.standard_id);
+    const original = m.original_standard_id != null
+      ? { original_standard_id: m.original_standard_id, original_category: m.original_category ?? null, original_overridden: m.original_overridden ?? null }
+      : { original_standard_id: m.standard_id, original_category: m.category,
+          original_overridden: firstStandard ? m.category !== categorise(m.diameter_mm, previous, firstStandard) : null };
+    measurements.push({ ...m, antibiotic_id: antibioticId, breakpoint_id: bp?.id ?? null, standard_id: standard.id, category, ...original });
+    annotations.push({ disk: { cx: m.disk_cx, cy: m.disk_cy, r: m.disk_r }, halo_r: m.halo_r, code: antibiotic.code, category,
+      s_r: bp?.susceptible ? (bp.susceptible * p.px_per_mm) / 2 : null, r_r: bp?.resistant ? (bp.resistant * p.px_per_mm) / 2 : null });
+  }
+  return { measurements, annotations };
 }
 
 // ---------------------------------------------------------------- blob URLs
@@ -270,8 +318,50 @@ export const localApi: Api = {
     return blobUrl(annotated ? p.annotated_key : p.image_key);
   },
 
+  async reinterpretExperiment(id, data) {
+    const source = await db.get<ExperimentRec>("experiments", id);
+    if (!source) throw notFound();
+    const standard = standardById.get(data.standard_id);
+    if (!standard) throw invalid("Unknown standard");
+    if (standard.id === source.standard_id) throw invalid("The experiment already uses this standard");
+    // Everything is prepared first: an IndexedDB transaction cannot wait for the worker.
+    const copies: { a: AntibiogramRec; plates: { p: PlateRec; image: Blob; annotated: Blob; measurements: MeasurementRec[] }[] }[] = [];
+    for (const a of (await db.getAll<AntibiogramRec>("antibiograms", "experiment_id", id)).sort((x, y) => x.id - y.id)) {
+      const plates = [];
+      for (const p of (await db.getAll<PlateRec>("plates", "antibiogram_id", a.id)).sort((x, y) => x.id - y.id)) {
+        const image = await db.get<Blob>("blobs", p.image_key);
+        if (!image) throw notFound();
+        const { measurements, annotations } = reinterpretPlate(p, a.family_id, standard);
+        plates.push({ p, image, measurements, annotated: await call("annotate", { image, annotations }) });
+      }
+      copies.push({ a, plates });
+    }
+    // "E. coli (EUCAST 6.0)" -> "E. coli (EUCAST 16.1)", not "E. coli (EUCAST 6.0) (EUCAST 16.1)"
+    const sourceSuffix = ` (${standardLabel(standardById.get(source.standard_id))})`;
+    const base = (source.name.endsWith(sourceSuffix) && source.name.slice(0, -sourceSuffix.length)) || source.name;
+    const rec: Omit<ExperimentRec, "id"> = {
+      name: (data.name?.trim() || `${base} (${standardLabel(standard)})`).slice(0, 100), comments: source.comments,
+      standard_id: standard.id, created_at: now(), reinterpreted_from: `${base}${sourceSuffix}`.slice(0, 250),
+    };
+    const newId = await db.write(["experiments", "antibiograms", "plates", "blobs"], async (tx) => {
+      const experimentId = await db.put<number>(tx, "experiments", rec);
+      for (const { a: { id: _a, ...a }, plates } of copies) {
+        const antibiogramId = await db.put<number>(tx, "antibiograms", { ...a, experiment_id: experimentId });
+        for (const { p: { id: _p, ...p }, image, annotated, measurements } of plates) {
+          const imageKey = newKey(), annotatedKey = newKey();
+          await db.put(tx, "blobs", image, imageKey);
+          await db.put(tx, "blobs", annotated, annotatedKey);
+          await db.put(tx, "plates", { ...p, antibiogram_id: antibiogramId, experiment_id: experimentId, image_key: imageKey,
+            annotated_key: annotatedKey, measurements } satisfies Omit<PlateRec, "id">);
+        }
+      }
+      return experimentId;
+    });
+    return { ...rec, id: newId, antibiogram_count: copies.length, plate_count: copies.reduce((n, c) => n + c.plates.length, 0) };
+  },
+
   async exportExperiment(id, name) {
-    return experimentWorkbook(await experimentDetail(id), name);
+    return experimentWorkbook(await experimentDetail(id), name, catalog.standards);
   },
 
   // ------------------------------------------------------------- analysis
@@ -425,7 +515,8 @@ export const localApi: Api = {
     if (backup?.format !== "antibiogramj-backup" || backup.version !== 1) throw invalid("The file is not an AntibiogramJ backup");
     for (const p of backup.plates) {
       for (const m of p.measurements) {
-        if (!antibioticById.has(m.antibiotic_id) || !standardById.has(m.standard_id)) throw invalid("The backup uses an unknown catalogue");
+        if (!antibioticById.has(m.antibiotic_id) || !standardById.has(m.standard_id)
+          || (m.original_standard_id != null && !standardById.has(m.original_standard_id))) throw invalid("The backup uses an unknown catalogue");
       }
     }
     const blobs = new Map<string, Blob>();

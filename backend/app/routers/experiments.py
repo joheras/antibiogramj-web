@@ -1,5 +1,7 @@
 """Experiments, antibiograms and plates owned by the current user."""
 
+from pathlib import Path
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import FileResponse, Response
 from sqlalchemy import func, select
@@ -12,8 +14,8 @@ from ..db import get_db
 from ..excel import experiment_workbook
 from ..models import Antibiogram, Antibiotic, Breakpoint, Experiment, Family, Measurement, Plate, Standard, User
 from ..schemas import (AntibiogramUpdate, ExperimentDetail, ExperimentIn, ExperimentOut, ExperimentSummary, PlateIn,
-                       PlateOut)
-from ..standards import CATEGORIES, categorise
+                       PlateOut, ReinterpretIn)
+from ..standards import CATEGORIES, categorise, pick_breakpoint
 from ..templates import learn
 from .analysis import diameter_mm, get_upload, px_per_mm
 
@@ -115,6 +117,96 @@ def export_experiment(experiment_id: int, db: Session = Depends(get_db), user: U
     safe = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in experiment.name)[:60] or "experiment"
     return Response(content, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     headers={"Content-Disposition": f'attachment; filename="{safe}.xlsx"'})
+
+
+@router.post("/experiments/{experiment_id}/reinterpret", response_model=ExperimentOut, status_code=201)
+def reinterpret_experiment(experiment_id: int, body: ReinterpretIn, db: Session = Depends(get_db),
+                           user: User = Depends(current_user)):
+    """Copy of the experiment with every measured diameter categorised with another standard.
+
+    The original experiment is not modified. Each copied measurement keeps its first interpretation (standard,
+    category and whether it was set by hand); manual categories are not carried over, they are recalculated.
+    Antibiotics or families without a breakpoint in the new standard become "Not available".
+    """
+    source = _experiment(db, user, experiment_id, full=True)
+    standard = db.get(Standard, body.standard_id)
+    if standard is None:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Unknown standard")
+    if standard.id == source.standard_id:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "The experiment already uses this standard")
+    # "E. coli (EUCAST 6.0)" -> "E. coli (EUCAST 16.1)", not "E. coli (EUCAST 6.0) (EUCAST 16.1)"
+    source_suffix = f" ({source.standard.name} {source.standard.version})"
+    base = source.name.removesuffix(source_suffix) or source.name
+    copy = Experiment(owner_id=user.id, name=body.name or f"{base} ({standard.name} {standard.version})"[:100],
+                      comments=source.comments, standard_id=standard.id,
+                      reinterpreted_from=f"{base}{source_suffix}"[:250])
+    db.add(copy)
+    db.flush()
+
+    # Antibiotics with the same name and disk may be listed under another drug class in each standard.
+    same_disk: dict[tuple[str, str], list[int]] = {}
+    for a in db.scalars(select(Antibiotic).order_by(Antibiotic.id)):
+        same_disk.setdefault((a.name.lower(), a.disk_content), []).append(a.id)
+    breakpoints: dict[tuple[int, int], list[Breakpoint]] = {}
+    for b in db.scalars(select(Breakpoint).where(Breakpoint.standard_id == standard.id).order_by(Breakpoint.id)):
+        breakpoints.setdefault((b.family_id, b.antibiotic_id), []).append(b)
+
+    new_files: list[str] = []
+    try:
+        for a in source.antibiograms:
+            antibiogram = Antibiogram(experiment_id=copy.id, family_id=a.family_id, genus=a.genus, species=a.species,
+                                      strain=a.strain, sample=a.sample, comments=a.comments,
+                                      supplementary_tests=dict(a.supplementary_tests or {}), qc_strain=a.qc_strain,
+                                      created_at=a.created_at)
+            db.add(antibiogram)
+            db.flush()
+            for p in a.plates:
+                image = storage.load_image(p.image_path)
+                plate = Plate(antibiogram_id=antibiogram.id, original_filename=p.original_filename,
+                              image_path=storage.new_rel_path(f"plates/{user.id}", Path(p.image_path).suffix),
+                              annotated_path=storage.new_rel_path(f"plates/{user.id}", ".jpg"),
+                              disk_mm=p.disk_mm, px_per_mm=p.px_per_mm, created_at=p.created_at)
+                db.add(plate)
+                db.flush()
+                annotations, used = [], {m.antibiotic_id for m in p.measurements}
+                for m in p.measurements:
+                    antibiotic_id, candidates = m.antibiotic_id, breakpoints.get((a.family_id, m.antibiotic_id), [])
+                    if not candidates:
+                        for other in same_disk.get((m.antibiotic.name.lower(), m.antibiotic.disk_content), []):
+                            if other not in used and breakpoints.get((a.family_id, other)):
+                                used.discard(antibiotic_id)
+                                used.add(other)
+                                antibiotic_id, candidates = other, breakpoints[(a.family_id, other)]
+                                break
+                    breakpoint = pick_breakpoint(candidates, m.breakpoint.case if m.breakpoint else None)
+                    category = categorise(m.diameter_mm, breakpoint, standard)
+                    if m.original_standard_id is None:
+                        original = (m.standard_id, m.category,
+                                    m.category != categorise(m.diameter_mm, m.breakpoint, m.standard))
+                    else:
+                        original = (m.original_standard_id, m.original_category, m.original_overridden)
+                    db.add(Measurement(plate_id=plate.id, antibiotic_id=antibiotic_id, standard_id=standard.id,
+                                       breakpoint_id=breakpoint.id if breakpoint else None, disk_cx=m.disk_cx,
+                                       disk_cy=m.disk_cy, disk_r=m.disk_r, halo_r=m.halo_r,
+                                       diameter_mm=m.diameter_mm, category=category, microcolonies=m.microcolonies,
+                                       interpretation=m.interpretation, original_standard_id=original[0],
+                                       original_category=original[1], original_overridden=original[2]))
+                    annotations.append({
+                        "disk": cvp.Circle(m.disk_cx, m.disk_cy, m.disk_r), "halo_r": m.halo_r,
+                        "code": m.antibiotic.code, "category": category,
+                        "s_r": breakpoint.susceptible * p.px_per_mm / 2 if breakpoint and breakpoint.susceptible else None,
+                        "r_r": breakpoint.resistant * p.px_per_mm / 2 if breakpoint and breakpoint.resistant else None,
+                    })
+                new_files += [plate.image_path, plate.annotated_path]
+                storage.copy(p.image_path, plate.image_path)
+                storage.save_image(cvp.render_annotations(image, annotations), plate.annotated_path)
+        db.commit()
+    except Exception:
+        db.rollback()
+        for rel in new_files:
+            storage.delete(rel)
+        raise
+    return copy
 
 
 # -------------------------------------------------------------- antibiograms

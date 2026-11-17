@@ -45,7 +45,8 @@ The standards are AntibiogramJXML files in `backend/seed/standards/` (schema `an
 | EUCAST 6.0 | 2016-01-01 | From the desktop application |
 | CLSI 2015 | 2016-01-01 | From the desktop application (Enterobacteriaceae only) |
 
-New experiments use the default standard; existing experiments keep the standard they were created with. The
+New experiments use the default standard; existing experiments keep the standard they were created with
+(**Reinterpret with…**, below, reads them with another one). The
 server loads the seed standards that are missing from its database at every start (existing standards and their
 breakpoints are never modified), and new standards are always appended to `SEED_STANDARDS` in
 `backend/app/main.py` so the ids of existing standards, antibiotics and breakpoints do not change.
@@ -63,7 +64,8 @@ breakpoints are never modified), and new standards are always appended to `SEED_
 * EUCAST renamed the table *Enterobacteriaceae* to **Enterobacterales** (it applies to the whole order). It keeps
   the existing family name *Enterobacteriaceae* in the app, so the same bacteria family works with every
   standard. Likewise, the anaerobe tables use the existing *Gram-negative anaerobes* and *Gram-positive anaerobes
-  except Clostridium difficile* families (the species is in the case, e.g. "Bacteroides spp."). New organism
+  except Clostridium difficile* families (the species is in the case, e.g. "Bacteroides spp."). With standards valid
+  from 2019 the app shows and exports these names as *Enterobacterales* and *Clostridioides difficile*. New organism
   groups (Aeromonas, Vibrio, Kingella kingae, Bacillus, Brucella, ...) are new families.
 * Antibiotics with the same name, disk content and class as in EUCAST 6.0 are shared, so the bundled disk code
   templates still recognise them; new agents/disks (cefiderocol, ceftazidime-avibactam, temocillin, ...) have no
@@ -97,6 +99,19 @@ of the strongest edges: 99.9th percentile of the Sobel gradient divided by the c
 Hough plate detection) and low resolution (plate < 700 px). Thresholds were calibrated on the sample images of
 AntibiogramJ and on blurred, noisy, over-exposed, cropped and down-scaled versions of them; `tests/images/1.tiff`
 raises no warning, and `npm run validate:cv` checks that the browser gives the same measures as Python.
+
+### Reinterpreting an experiment with another standard
+
+The measured diameters are stored, so **Reinterpret with…** on an experiment page creates a *copy* of the
+experiment (organisms, supplementary tests, plates and images) whose results are categorised with the breakpoints
+of another standard, with its annotated images redrawn and the expert system applied to the new categories. The
+original experiment is not modified. Every copied result keeps its first interpretation (standard and category,
+and whether the category had been set by hand), shown in the **Original** column of the experiment and plate pages
+and in the Excel export (columns *Standard*, *Original standard*, *Original category*). Manual categories are not
+carried over: they were decided with the other breakpoints. The breakpoint of the same case (e.g. "uncomplicated UTI
+only") is used when the new standard has it, otherwise the first one; antibiotics or organism groups without a
+zone-diameter breakpoint in the new standard become **Not available** (the experiment page says how many).
+Antibiotics listed under another drug class in each standard (same name and disk) are matched.
 
 ### Expert system
 

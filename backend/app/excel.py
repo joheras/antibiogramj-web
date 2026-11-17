@@ -15,6 +15,7 @@ from openpyxl.utils import get_column_letter
 
 from . import qc
 from .models import Experiment
+from .standards import family_label
 
 _BOLD = Font(bold=True)
 _HEADER_FILL = PatternFill("solid", fgColor="DDE6F0")
@@ -70,22 +71,27 @@ def experiment_workbook(experiment: Experiment) -> bytes:
     ws.append(["Comments", experiment.comments])
     any_qc = any(qc.strain(a.qc_strain) for a in experiment.antibiograms)
     ws.append(["QC ranges", qc.source() if any_qc else "No QC strains in this experiment"])
-    ws.append([])
+    ws.append(["Reinterpretation of", experiment.reinterpreted_from or ""])
     _header(ws, 6, ["Antibiogram", "Family", "Genus", "Species", "Strain", "Sample", "Plate", "Antibiotic",
                     "Code", "Disk content", "Diameter (mm)", "Category", "Microcolonies", "Interpretation",
                     "Breakpoint case", "S limit (mm)", "R limit (mm)", "QC strain", "QC range (mm)", "QC target",
-                    "QC result"])
+                    "QC result", "Standard", "Original standard", "Original category"])
     for a in experiment.antibiograms:
         strain = qc.strain(a.qc_strain)
         for p in a.plates:
             for m in p.measurements:
                 qc_cells, status = _qc_cells(strain, m)
-                ws.append([a.id, a.family.name, a.genus, a.species, a.strain, a.sample, p.id, m.antibiotic.name,
+                original = m.original_standard
+                ws.append([a.id, family_label(a.family.name, experiment.standard), a.genus, a.species, a.strain,
+                           a.sample, p.id, m.antibiotic.name,
                            m.antibiotic.code, m.antibiotic.disk_content, m.diameter_mm,
                            _category(m.category, experiment.standard),
                            "Yes" if m.microcolonies else "No", m.interpretation,
                            m.breakpoint.case if m.breakpoint else "", _limit(m.breakpoint, "susceptible"),
-                           _limit(m.breakpoint, "resistant"), *qc_cells])
+                           _limit(m.breakpoint, "resistant"), *qc_cells, f"{m.standard.name} {m.standard.version}",
+                           f"{original.name} {original.version}" if original else "",
+                           (_category(m.original_category, original)
+                            + (" (set manually)" if m.original_overridden else "")) if original else ""])
                 fill = _CATEGORY_FILL.get(m.category)
                 if fill:
                     ws.cell(row=ws.max_row, column=12).fill = fill
@@ -98,7 +104,7 @@ def experiment_workbook(experiment: Experiment) -> bytes:
         ws = wb.create_sheet(f"Antibiogram {i}")
         _header(ws, 1, ["Bacteria information", "", "", "Date"])
         ws.cell(row=2, column=4, value=a.created_at.strftime("%Y-%m-%d"))
-        for row, (label, value) in enumerate([("Family", a.family.name), ("Species", a.species),
+        for row, (label, value) in enumerate([("Family", family_label(a.family.name, experiment.standard)), ("Species", a.species),
                                               ("Genus", a.genus), ("Strain number", a.strain),
                                               ("Sample", a.sample), ("Comments", a.comments)], start=2):
             ws.cell(row=row, column=1, value=label).font = _BOLD

@@ -285,6 +285,11 @@ export default function HelpPage() {
               CLSI, S is ≥ S and R is ≤ R. When both EUCAST breakpoints are equal there is no I category.
               The circles on the images use these colours:</p>
             <Legend />
+            <p><b>Reinterpret with…</b> (experiment page) creates a copy of an experiment whose stored diameters are
+              categorised with another standard, for example to see older results with the current EUCAST breakpoints.
+              The original experiment does not change, and every result of the copy shows its first category and standard
+              in the <b>Original</b> column (also in the Excel export). Categories set by hand are recalculated; antibiotics
+              without a breakpoint in the new standard become <i>Not available</i>.</p>
           </section>
 
           <section id="expert" className="card">
