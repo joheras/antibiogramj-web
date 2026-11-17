@@ -38,6 +38,11 @@ const near = (a: number, b: number, tol: number, what: string) => {
 const image = read(root + "backend/tests/images/1.tiff");
 const plate = C.detectPlate(cv, image)!;
 for (const k of ["cx", "cy", "r"] as const) near(plate[k], ref.plate[k], 2, `plate.${k}`);
+// The sample photo is good: no quality warnings, and the same measures as Python.
+const quality = C.photoQuality(cv, image, plate);
+if (quality.warnings.length || ref.quality.warnings.length) failures.push(`quality warnings: ${quality.warnings} vs ${ref.quality.warnings}`);
+near(quality.metrics.sharpness, ref.quality.metrics.sharpness, 0.5, "quality.sharpness");
+near(quality.metrics.glare_fraction, ref.quality.metrics.glare_fraction, 0.001, "quality.glare_fraction");
 let c = C.crop(image, Math.round(plate.cx - plate.r), Math.round(plate.cy - plate.r), Math.round(2 * plate.r), Math.round(2 * plate.r));
 const s = 1600 / Math.max(c.width, c.height);
 c = C.enhanceContrast(C.resizeRgb(cv, c, Math.round(c.width * s), Math.round(c.height * s)));
@@ -55,4 +60,4 @@ if (failures.length) {
   console.error("FAILED\n  " + failures.join("\n  "));
   process.exit(1);
 }
-console.log(`OK: plate, ${disks.length} disks, antibiotics and halos match the Python backend`);
+console.log(`OK: plate, photo quality, ${disks.length} disks, antibiotics and halos match the Python backend`);

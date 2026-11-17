@@ -232,6 +232,17 @@ button.link { border: 0; padding: 0; background: none; color: var(--accent); tex
 .help-body .table-wrap { margin: 8px 0; }
 .lead { font-size: 1.05rem; }
 .warn { background: var(--i-bg); color: var(--i-fg); border-radius: 8px; padding: 10px 14px; font-size: 0.92rem; }
+.photo-quality { margin: 0 0 12px; }
+.qc { white-space: nowrap; font-weight: 600; }
+.qc.qc-in { color: var(--s-fg); }
+.qc.qc-low, .qc.qc-high { color: var(--r-fg); background: var(--r-bg); border-radius: 4px; padding: 0 4px; }
+.qc .small { font-weight: 400; }
+.qc-alert { color: var(--r-fg); background: var(--r-bg); padding: 8px 12px; border-radius: 8px; }
+.qc-panel { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px; }
+.qc-panel h3 { margin: 0 0 8px; font-size: 1rem; }
+.photo-quality ul { margin: 6px 0; padding-left: 1.2em; }
+.photo-quality li { margin: 4px 0; }
+.photo-quality a { color: inherit; }
 .figure { margin: 12px 0; }
 .figure img { width: 100%; height: auto; display: block; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface-2); }
 .figure figcaption { color: var(--muted); font-size: 0.85rem; margin-top: 6px; }

@@ -5,6 +5,8 @@ import AsyncImage from "../components/AsyncImage";
 import CategoryBadge from "../components/CategoryBadge";
 import AntibiogramEditor from "../components/AntibiogramEditor";
 import ExpertRulesPanel from "../components/ExpertRulesPanel";
+import { QcCell, QcPanel } from "../components/Qc";
+import { qcStrain } from "../qc";
 import { CATEGORY_NAME, evaluate } from "../expertRules";
 
 export default function ExperimentPage() {
@@ -32,8 +34,8 @@ export default function ExperimentPage() {
   }
 
   async function updateAntibiogram(a: Antibiogram, data: Partial<AntibiogramUpdate>) {
-    const { genus, species, strain, sample, comments, supplementary_tests } = a;
-    await api.updateAntibiogram(a.id, { genus, species, strain, sample, comments, supplementary_tests, ...data });
+    const { genus, species, strain, sample, comments, supplementary_tests, qc_strain } = a;
+    await api.updateAntibiogram(a.id, { genus, species, strain, sample, comments, supplementary_tests, qc_strain, ...data });
     load();
   }
 
@@ -66,11 +68,12 @@ export default function ExperimentPage() {
         </div>
       ) : exp.antibiograms.map((a) => {
         const evaluation = evaluate(a, exp.standard);
+        const qc = qcStrain(a.qc_strain);
         return (
         <section key={a.id} className="card antibiogram">
           <div className="section-head">
             <div>
-              <h2><i>{[a.genus, a.species].filter(Boolean).join(" ") || "Unnamed organism"}</i></h2>
+              <h2><i>{[a.genus, a.species].filter(Boolean).join(" ") || "Unnamed organism"}</i>{qc && <> <span className="tag" title={qc.name}>QC strain {qc.id}</span></>}</h2>
               <p className="muted">
                 {a.family.name}
                 {a.strain && <> · strain {a.strain}</>}
@@ -101,7 +104,7 @@ export default function ExperimentPage() {
           <div className="table-wrap">
             <table>
               <thead>
-                <tr><th>Antibiotic</th><th>Code</th><th>Plate</th><th className="num">Diameter</th><th>Category</th><th title="Category to report after applying the expert rules">Reported</th><th>Microcolonies</th><th>Interpretation</th></tr>
+                <tr><th>Antibiotic</th><th>Code</th><th>Plate</th><th className="num">Diameter</th>{qc && <th>QC range</th>}<th>Category</th><th title="Category to report after applying the expert rules">Reported</th><th>Microcolonies</th><th>Interpretation</th></tr>
               </thead>
               <tbody>
                 {a.plates.flatMap((p, i) => p.measurements.map((m) => (
@@ -110,6 +113,7 @@ export default function ExperimentPage() {
                     <td>{m.antibiotic.code}</td>
                     <td>{i + 1}</td>
                     <td className="num">{m.diameter_mm.toFixed(1)} mm</td>
+                    {qc && <td><QcCell strain={qc} measurement={m} /></td>}
                     <td><CategoryBadge category={m.category} standard={exp.standard} /></td>
                     <td>{(() => {
                       const r = evaluation.reported.get(m.id);
@@ -124,7 +128,8 @@ export default function ExperimentPage() {
               </tbody>
             </table>
           </div>
-          {a.plates.some((p) => p.measurements.length > 0) && (
+          {qc && <QcPanel antibiogram={a} />}
+          {!qc && a.plates.some((p) => p.measurements.length > 0) && (
             <ExpertRulesPanel antibiogram={a} evaluation={evaluation} standardName={`${exp.standard.name} ${exp.standard.version}`}
               onEdit={() => setEditing(a.id)}
               onTests={(supplementary_tests) => updateAntibiogram(a, { supplementary_tests }).catch((e) => setError(e.message))} />

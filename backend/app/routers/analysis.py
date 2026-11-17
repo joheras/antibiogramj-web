@@ -1,6 +1,6 @@
 """Image-analysis wizard (workspace/wizard/step*.java).
 
-1. upload        -> store the image and suggest the plate region
+1. upload        -> store the image, suggest the plate region and check the photo quality
 2. process       -> crop + optional automatic brightness/contrast
 3. disks         -> detect antibiotic disks (user then edits them)
 4. identify      -> read the code printed on every disk
@@ -22,6 +22,7 @@ from .. import storage
 from ..auth import current_user
 from ..config import settings
 from ..cv import processing as cvp
+from ..cv import quality
 from ..cv.matching import best_match
 from ..db import get_db
 from ..models import Antibiotic, Breakpoint, Family, Standard, Upload, User
@@ -80,7 +81,8 @@ def upload_image(file: UploadFile = File(...), db: Session = Depends(get_db), us
     db.commit()
     plate = cvp.detect_plate(image)
     h, w = image.shape[:2]
-    return UploadOut(upload_id=upload.id, width=w, height=h, plate=CircleIO(**plate.as_dict()) if plate else None)
+    return UploadOut(upload_id=upload.id, width=w, height=h, plate=CircleIO(**plate.as_dict()) if plate else None,
+                     quality=quality.check(image, plate))
 
 
 @router.get("/uploads/{upload_id}/image")

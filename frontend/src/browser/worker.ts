@@ -140,7 +140,8 @@ const commands = {
     const original = await decode(args.file);
     sessions.clear(); // one plate at a time
     sessions.set(args.uploadId, { original });
-    return { width: original.width, height: original.height, plate: C.detectPlate(cv, original), png: await encode(original) };
+    const plate = C.detectPlate(cv, original);
+    return { width: original.width, height: original.height, plate, quality: C.photoQuality(cv, original, plate), png: await encode(original) };
   },
 
   async process(args: { uploadId: string; crop: C.Circle | null; autoContrast: boolean; maxSide: number }) {

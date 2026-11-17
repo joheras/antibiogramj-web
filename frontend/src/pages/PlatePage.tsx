@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, download, type Plate } from "../api";
 import { useImageUrl } from "../components/AsyncImage";
 import CategoryBadge from "../components/CategoryBadge";
+import { QcCell } from "../components/Qc";
+import { qcStrain, qcResult, type QcStrain } from "../qc";
 import { useSession } from "../session";
 
 export default function PlatePage() {
@@ -12,8 +14,14 @@ export default function PlatePage() {
   const [plate, setPlate] = useState<Plate | null>(null);
   const [annotated, setAnnotated] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [qc, setQc] = useState<QcStrain | undefined>(undefined);
   useEffect(() => {
-    api.plate(id).then(setPlate).catch((e) => setError(e.message));
+    api.plate(id).then(async (p) => {
+      setPlate(p);
+      // The QC strain is a property of the antibiogram of the plate.
+      const exp = await api.experiment(p.experiment_id);
+      setQc(qcStrain(exp.antibiograms.find((a) => a.id === p.antibiogram_id)?.qc_strain));
+    }).catch((e) => setError(e.message));
   }, [id]);
 
   const experimentId = plate?.experiment_id;
@@ -36,7 +44,7 @@ export default function PlatePage() {
       </nav>
       <div className="page-head">
         <div>
-          <h1>Plate</h1>
+          <h1>Plate{qc && <> <span className="tag" title={qc.name}>QC strain {qc.id}</span></>}</h1>
           <p className="muted">
             {plate.original_filename} · {new Date(plate.created_at).toLocaleString()} · disk {plate.disk_mm} mm ·
             {" "}{plate.px_per_mm.toFixed(1)} px/mm
@@ -47,6 +55,10 @@ export default function PlatePage() {
           <button className="danger ghost" onClick={remove}>Delete plate</button>
         </div>
       </div>
+      {qc && (() => {
+        const out = plate.measurements.filter((m) => ["low", "high"].includes(qcResult(qc, m).status)).length;
+        return <p className={out ? "qc-alert" : "ok"}>{out ? `${out} result(s) of this ${qc.name} plate are out of the EUCAST QC range.` : `All results with a QC range are within it (${qc.name}).`}</p>;
+      })()}
       <div className="split">
         <div>
           <label className="check">
@@ -57,13 +69,14 @@ export default function PlatePage() {
         </div>
         <div className="table-wrap">
           <table>
-            <thead><tr><th>Antibiotic</th><th className="num">Diameter</th><th>Breakpoints</th><th>Category</th><th>Microcol.</th><th>Interpretation</th></tr></thead>
+            <thead><tr><th>Antibiotic</th><th className="num">Diameter</th>{qc && <th>QC range</th>}<th>Breakpoints</th><th>Category</th><th>Microcol.</th><th>Interpretation</th></tr></thead>
             <tbody>
               {plate.measurements.map((m) => (
                 <tr key={m.id}>
                   <td>{m.antibiotic.name} <span className="muted">{m.antibiotic.disk_content}</span>
                     {m.breakpoint?.case && <div className="muted small">{m.breakpoint.case}</div>}</td>
                   <td className="num">{m.diameter_mm.toFixed(1)} mm</td>
+                  {qc && <td><QcCell strain={qc} measurement={m} /></td>}
                   <td className="muted">{m.breakpoint?.available && m.breakpoint.susceptible !== null
                     ? `S ${m.breakpoint.susceptible} / R ${m.breakpoint.resistant}` : "–"}</td>
                   <td><CategoryBadge category={m.category} standard={catalog.standards.find((s) => s.id === m.standard_id)} /></td>

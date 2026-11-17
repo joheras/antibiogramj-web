@@ -20,7 +20,7 @@ export function exampleBacteria(catalog: Catalog): BacteriaIn {
   const family = catalog.families.find((f) => /^Enterobac/i.test(f.name));
   return {
     family_id: family?.id ?? 0, genus: "Escherichia", species: "coli", strain: "", sample: "Example plate",
-    comments: "Sample plate bundled with AntibiogramJ.",
+    comments: "Sample plate bundled with AntibiogramJ.", qc_strain: "",
   };
 }
 

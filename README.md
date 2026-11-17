@@ -30,6 +30,7 @@ It comes in two flavours built from the same React frontend:
 | Standards EUCAST 6.0 + CLSI 2015 (AntibiogramJXML) | Same files + **EUCAST 16.1** (default for new experiments) |
 | Export experiment to Excel | `.xlsx` with a summary sheet + one sheet per antibiogram |
 | Expert-rules system (stub: intrinsic resistance, exceptional phenotypes, interpretive rules) | **EUCAST expert system** (see below) |
+| – | **Quality control** with the EUCAST QC strains (QC Tables v 16.0) and **photo quality checks** (see below) |
 
 Not yet ported: searches (by antibiotic / strains / antibiograms), editable abbreviations, loading new standards
 from the UI, import/export of experiments as files.
@@ -74,6 +75,28 @@ not an uncertain result. With EUCAST standards valid from 2019 (EUCAST 16.1) the
 **"Susceptible, increased exposure"**; with EUCAST 6.0 and CLSI it is "Intermediate", its meaning in those
 standards. The stored value is still "Intermediate" (compatible with existing data and the desktop application).
 With an off-scale breakpoint (S ≥ 50 mm) wild-type isolates are categorised I and must never be reported S.
+
+### Quality control
+
+An antibiogram can be marked as a **EUCAST QC strain** (wizard step 1 or **Edit**). Its zone diameters, rounded to
+the whole millimetre, are compared with the QC range and target of the strain in the plate and experiment views and in
+the Excel export (both the web export and `/api/experiments/{id}/export.xlsx`). The ranges come from the
+[EUCAST QC Tables v 16.0](https://www.eucast.org/fileadmin/eucast/pdf/disk_test_documents/2026/v_16.0_EUCAST_QC_tables_routine_and_extended_QC.pdf)
+(valid from 2026-01-01; routine, β-lactamase-inhibitor and extended QC strains, disk diffusion only), converted by
+`backend/scripts/eucast_qc_pdf_to_json.py` (needs `pdftotext` from poppler-utils) into
+`backend/seed/qc/EUCAST-QC-16.0.json` and `frontend/src/qcTables.json`; `frontend/src/qc.ts` and `backend/app/qc.py`
+apply them. Every disk of the catalogue (78 distinct antibiotic and content pairs) has a range for at least one strain.
+
+### Photo quality checks
+
+Right after the upload (`backend/app/cv/quality.py`, ported to `frontend/src/browser/cv.ts::photoQuality`), the
+photo is checked and non-blocking warnings with tips are shown in the pre-processing step: out of focus (sharpness
+of the strongest edges: 99.9th percentile of the Sobel gradient divided by the contrast, on a copy with the plate at
+800 px; the variance of the Laplacian was discarded because sensor noise raises it as much as focus), glare
+(saturated pixels that are not disk-shaped), plate not found / partly outside the photo / small in the frame (from the
+Hough plate detection) and low resolution (plate < 700 px). Thresholds were calibrated on the sample images of
+AntibiogramJ and on blurred, noisy, over-exposed, cropped and down-scaled versions of them; `tests/images/1.tiff`
+raises no warning, and `npm run validate:cv` checks that the browser gives the same measures as Python.
 
 ### Expert system
 

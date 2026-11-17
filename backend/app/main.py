@@ -32,7 +32,8 @@ def init_db() -> None:
 
 # Columns added after the first release: (table, column, DDL type). create_all() does not add columns to
 # existing tables.
-ADDED_COLUMNS = [("antibiograms", "supplementary_tests", "JSON")]
+ADDED_COLUMNS = [("antibiograms", "supplementary_tests", "JSON"),
+                 ("antibiograms", "qc_strain", "VARCHAR(50) NOT NULL DEFAULT ''")]
 
 
 def add_missing_columns(bind=None) -> None:

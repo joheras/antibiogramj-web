@@ -390,3 +390,108 @@ export function detectHalo(bright: Uint8Array, w: number, h: number, disk: Circl
   }
   return { cx: disk.cx, cy: disk.cy, r };
 }
+
+// ------------------------------------------------------------- photo quality
+/* Photo quality checks right after the upload; see backend/app/cv/quality.py (same algorithm,
+ * thresholds and rounding). */
+export interface QualityMetrics {
+  plate_found: boolean; plate_diameter_px: number | null; plate_fraction: number | null;
+  outside_fraction: number; sharpness: number; glare_fraction: number; width: number; height: number;
+}
+
+const QUALITY = {
+  analysisDiameter: 800, inner: 0.85, minSharpness: 19, maxGlare: 0.003, saturated: 250,
+  minPlateDiameter: 700, minPlateFraction: 0.6, maxOutside: 0.08, diskFraction: 6 / 90,
+};
+
+const roundTo = (x: number, digits: number) => Math.round(x * 10 ** digits) / 10 ** digits;
+
+/** numpy.percentile (linear interpolation) of sorted values. */
+function percentileSorted(sorted: ArrayLike<number>, q: number): number {
+  if (!sorted.length) return 0;
+  const pos = (q / 100) * (sorted.length - 1), lo = Math.floor(pos), hi = Math.min(lo + 1, sorted.length - 1);
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
+}
+
+/** Saturated pixels outside round, disk-sized blobs (8-connected components), as a fraction of ``area``. */
+function glareFraction(sat: Uint8Array, w: number, h: number, area: number, plateR: number): number {
+  const diskArea = Math.PI * (QUALITY.diskFraction * plateR) ** 2;
+  const seen = new Uint8Array(w * h), stack: number[] = [];
+  let glare = 0;
+  for (let start = 0; start < w * h; start++) {
+    if (!sat[start] || seen[start]) continue;
+    let a = 0, x0 = w, x1 = -1, y0 = h, y1 = -1;
+    seen[start] = 1;
+    stack.push(start);
+    while (stack.length) {
+      const p = stack.pop()!, x = p % w, y = (p - x) / w;
+      a++;
+      if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx, ny = y + dy, q = ny * w + nx;
+          if (nx >= 0 && ny >= 0 && nx < w && ny < h && sat[q] && !seen[q]) { seen[q] = 1; stack.push(q); }
+        }
+      }
+    }
+    const side = Math.max(x1 - x0 + 1, y1 - y0 + 1);
+    if (a <= 1.5 * diskArea && a / (Math.PI * (side / 2) ** 2) > 0.5) continue; // an over-exposed disk
+    glare += a;
+  }
+  return area ? glare / area : 0;
+}
+
+export function photoQuality(cv: CV, img: Rgb, plate: Circle | null): { warnings: string[]; metrics: QualityMetrics } {
+  const { width: w, height: h } = img;
+  const [cx, cy, r] = plate ? [plate.cx, plate.cy, plate.r] : [w / 2, h / 2, Math.min(w, h) / 2];
+  const scale = Math.min(1, QUALITY.analysisDiameter / (2 * r));
+  const small = scale >= 1 ? img : resizeRgb(cv, img, Math.round(w * scale), Math.round(h * scale));
+  const sw = small.width, sh = small.height, d = small.data;
+  const rr = QUALITY.inner * r * scale, scx = cx * scale, scy = cy * scale;
+
+  const gray = new Uint8Array(sw * sh);
+  for (let p = 0; p < sw * sh; p++) gray[p] = (d[p * 3] * 4899 + d[p * 3 + 1] * 9617 + d[p * 3 + 2] * 1868 + 8192) >> 14;
+  const magnitudes: number[] = [], levels: number[] = [];
+  const sat = new Uint8Array(sw * sh);
+  let area = 0;
+  for (let y = 1; y < sh - 1; y++) {
+    for (let x = 1; x < sw - 1; x++) {
+      if ((x - scx) ** 2 + (y - scy) ** 2 >= rr * rr) continue;
+      const p = y * sw + x;
+      area++;
+      const g = (o: number) => gray[p + o];
+      const gx = g(-sw + 1) - g(-sw - 1) + 2 * (g(1) - g(-1)) + g(sw + 1) - g(sw - 1);
+      const gy = g(sw - 1) - g(-sw - 1) + 2 * (g(sw) - g(-sw)) + g(sw + 1) - g(-sw + 1);
+      magnitudes.push(Math.sqrt(gx * gx + gy * gy));
+      levels.push(gray[p]);
+      if (Math.min(d[p * 3], d[p * 3 + 1], d[p * 3 + 2]) >= QUALITY.saturated) sat[p] = 1;
+    }
+  }
+  const byValue = (a: number, b: number) => a - b;
+  levels.sort(byValue);
+  magnitudes.sort(byValue);
+  const contrast = Math.max(1, percentileSorted(levels, 99) - percentileSorted(levels, 1));
+  const sharpness = (10 * percentileSorted(magnitudes, 99.9)) / contrast;
+  const glare = glareFraction(sat, sw, sh, area, rr / QUALITY.inner);
+  const outside = plate ? Math.max(0, r - cx, r - cy, cx + r - w, cy + r - h) / r : 0;
+
+  const metrics: QualityMetrics = {
+    plate_found: !!plate, plate_diameter_px: plate ? Math.round(2 * r) : null,
+    plate_fraction: plate ? roundTo((2 * r) / Math.min(w, h), 3) : null, outside_fraction: roundTo(outside, 3),
+    sharpness: roundTo(sharpness, 2), glare_fraction: roundTo(glare, 4), width: w, height: h,
+  };
+  return { warnings: qualityWarnings(metrics), metrics };
+}
+
+export function qualityWarnings(m: QualityMetrics): string[] {
+  const out: string[] = [];
+  if (!m.plate_found) out.push("plate_not_found");
+  else {
+    if (m.outside_fraction > QUALITY.maxOutside) out.push("plate_cut");
+    if (m.plate_fraction! < QUALITY.minPlateFraction) out.push("plate_small");
+  }
+  if ((m.plate_diameter_px ?? Math.min(m.width, m.height)) < QUALITY.minPlateDiameter) out.push("low_resolution");
+  if (m.sharpness < QUALITY.minSharpness) out.push("blur");
+  if (m.glare_fraction > QUALITY.maxGlare) out.push("glare");
+  return out;
+}

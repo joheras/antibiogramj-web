@@ -93,6 +93,7 @@ def test_full_analysis_flow(alice, bob):
     assert r.status_code == 201, r.text
     up = r.json()
     assert up["plate"] is not None
+    assert up["quality"]["warnings"] == []  # a good photo raises no quality warning
     uid = up["upload_id"]
     assert bob.post(f"/api/analysis/uploads/{uid}/disks").status_code == 404  # isolation
 
@@ -165,8 +166,20 @@ def test_full_analysis_flow(alice, bob):
     assert r.status_code == 200
     wb = load_workbook(BytesIO(r.content))
     assert wb.sheetnames == ["Summary", "Antibiogram 1"]
-    assert wb["Summary"].max_row == 5 + 7
+    assert wb["Summary"].max_row == 6 + 7
     assert "Susceptible, increased exposure" not in {c.value for c in wb["Summary"]["L"]}  # EUCAST 6.0: I = Intermediate
+    assert {c.value for c in wb["Summary"]["U"]} == {None, "QC result"}  # not a QC strain
+
+    # Quality control: the antibiogram marked as E. coli ATCC 25922
+    assert alice.patch(f"/api/antibiograms/{ab_id}", json={**update, "qc_strain": "ATCC 99999"}).status_code == 422
+    assert alice.patch(f"/api/antibiograms/{ab_id}", json={**update, "qc_strain": "ATCC 25922"}).status_code == 204
+    assert alice.get(f"/api/experiments/{exp['id']}").json()["antibiograms"][0]["qc_strain"] == "ATCC 25922"
+    wb = load_workbook(BytesIO(alice.get(f"/api/experiments/{exp['id']}/export.xlsx").content))
+    rows = {r[7]: r for r in wb["Summary"].iter_rows(min_row=7, values_only=True)}
+    assert wb["Summary"]["B4"].value.startswith("EUCAST QC Tables v 16.0")
+    assert rows["Chloramphenicol"][17:] == ("ATCC 25922", "21-27", "24", "In range")  # ~22.8 mm
+    assert rows["Ampicillin"][17:] == ("ATCC 25922", "15-22", "18-19", "Out of range (too small)")  # no zone
+    assert wb["Antibiogram 1"]["A8"].value == "QC strain"
 
     # Learned templates for Alice only
     from app.db import SessionLocal
@@ -237,6 +250,52 @@ def test_add_missing_columns():
         conn.execute(text("INSERT INTO antibiograms (id, genus) VALUES (1, 'Escherichia')"))
     add_missing_columns(engine)
     add_missing_columns(engine)  # idempotent
-    assert "supplementary_tests" in {c["name"] for c in inspect(engine).get_columns("antibiograms")}
+    assert {"supplementary_tests", "qc_strain"} <= {c["name"] for c in inspect(engine).get_columns("antibiograms")}
     with engine.connect() as conn:
         assert conn.execute(text("SELECT supplementary_tests FROM antibiograms")).scalar() is None
+        assert conn.execute(text("SELECT qc_strain FROM antibiograms")).scalar() == ""
+
+
+def test_qc_tables():
+    """EUCAST QC Tables v 16.0, zone diameters (checked by hand against the PDF)."""
+    from app import qc
+
+    ecoli = qc.strain("ATCC 25922")
+    assert ecoli["name"] == "Escherichia coli ATCC 25922"
+    assert qc.qc_range(ecoli, "Amikacin", "30") == {"agent": "Amikacin", "disk_content": "30", "min": 19, "max": 26,
+                                                     "use": "routine", "target": "22-23"}
+    assert qc.qc_range(ecoli, "Fosfomycin iv", "200")["min"] == 26  # superscript note 14 not read as "20014"
+    assert qc.qc_range(ecoli, "Cefuroxime oral", "30")["max"] == 26
+    assert qc.qc_range(qc.strain("ATCC 29213"), "Benzylpenicillin", "1 unit")["target"] == "15"
+    assert qc.qc_range(qc.strain("ATCC 51299"), "Vancomycin", "5")["expected_category"] == "R"
+    assert qc.result(ecoli, "Amikacin", "30", 18.5) == (qc.qc_range(ecoli, "Amikacin", "30"), "in")  # rounds to 19
+    assert qc.result(ecoli, "Amikacin", "30", 26.6)[1] == "high"
+    assert qc.result(ecoli, "Mupirocin", "200", 20) == (None, "no-range")
+
+
+def test_photo_quality():
+    """No warning on the sample photo; the degraded versions are flagged."""
+    import cv2
+
+    from app.cv import quality
+    from app.cv.processing import detect_disks, detect_plate
+
+    image = cv2.imread(str(IMAGES / "1.tiff"))
+    h, w = image.shape[:2]
+
+    def warnings(img):
+        return quality.check(img, detect_plate(img))["warnings"]
+
+    assert warnings(image) == []
+    assert warnings(cv2.GaussianBlur(image, (0, 0), 2 * max(h, w) / 1600)) == ["blur"]
+    assert warnings(cv2.resize(image, None, fx=0.35, fy=0.35, interpolation=cv2.INTER_AREA)) == ["low_resolution"]
+    assert warnings(image[:, int(w * 0.2):]) == ["plate_cut"]
+    assert warnings(cv2.copyMakeBorder(image, h // 2, h // 2, w // 2, w // 2, cv2.BORDER_CONSTANT,
+                                       value=(40, 40, 40))) == ["plate_small"]
+    glare = image.copy()
+    cv2.ellipse(glare, (int(w * 0.4), int(h * 0.35)), (int(w * 0.12), int(h * 0.04)), 30, 0, 360, (255, 255, 255), -1)
+    assert warnings(glare) == ["glare"]
+    disks = image.copy()  # over-exposed white disks are not glare
+    for d in detect_disks(image):
+        cv2.circle(disks, (int(d.cx), int(d.cy)), int(d.r), (255, 255, 255), -1)
+    assert warnings(disks) == []

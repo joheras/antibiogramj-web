@@ -2,6 +2,8 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
+from . import qc
+
 
 class ORM(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -87,6 +89,12 @@ class ExperimentSummary(ExperimentOut):
     plate_count: int
 
 
+def _known_qc_strain(value: str) -> str:
+    if value and qc.strain(value) is None:
+        raise ValueError(f"Unknown QC strain: {value}")
+    return value
+
+
 class BacteriaIn(BaseModel):
     family_id: int
     genus: str = Field(default="", max_length=100)
@@ -94,6 +102,9 @@ class BacteriaIn(BaseModel):
     strain: str = Field(default="", max_length=100)
     sample: str = Field(default="", max_length=100)
     comments: str = Field(default="", max_length=1000)
+    qc_strain: str = Field(default="", max_length=50)
+
+    _qc = field_validator("qc_strain")(_known_qc_strain)
 
 
 class CircleIO(BaseModel):
@@ -150,12 +161,18 @@ class AntibiogramOut(ORM):
     comments: str
     created_at: datetime
     supplementary_tests: dict[str, str] = Field(default_factory=dict)
+    qc_strain: str = ""
     plates: list[PlateOut]
 
     @field_validator("supplementary_tests", mode="before")
     @classmethod
     def _none_is_empty(cls, value):  # rows created before the column existed
         return value or {}
+
+    @field_validator("qc_strain", mode="before")
+    @classmethod
+    def _none_is_blank(cls, value):
+        return value or ""
 
 
 class AntibiogramUpdate(BaseModel):
@@ -165,6 +182,9 @@ class AntibiogramUpdate(BaseModel):
     sample: str = Field(default="", max_length=100)
     comments: str = Field(default="", max_length=1000)
     supplementary_tests: dict[str, str] = Field(default_factory=dict)
+    qc_strain: str = Field(default="", max_length=50)
+
+    _qc = field_validator("qc_strain")(_known_qc_strain)
 
     @field_validator("supplementary_tests")
     @classmethod
@@ -181,11 +201,30 @@ class ExperimentDetail(ExperimentOut):
 
 
 # ------------------------------------------------------------------ analysis
+class QualityMetrics(BaseModel):
+    plate_found: bool
+    plate_diameter_px: int | None
+    plate_fraction: float | None
+    outside_fraction: float
+    sharpness: float
+    glare_fraction: float
+    width: int
+    height: int
+
+
+class PhotoQuality(BaseModel):
+    """Non-blocking warnings about the photo (codes; texts and tips are in the frontend)."""
+
+    warnings: list[str]
+    metrics: QualityMetrics
+
+
 class UploadOut(BaseModel):
     upload_id: str
     width: int
     height: int
     plate: CircleIO | None
+    quality: PhotoQuality
 
 
 class ProcessIn(BaseModel):

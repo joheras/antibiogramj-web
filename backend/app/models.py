@@ -112,6 +112,8 @@ class Antibiogram(Base):
     comments: Mapped[str] = mapped_column(String(1000), default="")
     # Results of supplementary tests used by the expert system (frontend/src/expertRules.ts), e.g. {"mec": "positive"}
     supplementary_tests: Mapped[dict] = mapped_column(JSON, default=dict)
+    # EUCAST QC strain (e.g. "ATCC 25922", see app/qc.py) or "" for a clinical isolate
+    qc_strain: Mapped[str] = mapped_column(String(50), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     experiment: Mapped[Experiment] = relationship(back_populates="antibiograms")

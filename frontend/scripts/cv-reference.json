@@ -4,6 +4,19 @@
   "cy": 836.77,
   "r": 829.13
  },
+ "quality": {
+  "warnings": [],
+  "metrics": {
+   "plate_found": true,
+   "plate_diameter_px": 1658,
+   "plate_fraction": 0.981,
+   "outside_fraction": 0.0,
+   "sharpness": 22.25,
+   "glare_fraction": 0.0,
+   "width": 1757,
+   "height": 1690
+  }
+ },
  "disks": [
   {
    "cx": 893.23,

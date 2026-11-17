@@ -11,6 +11,7 @@ import * as db from "./db";
 import type { Annotation, Commands } from "./worker";
 import { experimentWorkbook } from "../excel";
 import { SUPPLEMENTARY_TESTS } from "../expertRules";
+import { qcStrain } from "../qc";
 
 // ------------------------------------------------------------------ catalogue
 const catalog = catalogJson as unknown as {
@@ -43,7 +44,11 @@ interface ExperimentRec { id: number; name: string; comments: string; standard_i
 interface AntibiogramRec {
   id: number; experiment_id: number; family_id: number; genus: string; species: string; strain: string;
   sample: string; comments: string; created_at: string; supplementary_tests?: Record<string, string>;
+  qc_strain?: string; // added after the first release
 }
+
+/** Only EUCAST QC strains of qc.ts ("" = clinical isolate). */
+const cleanQc = (id: string | undefined) => (qcStrain(id) ? id! : "");
 
 /** Only the known tests and options are stored. */
 function cleanTests(tests: Record<string, string>): Record<string, string> {
@@ -82,8 +87,8 @@ async function experimentDetail(id: number): Promise<ExperimentDetail> {
   const result: Antibiogram[] = [];
   for (const a of antibiograms.sort((x, y) => x.id - y.id)) {
     const plates = await db.getAll<PlateRec>("plates", "antibiogram_id", a.id);
-    const { family_id, supplementary_tests, ...rest } = a;
-    result.push({ ...rest, supplementary_tests: supplementary_tests ?? {}, family: familyById.get(family_id)!, plates: plates.sort((x, y) => x.id - y.id).map(toPlate) });
+    const { family_id, supplementary_tests, qc_strain, ...rest } = a;
+    result.push({ ...rest, supplementary_tests: supplementary_tests ?? {}, qc_strain: qc_strain ?? "", family: familyById.get(family_id)!, plates: plates.sort((x, y) => x.id - y.id).map(toPlate) });
   }
   return { ...e, standard: standardById.get(e.standard_id)!, antibiograms: result };
 }
@@ -229,7 +234,7 @@ export const localApi: Api = {
       await db.put(tx, "antibiograms", {
         ...a, genus: data.genus.slice(0, 100), species: data.species.slice(0, 100), strain: data.strain.slice(0, 100),
         sample: data.sample.slice(0, 100), comments: data.comments.slice(0, 1000),
-        supplementary_tests: cleanTests(data.supplementary_tests),
+        supplementary_tests: cleanTests(data.supplementary_tests), qc_strain: cleanQc(data.qc_strain),
       });
     });
   },
@@ -277,7 +282,7 @@ export const localApi: Api = {
     uploads.clear();
     uploads.set(uploadId, { filename: file.name.slice(0, 255), original: URL.createObjectURL(res.png) });
     loadTemplates().catch(() => undefined); // warm up while the user adjusts the crop
-    return { upload_id: uploadId, width: res.width, height: res.height, plate: res.plate };
+    return { upload_id: uploadId, width: res.width, height: res.height, plate: res.plate, quality: res.quality };
   },
 
   async uploadImage(id, stage) {
@@ -333,7 +338,7 @@ export const localApi: Api = {
     } else if (body.experiment_id !== null && body.bacteria) {
       if (!(await db.get("experiments", body.experiment_id))) throw notFound();
       if (!familyById.has(body.bacteria.family_id)) throw invalid("Unknown bacteria family");
-      antibiogram = { experiment_id: body.experiment_id, ...body.bacteria, created_at: now() };
+      antibiogram = { experiment_id: body.experiment_id, ...body.bacteria, qc_strain: cleanQc(body.bacteria.qc_strain), created_at: now() };
     } else {
       throw invalid("Give an antibiogram, or an experiment and the bacteria data");
     }

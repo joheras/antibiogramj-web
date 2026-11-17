@@ -9,6 +9,9 @@ import { exampleBacteria, exampleFile } from "../example";
 import { genusSuggestions, speciesSuggestions } from "../expertRules";
 import { useImageUrl } from "../components/AsyncImage";
 import ImageEditor, { type EditorCircle } from "../components/ImageEditor";
+import PhotoQualityNotice from "../components/PhotoQuality";
+import { QcCell, QcStrainSelect } from "../components/Qc";
+import { qcFamily, qcResult, qcStrain, QC_SOURCE } from "../qc";
 import { useSession } from "../session";
 import { Legend } from "./PlatePage";
 
@@ -42,7 +45,7 @@ export default function WizardPage() {
 
   // Step 0
   const [target, setTarget] = useState<"new" | number>("new");
-  const [bacteria, setBacteria] = useState<BacteriaIn>({ family_id: 0, genus: "", species: "", strain: "", sample: "", comments: "" });
+  const [bacteria, setBacteria] = useState<BacteriaIn>({ family_id: 0, genus: "", species: "", strain: "", sample: "", comments: "", qc_strain: "" });
   const [file, setFile] = useState<File | null>(null);
   const [upload, setUpload] = useState<UploadResult | null>(null);
   // Step 1
@@ -192,6 +195,7 @@ export default function WizardPage() {
           />
           <aside className="panel">
             <h2>Pre-processing</h2>
+            <PhotoQualityNotice quality={upload.quality} />
             <p className="help">Adjust the circle to the Petri dish: drag it to move it and use the handle to resize it. The image is cropped to the circle.</p>
             <div className="btn-col">
               <button onClick={() => setCrop(upload.plate)} disabled={!upload.plate}>Automatic selection</button>
@@ -276,7 +280,7 @@ export default function WizardPage() {
       {step === 4 && working && (
         <HaloStep
           src={workingSrc} width={working.width} height={working.height} disks={disks} antibioticIds={antibioticIds as number[]}
-          readings={readings} setReadings={setReadings} pxPerMm={pxPerMm} diskMm={diskMm} exp={exp}
+          readings={readings} setReadings={setReadings} pxPerMm={pxPerMm} diskMm={diskMm} exp={exp} target={target} qcId={bacteria.qc_strain}
           selected={selected} setSelected={setSelected} onBack={() => setStep(3)} onSave={save} busy={!!busy}
         />
       )}
@@ -306,7 +310,7 @@ function StepOrganism({ exp, target, setTarget, bacteria, setBacteria, file, set
             {exp.antibiograms.map((a) => (
               <label key={a.id} className="check">
                 <input type="radio" checked={target === a.id} onChange={() => setTarget(a.id)} />
-                Add to antibiogram: <b>{bacteriaLabel(a)}</b> <span className="muted">({a.family.name}, {a.plates.length} plate{a.plates.length === 1 ? "" : "s"})</span>
+                Add to antibiogram: <b>{bacteriaLabel(a)}</b> {a.qc_strain && <span className="tag">QC</span>} <span className="muted">({a.family.name}, {a.plates.length} plate{a.plates.length === 1 ? "" : "s"})</span>
               </label>
             ))}
             <label className="check"><input type="radio" checked={target === "new"} onChange={() => setTarget("new")} /> New antibiogram (new organism)</label>
@@ -314,6 +318,16 @@ function StepOrganism({ exp, target, setTarget, bacteria, setBacteria, file, set
         )}
         {target === "new" && (
           <div className="form-grid">
+            <label className="span2">Quality-control strain
+              <QcStrainSelect value={bacteria.qc_strain} onChange={(id) => {
+                const s = qcStrain(id);
+                setBacteria(s
+                  ? { ...bacteria, qc_strain: id, genus: s.genus, species: s.species, strain: s.id,
+                      family_id: qcFamily(s, catalog.families)?.id ?? bacteria.family_id }
+                  : { ...bacteria, qc_strain: "" });
+              }} />
+              <span className="muted small">Mark the plate of a EUCAST QC strain to compare its zones with the QC ranges ({QC_SOURCE}).</span>
+            </label>
             <label className="span2">Bacteria family / group (as in the standard)
               <select required value={bacteria.family_id || ""} onChange={set("family_id")}>
                 <option value="" disabled>Choose…</option>
@@ -367,12 +381,13 @@ function AntibioticSelect({ value, onChange }: { value: number | null; onChange:
 }
 
 // ------------------------------------------------------------------ step 4
-function HaloStep({ src, width, height, disks, antibioticIds, readings, setReadings, pxPerMm, diskMm, exp, selected, setSelected, onBack, onSave, busy }: {
+function HaloStep({ src, width, height, disks, antibioticIds, readings, setReadings, pxPerMm, diskMm, exp, target, qcId, selected, setSelected, onBack, onSave, busy }: {
   src: string; width: number; height: number; disks: Disk[]; antibioticIds: number[]; readings: Reading[];
   setReadings: React.Dispatch<React.SetStateAction<Reading[]>>; pxPerMm: number; diskMm: number; exp: ExperimentDetail;
-  selected: string | null; setSelected: (id: string | null) => void; onBack: () => void; onSave: () => void; busy: boolean;
+  target: "new" | number; qcId: string; selected: string | null; setSelected: (id: string | null) => void; onBack: () => void; onSave: () => void; busy: boolean;
 }) {
   const { catalog } = useSession();
+  const qc = qcStrain(target === "new" ? qcId : exp.antibiograms.find((a) => a.id === target)?.qc_strain);
   const idx = Math.max(0, disks.findIndex((d) => d.id === selected));
   const reading = readings[idx];
   const disk = disks[idx];
@@ -423,6 +438,10 @@ function HaloStep({ src, width, height, disks, antibioticIds, readings, setReadi
               <span className="check-mark">{readings[i].checked ? "✓" : ""}</span>
               <span className="grow">{catalog.antibioticById.get(antibioticIds[i])?.name}</span>
               <span className="num">{diam(readings[i]).toFixed(1)}</span>
+              {qc && (() => {
+                const s = qcResult(qc, { antibiotic: catalog.antibioticById.get(antibioticIds[i])!, diameter_mm: diam(readings[i]) }).status;
+                return s === "low" || s === "high" ? <span className="qc qc-low" title="Out of the QC range">QC ✗</span> : null;
+              })()}
               <CategoryBadge category={category(readings[i])} standard={exp.standard} compact />
             </button>
           ))}
@@ -443,6 +462,11 @@ function HaloStep({ src, width, height, disks, antibioticIds, readings, setReadi
               : <span className="muted">No zone-diameter breakpoint in {exp.standard.name} {exp.standard.version} for this organism.</span>}
           </p>
           {b?.comments && <details><summary>Breakpoint notes</summary><p className="small">{b.comments}</p></details>}
+          {qc && (
+            <p className="limits">QC range ({qc.id}):{" "}
+              <QcCell strain={qc} measurement={{ antibiotic: catalog.antibioticById.get(antibioticIds[idx])!, diameter_mm: diam(reading) }} />
+            </p>
+          )}
 
           <label>Inhibition zone diameter (mm)
             <div className="slider-row">

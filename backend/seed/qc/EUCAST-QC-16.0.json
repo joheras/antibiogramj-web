@@ -1,0 +1,2041 @@
+{
+ "name": "EUCAST QC Tables",
+ "version": "16.0",
+ "valid_from": "2026-01-01",
+ "url": "https://www.eucast.org/fileadmin/eucast/pdf/disk_test_documents/2026/v_16.0_EUCAST_QC_tables_routine_and_extended_QC.pdf",
+ "citation": "The European Committee on Antimicrobial Susceptibility Testing. Routine and extended internal quality control for MIC determination and disk diffusion as recommended by EUCAST. Version 16.0, 2026. http://www.eucast.org.",
+ "strains": [
+  {
+   "id": "ATCC 25922",
+   "name": "Escherichia coli ATCC 25922",
+   "genus": "Escherichia",
+   "species": "coli",
+   "ranges": [
+    {
+     "agent": "Amikacin",
+     "disk_content": "30",
+     "min": 19,
+     "max": 26,
+     "use": "routine",
+     "target": "22-23"
+    },
+    {
+     "agent": "Amoxicillin-clavulanic acid",
+     "disk_content": "20-10",
+     "min": 18,
+     "max": 24,
+     "use": "routine",
+     "target": "21"
+    },
+    {
+     "agent": "Ampicillin",
+     "disk_content": "10",
+     "min": 15,
+     "max": 22,
+     "use": "routine",
+     "target": "18-19"
+    },
+    {
+     "agent": "Ampicillin-sulbactam",
+     "disk_content": "10-10",
+     "min": 19,
+     "max": 24,
+     "use": "routine",
+     "target": "21-22"
+    },
+    {
+     "agent": "Azithromycin",
+     "disk_content": "15",
+     "min": 14,
+     "max": 20,
+     "use": "routine",
+     "target": "17"
+    },
+    {
+     "agent": "Aztreonam",
+     "disk_content": "30",
+     "min": 28,
+     "max": 36,
+     "use": "routine",
+     "target": "32"
+    },
+    {
+     "agent": "Aztreonam-avibactam",
+     "disk_content": "30-20",
+     "min": 32,
+     "max": 38,
+     "use": "routine",
+     "target": "35"
+    },
+    {
+     "agent": "Cefadroxil",
+     "disk_content": "30",
+     "min": 14,
+     "max": 20,
+     "use": "routine",
+     "target": "17"
+    },
+    {
+     "agent": "Cefalexin",
+     "disk_content": "30",
+     "min": 15,
+     "max": 21,
+     "use": "routine",
+     "target": "18"
+    },
+    {
+     "agent": "Cefazolin",
+     "disk_content": "30",
+     "min": 21,
+     "max": 27,
+     "use": "routine",
+     "target": "24"
+    },
+    {
+     "agent": "Cefepime",
+     "disk_content": "30",
+     "min": 31,
+     "max": 37,
+     "use": "routine",
+     "target": "34"
+    },
+    {
+     "agent": "Cefepime-enmetazobactam",
+     "disk_content": "30-20",
+     "min": 32,
+     "max": 38,
+     "use": "routine",
+     "target": "35"
+    },
+    {
+     "agent": "Cefiderocol",
+     "disk_content": "30",
+     "min": 24,
+     "max": 30,
+     "use": "routine",
+     "target": "27"
+    },
+    {
+     "agent": "Cefixime",
+     "disk_content": "5",
+     "min": 20,
+     "max": 26,
+     "use": "routine",
+     "target": "23"
+    },
+    {
+     "agent": "Cefoperazone",
+     "disk_content": "30",
+     "min": 25,
+     "max": 31,
+     "use": "routine",
+     "target": "28"
+    },
+    {
+     "agent": "Cefotaxime",
+     "disk_content": "5",
+     "min": 25,
+     "max": 31,
+     "use": "routine",
+     "target": "28"
+    },
+    {
+     "agent": "Cefoxitin",
+     "disk_content": "30",
+     "min": 23,
+     "max": 29,
+     "use": "routine",
+     "target": "26"
+    },
+    {
+     "agent": "Cefpodoxime",
+     "disk_content": "10",
+     "min": 23,
+     "max": 28,
+     "use": "routine",
+     "target": "25-26"
+    },
+    {
+     "agent": "Ceftaroline",
+     "disk_content": "5",
+     "min": 24,
+     "max": 30,
+     "use": "routine",
+     "target": "27"
+    },
+    {
+     "agent": "Ceftazidime",
+     "disk_content": "10",
+     "min": 23,
+     "max": 29,
+     "use": "routine",
+     "target": "26"
+    },
+    {
+     "agent": "Ceftazidime-avibactam",
+     "disk_content": "10-4",
+     "min": 24,
+     "max": 30,
+     "use": "routine",
+     "target": "27"
+    },
+    {
+     "agent": "Ceftibuten",
+     "disk_content": "30",
+     "min": 27,
+     "max": 35,
+     "use": "routine",
+     "target": "31"
+    },
+    {
+     "agent": "Ceftobiprole",
+     "disk_content": "5",
+     "min": 25,
+     "max": 31,
+     "use": "routine",
+     "target": "28"
+    },
+    {
+     "agent": "Ceftolozane-tazobactam",
+     "disk_content": "30-10",
+     "min": 24,
+     "max": 32,
+     "use": "routine",
+     "target": "28"
+    },
+    {
+     "agent": "Ceftriaxone",
+     "disk_content": "30",
+     "min": 29,
+     "max": 35,
+     "use": "routine",
+     "target": "32"
+    },
+    {
+     "agent": "Cefuroxime",
+     "disk_content": "30",
+     "min": 20,
+     "max": 26,
+     "use": "routine",
+     "target": "23"
+    },
+    {
+     "agent": "Chloramphenicol",
+     "disk_content": "30",
+     "min": 21,
+     "max": 27,
+     "use": "routine",
+     "target": "24"
+    },
+    {
+     "agent": "Ciprofloxacin",
+     "disk_content": "5",
+     "min": 29,
+     "max": 37,
+     "use": "routine",
+     "target": "33"
+    },
+    {
+     "agent": "Doripenem",
+     "disk_content": "10",
+     "min": 27,
+     "max": 35,
+     "use": "routine",
+     "target": "31"
+    },
+    {
+     "agent": "Eravacycline",
+     "disk_content": "20",
+     "min": 18,
+     "max": 24,
+     "use": "routine",
+     "target": "21"
+    },
+    {
+     "agent": "Ertapenem",
+     "disk_content": "10",
+     "min": 29,
+     "max": 36,
+     "use": "routine",
+     "target": "32-33"
+    },
+    {
+     "agent": "Fosfomycin",
+     "disk_content": "200",
+     "min": 26,
+     "max": 34,
+     "use": "routine",
+     "target": "30"
+    },
+    {
+     "agent": "Gentamicin",
+     "disk_content": "10",
+     "min": 19,
+     "max": 26,
+     "use": "routine",
+     "target": "22-23"
+    },
+    {
+     "agent": "Imipenem",
+     "disk_content": "10",
+     "min": 26,
+     "max": 32,
+     "use": "routine",
+     "target": "29"
+    },
+    {
+     "agent": "Imipenem-relebactam",
+     "disk_content": "10-25",
+     "min": 27,
+     "max": 33,
+     "use": "routine",
+     "target": "30"
+    },
+    {
+     "agent": "Levofloxacin",
+     "disk_content": "5",
+     "min": 29,
+     "max": 37,
+     "use": "routine",
+     "target": "33"
+    },
+    {
+     "agent": "Mecillinam",
+     "disk_content": "10",
+     "min": 24,
+     "max": 30,
+     "use": "routine",
+     "target": "27"
+    },
+    {
+     "agent": "Meropenem",
+     "disk_content": "10",
+     "min": 28,
+     "max": 35,
+     "use": "routine",
+     "target": "31-32"
+    },
+    {
+     "agent": "Meropenem-vaborbactam",
+     "disk_content": "20-10",
+     "min": 31,
+     "max": 37,
+     "use": "routine",
+     "target": "34"
+    },
+    {
+     "agent": "Moxifloxacin",
+     "disk_content": "5",
+     "min": 28,
+     "max": 35,
+     "use": "routine",
+     "target": "31-32"
+    },
+    {
+     "agent": "Nalidixic acid",
+     "disk_content": "30",
+     "min": 22,
+     "max": 28,
+     "use": "routine",
+     "target": "25"
+    },
+    {
+     "agent": "Neomycin",
+     "disk_content": "10",
+     "min": 14,
+     "max": 20,
+     "use": "routine",
+     "target": "17"
+    },
+    {
+     "agent": "Netilmicin",
+     "disk_content": "10",
+     "min": 18,
+     "max": 24,
+     "use": "routine",
+     "target": "21"
+    },
+    {
+     "agent": "Nitrofurantoin",
+     "disk_content": "100",
+     "min": 17,
+     "max": 23,
+     "use": "routine",
+     "target": "20"
+    },
+    {
+     "agent": "Nitroxoline",
+     "disk_content": "30",
+     "min": 18,
+     "max": 24,
+     "use": "routine",
+     "target": "21"
+    },
+    {
+     "agent": "Norfloxacin",
+     "disk_content": "10",
+     "min": 28,
+     "max": 35,
+     "use": "routine",
+     "target": "31-32"
+    },
+    {
+     "agent": "Ofloxacin",
+     "disk_content": "5",
+     "min": 29,
+     "max": 33,
+     "use": "routine",
+     "target": "31"
+    },
+    {
+     "agent": "Pefloxacin",
+     "disk_content": "5",
+     "min": 26,
+     "max": 32,
+     "use": "routine",
+     "target": "29"
+    },
+    {
+     "agent": "Piperacillin",
+     "disk_content": "30",
+     "min": 21,
+     "max": 27,
+     "use": "routine",
+     "target": "24"
+    },
+    {
+     "agent": "Piperacillin-tazobactam",
+     "disk_content": "30-6",
+     "min": 21,
+     "max": 27,
+     "use": "routine",
+     "target": "24"
+    },
+    {
+     "agent": "Streptomycin",
+     "disk_content": "10",
+     "min": 12,
+     "max": 20,
+     "use": "routine",
+     "target": "16"
+    },
+    {
+     "agent": "Temocillin",
+     "disk_content": "30",
+     "min": 16,
+     "max": 22,
+     "use": "routine",
+     "target": "19"
+    },
+    {
+     "agent": "Ticarcillin",
+     "disk_content": "75",
+     "min": 24,
+     "max": 30,
+     "use": "routine",
+     "target": "27"
+    },
+    {
+     "agent": "Ticarcillin-clavulanic acid",
+     "disk_content": "75-10",
+     "min": 24,
+     "max": 30,
+     "use": "routine",
+     "target": "27"
+    },
+    {
+     "agent": "Tigecycline",
+     "disk_content": "15",
+     "min": 20,
+     "max": 27,
+     "use": "routine",
+     "target": "23-24"
+    },
+    {
+     "agent": "Tobramycin",
+     "disk_content": "10",
+     "min": 18,
+     "max": 26,
+     "use": "routine",
+     "target": "22"
+    },
+    {
+     "agent": "Trimethoprim",
+     "disk_content": "5",
+     "min": 21,
+     "max": 28,
+     "use": "routine",
+     "target": "24-25"
+    },
+    {
+     "agent": "Trimethoprim-sulfamethoxazole",
+     "disk_content": "1.25-23.75",
+     "min": 23,
+     "max": 29,
+     "use": "routine",
+     "target": "26"
+    }
+   ]
+  },
+  {
+   "id": "ATCC 27853",
+   "name": "Pseudomonas aeruginosa ATCC 27853",
+   "genus": "Pseudomonas",
+   "species": "aeruginosa",
+   "ranges": [
+    {
+     "agent": "Amikacin",
+     "disk_content": "30",
+     "min": 20,
+     "max": 26,
+     "use": "routine",
+     "target": "23"
+    },
+    {
+     "agent": "Aztreonam",
+     "disk_content": "30",
+     "min": 23,
+     "max": 29,
+     "use": "routine",
+     "target": "26"
+    },
+    {
+     "agent": "Cefepime",
+     "disk_content": "30",
+     "min": 25,
+     "max": 31,
+     "use": "routine",
+     "target": "28"
+    },
+    {
+     "agent": "Cefiderocol",
+     "disk_content": "30",
+     "min": 23,
+     "max": 29,
+     "use": "routine",
+     "target": "26"
+    },
+    {
+     "agent": "Ceftazidime",
+     "disk_content": "10",
+     "min": 21,
+     "max": 27,
+     "use": "routine",
+     "target": "24"
+    },
+    {
+     "agent": "Ceftazidime-avibactam",
+     "disk_content": "10-4",
+     "min": 21,
+     "max": 27,
+     "use": "routine",
+     "target": "24"
+    },
+    {
+     "agent": "Ceftolozane-tazobactam",
+     "disk_content": "30-10",
+     "min": 25,
+     "max": 31,
+     "use": "routine",
+     "target": "28"
+    },
+    {
+     "agent": "Ciprofloxacin",
+     "disk_content": "5",
+     "min": 25,
+     "max": 33,
+     "use": "routine",
+     "target": "29"
+    },
+    {
+     "agent": "Doripenem",
+     "disk_content": "10",
+     "min": 28,
+     "max": 35,
+     "use": "routine",
+     "target": "31-32"
+    },
+    {
+     "agent": "Gentamicin",
+     "disk_content": "10",
+     "min": 17,
+     "max": 23,
+     "use": "routine",
+     "target": "20"
+    },
+    {
+     "agent": "Imipenem",
+     "disk_content": "10",
+     "min": 20,
+     "max": 28,
+     "use": "routine",
+     "target": "24"
+    },
+    {
+     "agent": "Imipenem-relebactam",
+     "disk_content": "10-25",
+     "min": 26,
+     "max": 31,
+     "use": "routine",
+     "target": "28-29"
+    },
+    {
+     "agent": "Levofloxacin",
+     "disk_content": "5",
+     "min": 19,
+     "max": 26,
+     "use": "routine",
+     "target": "22-23"
+    },
+    {
+     "agent": "Meropenem",
+     "disk_content": "10",
+     "min": 27,
+     "max": 33,
+     "use": "routine",
+     "target": "30"
+    },
+    {
+     "agent": "Meropenem-vaborbactam",
+     "disk_content": "20-10",
+     "min": 29,
+     "max": 35,
+     "use": "routine",
+     "target": "32"
+    },
+    {
+     "agent": "Netilmicin",
+     "disk_content": "10",
+     "min": 15,
+     "max": 21,
+     "use": "routine",
+     "target": "18"
+    },
+    {
+     "agent": "Piperacillin-tazobactam",
+     "disk_content": "30-6",
+     "min": 23,
+     "max": 29,
+     "use": "routine",
+     "target": "26"
+    },
+    {
+     "agent": "Ticarcillin-clavulanic acid",
+     "disk_content": "75-10",
+     "min": 20,
+     "max": 28,
+     "use": "routine",
+     "target": "24"
+    },
+    {
+     "agent": "Tobramycin",
+     "disk_content": "10",
+     "min": 20,
+     "max": 26,
+     "use": "routine",
+     "target": "23"
+    }
+   ]
+  },
+  {
+   "id": "ATCC 29213",
+   "name": "Staphylococcus aureus ATCC 29213",
+   "genus": "Staphylococcus",
+   "species": "aureus",
+   "ranges": [
+    {
+     "agent": "Amikacin",
+     "disk_content": "30",
+     "min": 18,
+     "max": 24,
+     "use": "routine",
+     "target": "21"
+    },
+    {
+     "agent": "Amoxicillin-clavulanic acid",
+     "disk_content": "2-1",
+     "min": 19,
+     "max": 25,
+     "use": "routine",
+     "target": "22"
+    },
+    {
+     "agent": "Ampicillin",
+     "disk_content": "2",
+     "min": 15,
+     "max": 21,
+     "use": "routine",
+     "target": "18"
+    },
+    {
+     "agent": "Benzylpenicillin",
+     "disk_content": "1 unit",
+     "min": 12,
+     "max": 18,
+     "use": "routine",
+     "target": "15"
+    },
+    {
+     "agent": "Cefoxitin",
+     "disk_content": "30",
+     "min": 24,
+     "max": 30,
+     "use": "routine",
+     "target": "27"
+    },
+    {
+     "agent": "Ceftaroline",
+     "disk_content": "5",
+     "min": 24,
+     "max": 30,
+     "use": "routine",
+     "target": "27"
+    },
+    {
+     "agent": "Ceftobiprole",
+     "disk_content": "5",
+     "min": 22,
+     "max": 28,
+     "use": "routine",
+     "target": "25"
+    },
+    {
+     "agent": "Chloramphenicol",
+     "disk_content": "30",
+     "min": 20,
+     "max": 28,
+     "use": "routine",
+     "target": "24"
+    },
+    {
+     "agent": "Ciprofloxacin",
+     "disk_content": "5",
+     "min": 21,
+     "max": 27,
+     "use": "routine",
+     "target": "24"
+    },
+    {
+     "agent": "Clindamycin",
+     "disk_content": "2",
+     "min": 23,
+     "max": 29,
+     "use": "routine",
+     "target": "26"
+    },
+    {
+     "agent": "Eravacycline",
+     "disk_content": "20",
+     "min": 20,
+     "max": 26,
+     "use": "routine",
+     "target": "23"
+    },
+    {
+     "agent": "Erythromycin",
+     "disk_content": "15",
+     "min": 23,
+     "max": 29,
+     "use": "routine",
+     "target": "26"
+    },
+    {
+     "agent": "Fusidic acid",
+     "disk_content": "10",
+     "min": 26,
+     "max": 32,
+     "use": "routine",
+     "target": "29"
+    },
+    {
+     "agent": "Gentamicin",
+     "disk_content": "10",
+     "min": 19,
+     "max": 25,
+     "use": "routine",
+     "target": "22"
+    },
+    {
+     "agent": "Lefamulin",
+     "disk_content": "5",
+     "min": 23,
+     "max": 29,
+     "use": "routine",
+     "target": "26"
+    },
+    {
+     "agent": "Levofloxacin",
+     "disk_content": "5",
+     "min": 23,
+     "max": 29,
+     "use": "routine",
+     "target": "26"
+    },
+    {
+     "agent": "Linezolid",
+     "disk_content": "10",
+     "min": 21,
+     "max": 27,
+     "use": "routine",
+     "target": "24"
+    },
+    {
+     "agent": "Minocycline",
+     "disk_content": "30",
+     "min": 23,
+     "max": 29,
+     "use": "routine",
+     "target": "26"
+    },
+    {
+     "agent": "Moxifloxacin",
+     "disk_content": "5",
+     "min": 25,
+     "max": 31,
+     "use": "routine",
+     "target": "28"
+    },
+    {
+     "agent": "Mupirocin",
+     "disk_content": "200",
+     "min": 31,
+     "max": 37,
+     "use": "routine",
+     "target": "34"
+    },
+    {
+     "agent": "Neomycin",
+     "disk_content": "10",
+     "min": 16,
+     "max": 22,
+     "use": "routine",
+     "target": "19"
+    },
+    {
+     "agent": "Netilmicin",
+     "disk_content": "10",
+     "min": 20,
+     "max": 26,
+     "use": "routine",
+     "target": "23"
+    },
+    {
+     "agent": "Nitrofurantoin",
+     "disk_content": "100",
+     "min": 17,
+     "max": 23,
+     "use": "routine",
+     "target": "20"
+    },
+    {
+     "agent": "Norfloxacin",
+     "disk_content": "10",
+     "min": 18,
+     "max": 24,
+     "use": "routine",
+     "target": "21"
+    },
+    {
+     "agent": "Ofloxacin",
+     "disk_content": "5",
+     "min": 21,
+     "max": 27,
+     "use": "routine",
+     "target": "24"
+    },
+    {
+     "agent": "Oxacillin",
+     "disk_content": "1",
+     "min": 19,
+     "max": 25,
+     "use": "routine",
+     "target": "22"
+    },
+    {
+     "agent": "Quinupristin-dalfopristin",
+     "disk_content": "15",
+     "min": 21,
+     "max": 27,
+     "use": "routine",
+     "target": "24"
+    },
+    {
+     "agent": "Rifampicin",
+     "disk_content": "5",
+     "min": 30,
+     "max": 36,
+     "use": "routine",
+     "target": "33"
+    },
+    {
+     "agent": "Tedizolid",
+     "disk_content": "2",
+     "min": 19,
+     "max": 25,
+     "use": "routine",
+     "target": "22"
+    },
+    {
+     "agent": "Tetracycline",
+     "disk_content": "30",
+     "min": 23,
+     "max": 31,
+     "use": "routine",
+     "target": "27"
+    },
+    {
+     "agent": "Tigecycline",
+     "disk_content": "15",
+     "min": 19,
+     "max": 25,
+     "use": "routine",
+     "target": "22"
+    },
+    {
+     "agent": "Tobramycin",
+     "disk_content": "10",
+     "min": 20,
+     "max": 26,
+     "use": "routine",
+     "target": "23"
+    },
+    {
+     "agent": "Trimethoprim",
+     "disk_content": "5",
+     "min": 22,
+     "max": 28,
+     "use": "routine",
+     "target": "25"
+    },
+    {
+     "agent": "Trimethoprim-sulfamethoxazole",
+     "disk_content": "1.25-23.75",
+     "min": 26,
+     "max": 32,
+     "use": "routine",
+     "target": "29"
+    }
+   ]
+  },
+  {
+   "id": "ATCC 29212",
+   "name": "Enterococcus faecalis ATCC 29212",
+   "genus": "Enterococcus",
+   "species": "faecalis",
+   "ranges": [
+    {
+     "agent": "Ampicillin",
+     "disk_content": "2",
+     "min": 15,
+     "max": 21,
+     "use": "routine",
+     "target": "18"
+    },
+    {
+     "agent": "Ciprofloxacin",
+     "disk_content": "5",
+     "min": 19,
+     "max": 25,
+     "use": "routine",
+     "target": "22"
+    },
+    {
+     "agent": "Eravacycline",
+     "disk_content": "20",
+     "min": 20,
+     "max": 26,
+     "use": "routine",
+     "target": "23"
+    },
+    {
+     "agent": "Gentamicin",
+     "disk_content": "30",
+     "min": 12,
+     "max": 18,
+     "use": "routine",
+     "target": "15"
+    },
+    {
+     "agent": "Imipenem",
+     "disk_content": "10",
+     "min": 24,
+     "max": 30,
+     "use": "routine",
+     "target": "27"
+    },
+    {
+     "agent": "Levofloxacin",
+     "disk_content": "5",
+     "min": 19,
+     "max": 25,
+     "use": "routine",
+     "target": "22"
+    },
+    {
+     "agent": "Linezolid",
+     "disk_content": "10",
+     "min": 19,
+     "max": 25,
+     "use": "routine",
+     "target": "22"
+    },
+    {
+     "agent": "Nitrofurantoin",
+     "disk_content": "100",
+     "min": 18,
+     "max": 24,
+     "use": "routine",
+     "target": "21"
+    },
+    {
+     "agent": "Norfloxacin",
+     "disk_content": "10",
+     "min": 16,
+     "max": 22,
+     "use": "routine",
+     "target": "19"
+    },
+    {
+     "agent": "Quinupristin-dalfopristin",
+     "disk_content": "15",
+     "min": 11,
+     "max": 17,
+     "use": "routine",
+     "target": "14"
+    },
+    {
+     "agent": "Streptomycin",
+     "disk_content": "300",
+     "min": 14,
+     "max": 20,
+     "use": "routine",
+     "target": "17"
+    },
+    {
+     "agent": "Teicoplanin",
+     "disk_content": "30",
+     "min": 15,
+     "max": 21,
+     "use": "routine",
+     "target": "18"
+    },
+    {
+     "agent": "Tigecycline",
+     "disk_content": "15",
+     "min": 20,
+     "max": 26,
+     "use": "routine",
+     "target": "23"
+    },
+    {
+     "agent": "Trimethoprim",
+     "disk_content": "5",
+     "min": 24,
+     "max": 32,
+     "use": "routine",
+     "target": "28"
+    },
+    {
+     "agent": "Trimethoprim-sulfamethoxazole",
+     "disk_content": "1.25-23.75",
+     "min": 26,
+     "max": 34,
+     "use": "routine",
+     "target": "30"
+    },
+    {
+     "agent": "Vancomycin",
+     "disk_content": "5",
+     "min": 10,
+     "max": 16,
+     "use": "routine",
+     "target": "13"
+    }
+   ]
+  },
+  {
+   "id": "ATCC 49619",
+   "name": "Streptococcus pneumoniae ATCC 49619",
+   "genus": "Streptococcus",
+   "species": "pneumoniae",
+   "ranges": [
+    {
+     "agent": "Ampicillin",
+     "disk_content": "2",
+     "min": 25,
+     "max": 31,
+     "use": "routine",
+     "target": "28"
+    },
+    {
+     "agent": "Benzylpenicillin",
+     "disk_content": "1 unit",
+     "min": 16,
+     "max": 22,
+     "use": "routine",
+     "target": "19"
+    },
+    {
+     "agent": "Cefaclor",
+     "disk_content": "30",
+     "min": 25,
+     "max": 31,
+     "use": "routine",
+     "target": "28"
+    },
+    {
+     "agent": "Cefepime",
+     "disk_content": "30",
+     "min": 31,
+     "max": 37,
+     "use": "routine",
+     "target": "34"
+    },
+    {
+     "agent": "Cefotaxime",
+     "disk_content": "5",
+     "min": 28,
+     "max": 34,
+     "use": "routine",
+     "target": "31"
+    },
+    {
+     "agent": "Cefpodoxime",
+     "disk_content": "10",
+     "min": 29,
+     "max": 35,
+     "use": "routine",
+     "target": "32"
+    },
+    {
+     "agent": "Ceftriaxone",
+     "disk_content": "30",
+     "min": 32,
+     "max": 38,
+     "use": "routine",
+     "target": "35"
+    },
+    {
+     "agent": "Cefuroxime",
+     "disk_content": "30",
+     "min": 28,
+     "max": 34,
+     "use": "routine",
+     "target": "31"
+    },
+    {
+     "agent": "Chloramphenicol",
+     "disk_content": "30",
+     "min": 24,
+     "max": 30,
+     "use": "routine",
+     "target": "27"
+    },
+    {
+     "agent": "Ciprofloxacin",
+     "disk_content": "5",
+     "min": 22,
+     "max": 28,
+     "use": "routine",
+     "target": "25"
+    },
+    {
+     "agent": "Clindamycin",
+     "disk_content": "2",
+     "min": 22,
+     "max": 28,
+     "use": "routine",
+     "target": "25"
+    },
+    {
+     "agent": "Doripenem",
+     "disk_content": "10",
+     "min": 31,
+     "max": 37,
+     "use": "routine",
+     "target": "34"
+    },
+    {
+     "agent": "Eravacycline",
+     "disk_content": "20",
+     "min": 24,
+     "max": 30,
+     "use": "routine",
+     "target": "27"
+    },
+    {
+     "agent": "Ertapenem",
+     "disk_content": "10",
+     "min": 28,
+     "max": 34,
+     "use": "routine",
+     "target": "31"
+    },
+    {
+     "agent": "Erythromycin",
+     "disk_content": "15",
+     "min": 26,
+     "max": 32,
+     "use": "routine",
+     "target": "29"
+    },
+    {
+     "agent": "Imipenem",
+     "disk_content": "10",
+     "min": 34,
+     "max": 42,
+     "use": "routine",
+     "target": "38"
+    },
+    {
+     "agent": "Lefamulin",
+     "disk_content": "5",
+     "min": 15,
+     "max": 21,
+     "use": "routine",
+     "target": "18"
+    },
+    {
+     "agent": "Levofloxacin",
+     "disk_content": "5",
+     "min": 21,
+     "max": 27,
+     "use": "routine",
+     "target": "24"
+    },
+    {
+     "agent": "Linezolid",
+     "disk_content": "10",
+     "min": 23,
+     "max": 29,
+     "use": "routine",
+     "target": "26"
+    },
+    {
+     "agent": "Meropenem",
+     "disk_content": "10",
+     "min": 30,
+     "max": 38,
+     "use": "routine",
+     "target": "34"
+    },
+    {
+     "agent": "Minocycline",
+     "disk_content": "30",
+     "min": 25,
+     "max": 31,
+     "use": "routine",
+     "target": "28"
+    },
+    {
+     "agent": "Moxifloxacin",
+     "disk_content": "5",
+     "min": 24,
+     "max": 30,
+     "use": "routine",
+     "target": "27"
+    },
+    {
+     "agent": "Nitrofurantoin",
+     "disk_content": "100",
+     "min": 25,
+     "max": 31,
+     "use": "routine",
+     "target": "28"
+    },
+    {
+     "agent": "Norfloxacin",
+     "disk_content": "10",
+     "min": 18,
+     "max": 24,
+     "use": "routine",
+     "target": "21"
+    },
+    {
+     "agent": "Ofloxacin",
+     "disk_content": "5",
+     "min": 18,
+     "max": 24,
+     "use": "routine",
+     "target": "21"
+    },
+    {
+     "agent": "Oxacillin",
+     "disk_content": "1",
+     "min": 8,
+     "max": 14,
+     "use": "routine",
+     "target": "11"
+    },
+    {
+     "agent": "Rifampicin",
+     "disk_content": "5",
+     "min": 26,
+     "max": 32,
+     "use": "routine",
+     "target": "29"
+    },
+    {
+     "agent": "Tedizolid",
+     "disk_content": "2",
+     "min": 19,
+     "max": 25,
+     "use": "routine",
+     "target": "22"
+    },
+    {
+     "agent": "Teicoplanin",
+     "disk_content": "30",
+     "min": 18,
+     "max": 24,
+     "use": "routine",
+     "target": "21"
+    },
+    {
+     "agent": "Telithromycin",
+     "disk_content": "15",
+     "min": 27,
+     "max": 33,
+     "use": "routine",
+     "target": "30"
+    },
+    {
+     "agent": "Tetracycline",
+     "disk_content": "30",
+     "min": 28,
+     "max": 34,
+     "use": "routine",
+     "target": "31"
+    },
+    {
+     "agent": "Tigecycline",
+     "disk_content": "15",
+     "min": 24,
+     "max": 30,
+     "use": "routine",
+     "target": "27"
+    },
+    {
+     "agent": "Trimethoprim-sulfamethoxazole",
+     "disk_content": "1.25-23.75",
+     "min": 18,
+     "max": 26,
+     "use": "routine",
+     "target": "22"
+    },
+    {
+     "agent": "Vancomycin",
+     "disk_content": "5",
+     "min": 17,
+     "max": 23,
+     "use": "routine",
+     "target": "20"
+    }
+   ]
+  },
+  {
+   "id": "ATCC 49766",
+   "name": "Haemophilus influenzae ATCC 49766",
+   "genus": "Haemophilus",
+   "species": "influenzae",
+   "ranges": [
+    {
+     "agent": "Amoxicillin-clavulanic acid",
+     "disk_content": "2-1",
+     "min": 17,
+     "max": 23,
+     "use": "routine",
+     "target": "20"
+    },
+    {
+     "agent": "Ampicillin",
+     "disk_content": "2",
+     "min": 19,
+     "max": 25,
+     "use": "routine",
+     "target": "22"
+    },
+    {
+     "agent": "Benzylpenicillin",
+     "disk_content": "1 unit",
+     "min": 15,
+     "max": 21,
+     "use": "routine",
+     "target": "18"
+    },
+    {
+     "agent": "Cefepime",
+     "disk_content": "30",
+     "min": 30,
+     "max": 36,
+     "use": "routine",
+     "target": "33"
+    },
+    {
+     "agent": "Cefixime",
+     "disk_content": "5",
+     "min": 29,
+     "max": 35,
+     "use": "routine",
+     "target": "32"
+    },
+    {
+     "agent": "Cefotaxime",
+     "disk_content": "5",
+     "min": 29,
+     "max": 37,
+     "use": "routine",
+     "target": "33"
+    },
+    {
+     "agent": "Cefpodoxime",
+     "disk_content": "10",
+     "min": 30,
+     "max": 36,
+     "use": "routine",
+     "target": "33"
+    },
+    {
+     "agent": "Ceftibuten",
+     "disk_content": "30",
+     "min": 31,
+     "max": 37,
+     "use": "routine",
+     "target": "34"
+    },
+    {
+     "agent": "Ceftolozane-tazobactam",
+     "disk_content": "30-10",
+     "min": 24,
+     "max": 30,
+     "use": "routine",
+     "target": "27"
+    },
+    {
+     "agent": "Ceftriaxone",
+     "disk_content": "30",
+     "min": 34,
+     "max": 42,
+     "use": "routine",
+     "target": "38"
+    },
+    {
+     "agent": "Cefuroxime",
+     "disk_content": "30",
+     "min": 26,
+     "max": 34,
+     "use": "routine",
+     "target": "30"
+    },
+    {
+     "agent": "Chloramphenicol",
+     "disk_content": "30",
+     "min": 31,
+     "max": 37,
+     "use": "routine",
+     "target": "34"
+    },
+    {
+     "agent": "Ciprofloxacin",
+     "disk_content": "5",
+     "min": 32,
+     "max": 40,
+     "use": "routine",
+     "target": "36"
+    },
+    {
+     "agent": "Doripenem",
+     "disk_content": "10",
+     "min": 26,
+     "max": 32,
+     "use": "routine",
+     "target": "29"
+    },
+    {
+     "agent": "Ertapenem",
+     "disk_content": "10",
+     "min": 27,
+     "max": 33,
+     "use": "routine",
+     "target": "30"
+    },
+    {
+     "agent": "Erythromycin",
+     "disk_content": "15",
+     "min": 10,
+     "max": 16,
+     "use": "routine",
+     "target": "13"
+    },
+    {
+     "agent": "Imipenem",
+     "disk_content": "10",
+     "min": 24,
+     "max": 30,
+     "use": "routine",
+     "target": "27"
+    },
+    {
+     "agent": "Levofloxacin",
+     "disk_content": "5",
+     "min": 31,
+     "max": 39,
+     "use": "routine",
+     "target": "35"
+    },
+    {
+     "agent": "Meropenem",
+     "disk_content": "10",
+     "min": 27,
+     "max": 35,
+     "use": "routine",
+     "target": "31"
+    },
+    {
+     "agent": "Minocycline",
+     "disk_content": "30",
+     "min": 26,
+     "max": 32,
+     "use": "routine",
+     "target": "29"
+    },
+    {
+     "agent": "Moxifloxacin",
+     "disk_content": "5",
+     "min": 30,
+     "max": 36,
+     "use": "routine",
+     "target": "33"
+    },
+    {
+     "agent": "Nalidixic acid",
+     "disk_content": "30",
+     "min": 26,
+     "max": 32,
+     "use": "routine",
+     "target": "29"
+    },
+    {
+     "agent": "Ofloxacin",
+     "disk_content": "5",
+     "min": 31,
+     "max": 37,
+     "use": "routine",
+     "target": "34"
+    },
+    {
+     "agent": "Piperacillin-tazobactam",
+     "disk_content": "30-6",
+     "min": 32,
+     "max": 40,
+     "use": "routine",
+     "target": "36"
+    },
+    {
+     "agent": "Rifampicin",
+     "disk_content": "5",
+     "min": 21,
+     "max": 27,
+     "use": "routine",
+     "target": "24"
+    },
+    {
+     "agent": "Telithromycin",
+     "disk_content": "15",
+     "min": 14,
+     "max": 20,
+     "use": "routine",
+     "target": "17"
+    },
+    {
+     "agent": "Tetracycline",
+     "disk_content": "30",
+     "min": 28,
+     "max": 34,
+     "use": "routine",
+     "target": "31"
+    },
+    {
+     "agent": "Trimethoprim-sulfamethoxazole",
+     "disk_content": "1.25-23.75",
+     "min": 27,
+     "max": 35,
+     "use": "routine",
+     "target": "31"
+    }
+   ]
+  },
+  {
+   "id": "ATCC 33560",
+   "name": "Campylobacter jejuni ATCC 33560",
+   "genus": "Campylobacter",
+   "species": "jejuni",
+   "ranges": [
+    {
+     "agent": "Ciprofloxacin",
+     "disk_content": "5",
+     "min": 34,
+     "max": 42,
+     "use": "routine",
+     "target": "38"
+    },
+    {
+     "agent": "Erythromycin",
+     "disk_content": "15",
+     "min": 27,
+     "max": 35,
+     "use": "routine",
+     "target": "31"
+    },
+    {
+     "agent": "Tetracycline",
+     "disk_content": "30",
+     "min": 30,
+     "max": 38,
+     "use": "routine",
+     "target": "34"
+    }
+   ]
+  },
+  {
+   "id": "ATCC 25285",
+   "name": "Bacteroides fragilis ATCC 25285",
+   "genus": "Bacteroides",
+   "species": "fragilis",
+   "ranges": [
+    {
+     "agent": "Amoxicillin-clavulanic acid",
+     "disk_content": "2-1",
+     "min": 23,
+     "max": 29,
+     "use": "routine",
+     "target": "26"
+    },
+    {
+     "agent": "Ampicillin-sulbactam",
+     "disk_content": "10-10",
+     "min": 28,
+     "max": 34,
+     "use": "routine",
+     "target": "31"
+    },
+    {
+     "agent": "Clindamycin",
+     "disk_content": "2",
+     "min": 22,
+     "max": 28,
+     "use": "routine",
+     "target": "25"
+    },
+    {
+     "agent": "Ertapenem",
+     "disk_content": "10",
+     "min": 33,
+     "max": 39,
+     "use": "routine",
+     "target": "36"
+    },
+    {
+     "agent": "Imipenem",
+     "disk_content": "10",
+     "min": 38,
+     "max": 44,
+     "use": "routine",
+     "target": "41"
+    },
+    {
+     "agent": "Meropenem",
+     "disk_content": "10",
+     "min": 32,
+     "max": 39,
+     "use": "routine",
+     "target": "35-36"
+    },
+    {
+     "agent": "Metronidazole",
+     "disk_content": "5",
+     "min": 29,
+     "max": 36,
+     "use": "routine",
+     "target": "32-33"
+    },
+    {
+     "agent": "Piperacillin-tazobactam",
+     "disk_content": "30-6",
+     "min": 29,
+     "max": 35,
+     "use": "routine",
+     "target": "32"
+    }
+   ]
+  },
+  {
+   "id": "ATCC 13124",
+   "name": "Clostridium perfringens ATCC 13124",
+   "genus": "Clostridium",
+   "species": "perfringens",
+   "ranges": [
+    {
+     "agent": "Amoxicillin-clavulanic acid",
+     "disk_content": "2-1",
+     "min": 28,
+     "max": 34,
+     "use": "routine",
+     "target": "31"
+    },
+    {
+     "agent": "Ampicillin",
+     "disk_content": "2",
+     "min": 28,
+     "max": 35,
+     "use": "routine",
+     "target": "31-32"
+    },
+    {
+     "agent": "Ampicillin-sulbactam",
+     "disk_content": "10-10",
+     "min": 32,
+     "max": 38,
+     "use": "routine",
+     "target": "35"
+    },
+    {
+     "agent": "Benzylpenicillin",
+     "disk_content": "1 unit",
+     "min": 22,
+     "max": 28,
+     "use": "routine",
+     "target": "25"
+    },
+    {
+     "agent": "Cefotaxime",
+     "disk_content": "5",
+     "min": 26,
+     "max": 33,
+     "use": "routine",
+     "target": "29-30"
+    },
+    {
+     "agent": "Ceftriaxone",
+     "disk_content": "30",
+     "min": 30,
+     "max": 37,
+     "use": "routine",
+     "target": "33-34"
+    },
+    {
+     "agent": "Clindamycin",
+     "disk_content": "2",
+     "min": 20,
+     "max": 26,
+     "use": "routine",
+     "target": "23"
+    },
+    {
+     "agent": "Ertapenem",
+     "disk_content": "10",
+     "min": 31,
+     "max": 37,
+     "use": "routine",
+     "target": "34"
+    },
+    {
+     "agent": "Imipenem",
+     "disk_content": "10",
+     "min": 31,
+     "max": 37,
+     "use": "routine",
+     "target": "34"
+    },
+    {
+     "agent": "Linezolid",
+     "disk_content": "10",
+     "min": 21,
+     "max": 27,
+     "use": "routine",
+     "target": "24"
+    },
+    {
+     "agent": "Meropenem",
+     "disk_content": "10",
+     "min": 33,
+     "max": 39,
+     "use": "routine",
+     "target": "36"
+    },
+    {
+     "agent": "Metronidazole",
+     "disk_content": "5",
+     "min": 20,
+     "max": 26,
+     "use": "routine",
+     "target": "23"
+    },
+    {
+     "agent": "Piperacillin-tazobactam",
+     "disk_content": "30-6",
+     "min": 29,
+     "max": 35,
+     "use": "routine",
+     "target": "32"
+    },
+    {
+     "agent": "Vancomycin",
+     "disk_content": "5",
+     "min": 14,
+     "max": 20,
+     "use": "routine",
+     "target": "17"
+    }
+   ]
+  },
+  {
+   "id": "ATCC 35218",
+   "name": "Escherichia coli ATCC 35218",
+   "genus": "Escherichia",
+   "species": "coli",
+   "ranges": [
+    {
+     "agent": "Amoxicillin-clavulanic acid",
+     "disk_content": "20-10",
+     "min": 17,
+     "max": 22,
+     "use": "inhibitor",
+     "target": "19-20"
+    },
+    {
+     "agent": "Ampicillin-sulbactam",
+     "disk_content": "10-10",
+     "min": 13,
+     "max": 19,
+     "use": "inhibitor",
+     "target": "16"
+    },
+    {
+     "agent": "Ceftolozane-tazobactam",
+     "disk_content": "30-10",
+     "min": 25,
+     "max": 31,
+     "use": "inhibitor",
+     "target": "28"
+    },
+    {
+     "agent": "Piperacillin-tazobactam",
+     "disk_content": "30-6",
+     "min": 21,
+     "max": 27,
+     "use": "inhibitor",
+     "target": "24"
+    },
+    {
+     "agent": "Ticarcillin-clavulanic acid",
+     "disk_content": "75-10",
+     "min": 21,
+     "max": 25,
+     "use": "inhibitor",
+     "target": "23"
+    }
+   ]
+  },
+  {
+   "id": "ATCC 700603",
+   "name": "Klebsiella pneumoniae ATCC 700603",
+   "genus": "Klebsiella",
+   "species": "pneumoniae",
+   "ranges": [
+    {
+     "agent": "Aztreonam-avibactam",
+     "disk_content": "30-20",
+     "min": 26,
+     "max": 32,
+     "use": "inhibitor",
+     "target": "29"
+    },
+    {
+     "agent": "Ceftazidime-avibactam",
+     "disk_content": "10-4",
+     "min": 18,
+     "max": 24,
+     "use": "inhibitor",
+     "target": "21"
+    },
+    {
+     "agent": "Ceftolozane-tazobactam",
+     "disk_content": "30-10",
+     "min": 17,
+     "max": 25,
+     "use": "inhibitor",
+     "target": "21"
+    },
+    {
+     "agent": "Piperacillin-tazobactam",
+     "disk_content": "30-6",
+     "min": 14,
+     "max": 20,
+     "use": "inhibitor",
+     "target": "17"
+    },
+    {
+     "agent": "Aztreonam",
+     "disk_content": "30",
+     "min": 9,
+     "max": 17,
+     "use": "extended",
+     "expected_category": "R"
+    },
+    {
+     "agent": "Cefotaxime",
+     "disk_content": "5",
+     "min": 12,
+     "max": 18,
+     "use": "extended",
+     "expected_category": "I or R"
+    },
+    {
+     "agent": "Cefpodoxime",
+     "disk_content": "10",
+     "min": 9,
+     "max": 16,
+     "use": "extended",
+     "expected_category": "R"
+    },
+    {
+     "agent": "Ceftazidime",
+     "disk_content": "10",
+     "min": 6,
+     "max": 12,
+     "use": "extended",
+     "expected_category": "I or R"
+    },
+    {
+     "agent": "Ceftriaxone",
+     "disk_content": "30",
+     "min": 16,
+     "max": 22,
+     "use": "extended",
+     "expected_category": "I or R"
+    }
+   ]
+  },
+  {
+   "id": "ATCC BAA-2814",
+   "name": "Klebsiella pneumoniae ATCC BAA-2814",
+   "genus": "Klebsiella",
+   "species": "pneumoniae",
+   "ranges": [
+    {
+     "agent": "Imipenem-relebactam",
+     "disk_content": "10-25",
+     "min": 22,
+     "max": 28,
+     "use": "inhibitor",
+     "target": "25"
+    },
+    {
+     "agent": "Meropenem-vaborbactam",
+     "disk_content": "20-10",
+     "min": 15,
+     "max": 21,
+     "use": "inhibitor",
+     "target": "18"
+    }
+   ]
+  },
+  {
+   "id": "NCTC 13353",
+   "name": "Escherichia coli NCTC 13353",
+   "genus": "Escherichia",
+   "species": "coli",
+   "ranges": [
+    {
+     "agent": "Cefepime-enmetazobactam",
+     "disk_content": "30-20",
+     "min": 27,
+     "max": 33,
+     "use": "inhibitor",
+     "target": "30"
+    }
+   ]
+  },
+  {
+   "id": "NCTC 12493",
+   "name": "Staphylococcus aureus NCTC 12493",
+   "genus": "Staphylococcus",
+   "species": "aureus",
+   "ranges": [
+    {
+     "agent": "Cefoxitin",
+     "disk_content": "30",
+     "min": 14,
+     "max": 20,
+     "use": "extended",
+     "expected_category": "R"
+    }
+   ]
+  },
+  {
+   "id": "ATCC 51299",
+   "name": "Enterococcus faecalis ATCC 51299",
+   "genus": "Enterococcus",
+   "species": "faecalis",
+   "ranges": [
+    {
+     "agent": "Teicoplanin",
+     "disk_content": "30",
+     "min": 16,
+     "max": 20,
+     "use": "extended",
+     "expected_category": "S"
+    },
+    {
+     "agent": "Vancomycin",
+     "disk_content": "5",
+     "min": 6,
+     "max": 12,
+     "use": "extended",
+     "expected_category": "R"
+    },
+    {
+     "agent": "Gentamicin",
+     "disk_content": "30",
+     "min": 6,
+     "max": 6,
+     "use": "extended",
+     "expected_category": "R"
+    },
+    {
+     "agent": "Streptomycin",
+     "disk_content": "300",
+     "min": 6,
+     "max": 6,
+     "use": "extended",
+     "expected_category": "R"
+    }
+   ]
+  },
+  {
+   "id": "ATCC 49247",
+   "name": "Haemophilus influenzae ATCC 49247",
+   "genus": "Haemophilus",
+   "species": "influenzae",
+   "ranges": [
+    {
+     "agent": "Ampicillin",
+     "disk_content": "2",
+     "min": 6,
+     "max": 12,
+     "use": "extended",
+     "expected_category": "R"
+    },
+    {
+     "agent": "Benzylpenicillin",
+     "disk_content": "1 unit",
+     "min": 6,
+     "max": 9,
+     "use": "extended",
+     "expected_category": "R"
+    }
+   ]
+  }
+ ]
+}

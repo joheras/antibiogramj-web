@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { MODE } from "../api";
 import CategoryBadge from "../components/CategoryBadge";
 import { startExample } from "../example";
+import { QC_SOURCE, QC_TABLES } from "../qc";
 import { useSession } from "../session";
 import { Legend } from "./PlatePage";
 // Screenshots of the example plate (src/assets/example-plate.jpg) at each step, taken from the browser build.
@@ -20,6 +21,7 @@ const SECTIONS = [
   ["photos", "Taking good photos"],
   ["workflow", "Step by step"],
   ["results", "Results and export"],
+  ["qc", "Quality control"],
   ["standards", "Standards and categories"],
   ["expert", "Expert system"],
   ["data", "Where your data is"],
@@ -147,6 +149,20 @@ export default function HelpPage() {
                 </ul>
               </div>
             </div>
+            <h3>Automatic photo checks</h3>
+            <p>
+              Right after the upload, AntibiogramJ checks the photo and shows a warning (you can still continue) when
+              it finds one of these problems:
+            </p>
+            <ul>
+              <li><b>Out of focus</b>: the edges of the disks and of their printed codes are not sharp.</li>
+              <li><b>Glare</b>: saturated white areas on the agar that are not disks (reflections of the lamps or of the lid).</li>
+              <li><b>Plate outside the photo</b>, <b>plate small in the frame</b> or <b>plate not found</b> (located with the same circle detection as the automatic crop).</li>
+              <li><b>Low resolution</b>: the plate is less than 700 pixels across.</li>
+            </ul>
+            <p className="muted small">
+              If you get a warning, the easiest fix is usually to take the photo again following the rules above.
+            </p>
           </section>
 
           <section id="workflow" className="card">
@@ -229,6 +245,23 @@ export default function HelpPage() {
               workbook with all the measurements of the experiment. <b>Edit</b> changes the organism data of an
               antibiogram; plates, antibiograms and experiments can be deleted.</p>
             <Figure src={experimentView} caption="Experiment view of the example, with the expert-system messages." height={846} />
+          </section>
+
+          <section id="qc" className="card">
+            <h2>Quality control</h2>
+            <p>To check the disks, the medium and the reading, test a <b>EUCAST QC strain</b> (for example <i>E. coli</i>
+              ATCC 25922, <i>P. aeruginosa</i> ATCC 27853, <i>S. aureus</i> ATCC 29213 or <i>E. faecalis</i> ATCC 29212)
+              and mark its antibiogram as a QC strain: choose it in <b>Quality-control strain</b> in the first step of the
+              wizard (the organism data are filled in) or with <b>Edit</b> on an existing antibiogram.</p>
+            <p>Every zone diameter of a QC antibiogram is then compared with the QC range and target of that strain:
+              the <b>QC range</b> column of the plate and experiment views shows ✓ (in range) or ✗ (out of range), the
+              experiment view summarises the results, and the Excel export adds the QC strain, range, target and result.
+              Diameters are rounded to the whole millimetre. An out-of-range result means the tests of the day must be
+              investigated (disk potency, medium, inoculum, incubation, reading) before reporting patient results.</p>
+            <p className="muted small">Ranges and targets: <a href={QC_TABLES.url} target="_blank" rel="noreferrer">{QC_SOURCE}</a>,
+              routine QC strains, the β-lactamase-producing strains that control the inhibitor of β-lactam–inhibitor
+              combinations and the extended QC strains of resistance mechanisms (zone diameters only). They are the same
+              whatever breakpoint standard the experiment uses.</p>
           </section>
 
           <section id="standards" className="card">

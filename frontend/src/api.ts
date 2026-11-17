@@ -30,6 +30,8 @@ export interface Antibiogram {
   sample: string; comments: string; created_at: string; plates: Plate[];
   /** Results of supplementary tests used by the expert system (see expertRules.ts), e.g. {"d_test": "positive"}. */
   supplementary_tests: Record<string, string>;
+  /** EUCAST QC strain (e.g. "ATCC 25922", see qc.ts) or "" for a clinical isolate. */
+  qc_strain: string;
 }
 export interface ExperimentSummary {
   id: number; name: string; comments: string; standard_id: number; created_at: string;
@@ -39,16 +41,22 @@ export interface ExperimentDetail extends Omit<ExperimentSummary, "antibiogram_c
   standard: Standard; antibiograms: Antibiogram[];
 }
 
-export interface UploadResult { upload_id: string; width: number; height: number; plate: Circle | null }
+export interface QualityMetrics {
+  plate_found: boolean; plate_diameter_px: number | null; plate_fraction: number | null;
+  outside_fraction: number; sharpness: number; glare_fraction: number; width: number; height: number;
+}
+/** Photo quality checks of the upload: warning codes (texts in components/PhotoQuality.tsx). */
+export interface PhotoQuality { warnings: string[]; metrics: QualityMetrics }
+export interface UploadResult { upload_id: string; width: number; height: number; plate: Circle | null; quality: PhotoQuality }
 export interface HaloResult {
   halo_r: number; diameter_mm: number; breakpoints: Breakpoint[]; breakpoint_id: number | null; category: string;
 }
 export interface BacteriaIn {
-  family_id: number; genus: string; species: string; strain: string; sample: string; comments: string;
+  family_id: number; genus: string; species: string; strain: string; sample: string; comments: string; qc_strain: string;
 }
 export interface AntibiogramUpdate {
   genus: string; species: string; strain: string; sample: string; comments: string;
-  supplementary_tests: Record<string, string>;
+  supplementary_tests: Record<string, string>; qc_strain: string;
 }
 export interface MeasurementIn {
   antibiotic_id: number; breakpoint_id: number | null; disk: Circle; halo_r: number;
