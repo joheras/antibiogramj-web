@@ -12,11 +12,14 @@ import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 from openpyxl import load_workbook  # noqa: E402
 
+from app.config import settings  # noqa: E402
 from app.main import app  # noqa: E402
 
 IMAGES = Path(__file__).parent / "images"
 EXPECTED_PLATE_1 = {"Tetracycline", "Cefotaxime", "Amoxicillin-clavulanic acid", "Cefoxitin", "Chloramphenicol",
                     "Ceftazidime", "Ampicillin"}
+# Codes read by OCR on plate 1, in disk order (None: not read with enough confidence).
+PLATE_1_OCR = ["TE 30", "CTX 30", "FOX 30", "AMC 30", None, "CAZ 30", "AMP 10"]
 
 
 def client_for(email: str) -> TestClient:
@@ -106,10 +109,31 @@ def test_full_analysis_flow(alice, bob):
     disks = alice.post(f"/api/analysis/uploads/{uid}/disks").json()["disks"]
     assert len(disks) == 7
 
-    # 4. identification with the bundled templates
-    results = alice.post(f"/api/analysis/uploads/{uid}/identify", json={"disks": disks}).json()["results"]
+    # 4. identification: OCR of the printed codes, bundled templates as fallback
+    results = alice.post(f"/api/analysis/uploads/{uid}/identify",
+                         json={"disks": disks, "family_id": families["Enterobacteriaceae"],
+                               "standard_id": eucast["id"]}).json()["results"]
     ids = [x["antibiotic_id"] for x in results]
     assert {antibiotics[i]["name"] for i in ids} == EXPECTED_PLATE_1
+    # Six codes are read by OCR with confidence; the almost invisible "C 30" falls back to the templates
+    # and is marked for review, with the right code among the OCR suggestions.
+    assert [x["code_read"] if x["source"] == "ocr" else None for x in results] == PLATE_1_OCR
+    for x in results:
+        assert x["review"] == (x["source"] != "ocr")
+        assert x["source"] == "ocr" or antibiotics[x["antibiotic_id"]]["name"] == "Chloramphenicol"
+        assert 1 <= len(x["suggestions"]) <= 3 and x["suggestions"][0]["confidence"] == x["confidence"]
+        if x["source"] == "ocr":
+            assert x["confidence"] >= -2 and x["suggestions"][0]["antibiotic_id"] == x["antibiotic_id"]
+    chloramphenicol = results[PLATE_1_OCR.index(None)]
+    assert "Chloramphenicol" in {antibiotics[s["antibiotic_id"]]["name"] for s in chloramphenicol["suggestions"]}
+    # Without OCR (turned off, or onnxruntime / the model missing) the templates alone are used, as before.
+    settings.ocr_enabled = False
+    try:
+        plain = alice.post(f"/api/analysis/uploads/{uid}/identify", json={"disks": disks}).json()["results"]
+    finally:
+        settings.ocr_enabled = True
+    assert [x["antibiotic_id"] for x in plain] == ids
+    assert all(x["source"] == "template" and not x["review"] and not x["suggestions"] for x in plain)
 
     # 5. halos
     body = {"disks": disks, "antibiotic_ids": ids, "family_id": families["Enterobacteriaceae"],

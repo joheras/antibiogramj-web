@@ -3,13 +3,12 @@
 1. upload        -> store the image, suggest the plate region and check the photo quality
 2. process       -> crop + optional automatic brightness/contrast
 3. disks         -> detect antibiotic disks (user then edits them)
-4. identify      -> read the code printed on every disk
+4. identify      -> read the code printed on every disk (OCR, templates as fallback)
 5. halos         -> measure inhibition zones and categorise them (S/I/R)
 The plate is saved through ``POST /api/plates``.
 """
 
 import uuid
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 
 import cv2
@@ -23,13 +22,12 @@ from ..auth import current_user
 from ..config import settings
 from ..cv import processing as cvp
 from ..cv import quality
-from ..cv.matching import best_match
 from ..db import get_db
+from ..identify import identify_disks
 from ..models import Antibiotic, Breakpoint, Family, Standard, Upload, User
-from ..schemas import (BreakpointOut, CircleIO, DisksOut, HaloResult, HalosIn, HalosOut, Identification, IdentifyIn,
+from ..schemas import (BreakpointOut, CircleIO, DisksOut, HaloResult, HalosIn, HalosOut, IdentifyIn,
                        IdentifyOut, ProcessIn, ProcessOut, UploadOut)
 from ..standards import categorise
-from ..templates import templates_for
 
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
 
@@ -128,11 +126,8 @@ def disks(upload_id: str, db: Session = Depends(get_db), user: User = Depends(cu
 @router.post("/uploads/{upload_id}/identify", response_model=IdentifyOut)
 def identify(upload_id: str, body: IdentifyIn, db: Session = Depends(get_db), user: User = Depends(current_user)):
     image = _working(get_upload(db, user, upload_id))
-    templates = templates_for(db, user.id)
     crops = [cvp.disk_crop(image, cvp.Circle(d.cx, d.cy, d.r)) for d in body.disks]
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        matches = list(pool.map(lambda c: best_match(c, templates) if c.size else (None, 0), crops))
-    return IdentifyOut(results=[Identification(antibiotic_id=a, score=s) for a, s in matches])
+    return IdentifyOut(results=identify_disks(db, user.id, crops, body.family_id, body.standard_id))
 
 
 @router.post("/uploads/{upload_id}/halos", response_model=HalosOut)

@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
@@ -243,11 +244,26 @@ class DisksOut(BaseModel):
 
 class IdentifyIn(BaseModel):
     disks: list[CircleIO] = Field(max_length=40)
+    # Used to choose among catalogue rows with the same name (the one with breakpoints).
+    family_id: int | None = None
+    standard_id: int | None = None
+
+
+class Suggestion(BaseModel):
+    antibiotic_id: int
+    code: str               # lexicon code read, e.g. "AK 30"
+    confidence: float       # OCR log-likelihood ratio, 0 = perfect reading
 
 
 class Identification(BaseModel):
     antibiotic_id: int | None
-    score: int
+    score: int              # template matches (0 = no template recognised the disk)
+    source: Literal["ocr", "template"] | None = None
+    review: bool = False    # not read with enough confidence: the user should check it
+    confidence: float | None = None
+    code_read: str | None = None
+    text_read: str | None = None   # unconstrained OCR reading
+    suggestions: list[Suggestion] = []
 
 
 class IdentifyOut(BaseModel):
