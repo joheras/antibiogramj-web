@@ -10,16 +10,16 @@ It comes in two flavours built from the same React frontend:
 | | **Server** (multi-user service) | **Browser** (runs entirely on the user's computer) |
 |---|---|---|
 | Analysis | Python + OpenCV + onnxruntime in `backend/` | OpenCV.js + onnxruntime-web (WebAssembly) in a Web Worker, `frontend/src/browser/` |
-| Data | PostgreSQL/SQLite + image files, per account | IndexedDB in the user's browser; backup/restore to a file |
-| Accounts | e-mail + password | none: nothing leaves the computer |
-| Build | `npm run build` + backend | `npm run build:browser` → static site in `frontend/dist-browser/` |
+| Data | PostgreSQL/SQLite + image files, per account | IndexedDB in the user's browser; backup/restore to a file; optional sync with the user's own Google Drive |
+| Accounts | e-mail + password | none: nothing is sent to any server of ours |
+| Build | `npm run build` + backend | `npm run build:browser` → static site in `frontend/dist-browser/`, installable (PWA) and usable offline |
 
 * **backend/** — FastAPI + SQLAlchemy + OpenCV. Multi-user (accounts, data isolated per user).
 * **frontend/** — React + TypeScript (Vite). SVG editor to adjust the plate, disks and halos. The pages talk to an
   `Api` interface (`src/api.ts`) implemented by `src/http.ts` (server) or `src/browser/localApi.ts` (browser);
   the build mode picks one, so each build contains only its own.
 
-## Features (v2.0, MVP)
+## Features
 
 | Desktop AntibiogramJ | Web |
 |---|---|
@@ -31,9 +31,13 @@ It comes in two flavours built from the same React frontend:
 | Export experiment to Excel | `.xlsx` with a summary sheet + one sheet per antibiogram |
 | Expert-rules system (stub: intrinsic resistance, exceptional phenotypes, interpretive rules) | **EUCAST expert system** (see below) |
 | – | **Quality control** with the EUCAST QC strains (QC Tables v 16.0) and **photo quality checks** (see below) |
+| – | **Reinterpretation** of an experiment with another standard or version, keeping the original results (see below) |
+| Desktop only | **Phones and tablets**: touch editing (pinch-zoom, larger handles), camera capture, compact layout; the browser version installs as an app (PWA) and works offline |
+| – | Browser version: optional **Google Drive** backups and a **phone → computer** flow (Capture on the phone, Inbox on the computer); local multi-photo import queue |
 
 Not yet ported: searches (by antibiotic / strains / antibiograms), editable abbreviations, loading new standards
-from the UI, import/export of experiments as files.
+from the UI, and export/import of experiments as files in the server version (the browser version has Back up /
+Restore and Google Drive).
 
 ### Breakpoint standards
 
@@ -203,6 +207,15 @@ npm run test:drive      # checks the Google Drive client against a mocked Drive 
 internal share served over HTTP(S)); it uses hash URLs, so no rewrite rules are needed. It must be served over
 `http(s)://` — opening `index.html` from the file system does not work (Web Workers and WebAssembly).
 
+* **Installable app (PWA)**: `pwa/plugin.ts` adds the web app manifest and writes `sw.js`, a service worker that
+  precaches every built file (app, OpenCV.js, onnxruntime-web, OCR model, templates; ~30 MB) with a version hash,
+  so the app works offline and shows an *update available* banner after a new deployment. It can be installed from
+  Chrome/Edge (Android, desktop) and from Safari's *Add to Home Screen* (iOS). On iPhone/iPad, installing it also
+  keeps Safari from deleting the stored data of a site that has not been used for 7 days; the app requests
+  persistent storage as well. The Help page explains installation.
+* **Phones**: the photo can be taken directly with the camera (`capture="environment"`); very large photos are
+  downscaled in the worker before analysis; the image editor supports pinch-zoom and pan with larger touch targets,
+  and the wizard uses a compact step indicator and a sticky action bar on small screens.
 * Data lives in the browser's IndexedDB of that site: **Back up** saves everything (experiments, images, learned
   templates) to one `.json` file and **Restore** adds a backup's experiments. Clearing the site data deletes it.
 * **Google Drive (optional)**: save/load experiments to the user's own Drive, phone **Capture** mode that sends

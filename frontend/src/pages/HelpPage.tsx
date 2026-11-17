@@ -200,10 +200,17 @@ export default function HelpPage() {
             <Figure src={step3} caption="Step 3: 7 disks detected; scale 19.6 px/mm." />
 
             <h3><span className="step-num">4</span>Antibiotics</h3>
-            <p>The code printed on each disk is read automatically; recognised disks are marked <span className="auto">auto</span>.
-              Correct any wrong or empty entry with the dropdown (antibiotics are grouped by class). When you save the
-              plate, AntibiogramJ learns the appearance of the confirmed disks, so recognition improves with use.
-              The same antibiotic cannot be assigned to two disks.</p>
+            <p>The code printed on each disk (e.g. <i>FOX 30</i>, <i>AK 30</i>) is read with text recognition (OCR) and
+              matched against the antibiotics of the catalogue, including the codes used by other manufacturers (e.g. BD
+              <i>AN</i> for amikacin). Disks read with high confidence are marked <span className="auto">auto</span>. When
+              the code cannot be read with confidence, the antibiotic suggested by the stored disk images is marked
+              <span className="auto review">check</span> and the most likely readings are shown as <b>Read as</b> buttons:
+              click one to choose it. Correct any wrong or empty entry with the dropdown (antibiotics are grouped by class).
+              When you save the plate, AntibiogramJ also learns the appearance of the confirmed disks, so recognition
+              improves with use. The same antibiotic cannot be assigned to two disks.</p>
+            {MODE === "browser" && <p className="muted small">The first time, the recognition model (a few MB) is
+              downloaded from this site; then it is kept by the browser and works offline. Reading takes about one
+              second per disk.</p>}
             <Figure src={step4} caption="Step 4: the 7 codes of the example are recognised automatically." />
 
             <h3><span className="step-num">5</span>Inhibition zones</h3>
@@ -384,10 +391,12 @@ export default function HelpPage() {
             <h2>FAQ and troubleshooting</h2>
             <details>
               <summary>An antibiotic code is not recognised or is wrong</summary>
-              <p>Choose the right antibiotic in step 4. Recognition depends on the codes being sharp and readable: take
-                the photo in focus, without glare on the disks. AntibiogramJ learns from the codes you confirm, so
-                the same disks are recognised better next time. If your antibiotic or disk content is not in the list,
-                it is not in the catalogue of the standards.</p>
+              <p>Choose the right antibiotic in step 4, or one of the <b>Read as</b> suggestions. Recognition depends on
+                the codes being sharp and readable: take the photo in focus, without glare on the disks, and avoid
+                heavily compressed images. Disks marked <span className="auto review">check</span> were not read with
+                confidence: always verify them. AntibiogramJ learns from the codes you confirm, so the same disks are
+                recognised better next time. If your antibiotic or disk content is not in the list, it is not in the
+                catalogue of the standards.</p>
             </details>
             <details>
               <summary>A zone is missing, too small or too large</summary>
