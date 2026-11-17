@@ -1,0 +1,1784 @@
+[
+ {
+  "plate": "0",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "read": [
+   [
+    "C 30",
+    -3.61
+   ],
+   [
+    "W 5",
+    -3.97
+   ],
+   [
+    "P 1",
+    -4.88
+   ]
+  ],
+  "names": [
+   "Chloramphenicol",
+   "Trimethoprim",
+   "Benzylpenicillin"
+  ],
+  "free": " 3",
+  "angle": 180.0
+ },
+ {
+  "plate": "0",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "read": [
+   [
+    "CN 10",
+    0.0
+   ],
+   [
+    "CC 2",
+    -4.05
+   ],
+   [
+    "S 10",
+    -4.4
+   ]
+  ],
+  "names": [
+   "Gentamicin",
+   "Clindamycin",
+   "Streptomycin"
+  ],
+  "free": "CN 00",
+  "angle": 240.0
+ },
+ {
+  "plate": "0",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "read": [
+   [
+    "SXT 25",
+    0.0
+   ],
+   [
+    "P 1",
+    -4.11
+   ],
+   [
+    "S 10",
+    -4.12
+   ]
+  ],
+  "names": [
+   "Trimethoprim-sulfamethoxazole",
+   "Benzylpenicillin",
+   "Streptomycin"
+  ],
+  "free": "SXT 25",
+  "angle": 100.0
+ },
+ {
+  "plate": "0",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "read": [
+   [
+    "NA 30",
+    -0.52
+   ],
+   [
+    "W 5",
+    -4.43
+   ],
+   [
+    "S 10",
+    -4.46
+   ]
+  ],
+  "names": [
+   "Nalidixic acid",
+   "Trimethoprim",
+   "Streptomycin"
+  ],
+  "free": "NA 90",
+  "angle": 273.3333333333333
+ },
+ {
+  "plate": "0",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "read": [
+   [
+    "TOB 10",
+    -1.84
+   ],
+   [
+    "S 10",
+    -4.41
+   ],
+   [
+    "P 10",
+    -4.67
+   ]
+  ],
+  "names": [
+   "Tobramycin",
+   "Streptomycin",
+   "Benzylpenicillin"
+  ],
+  "free": "T0B 10",
+  "angle": 320.0
+ },
+ {
+  "plate": "0",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "read": [
+   [
+    "CIP 5",
+    0.0
+   ],
+   [
+    "CPT 5",
+    -7.45
+   ],
+   [
+    "S 10",
+    -8.54
+   ]
+  ],
+  "names": [
+   "Ciprofloxacin",
+   "Ceftaroline",
+   "Streptomycin"
+  ],
+  "free": "CIP 5",
+  "angle": 353.3333333333333
+ },
+ {
+  "plate": "1",
+  "disk": 0,
+  "truth": "TE 30",
+  "want": "Tetracycline",
+  "read": [
+   [
+    "C 30",
+    -3.84
+   ],
+   [
+    "TE 30",
+    -5.24
+   ],
+   [
+    "P 1",
+    -6.62
+   ]
+  ],
+  "names": [
+   "Chloramphenicol",
+   "Tetracycline",
+   "Benzylpenicillin"
+  ],
+  "free": " 30",
+  "angle": 80.0
+ },
+ {
+  "plate": "1",
+  "disk": 1,
+  "truth": "CTX 30",
+  "want": "Cefotaxime",
+  "read": [
+   [
+    "CTX 30",
+    0.0
+   ],
+   [
+    "C 30",
+    -1.92
+   ],
+   [
+    "C/T 40",
+    -3.57
+   ]
+  ],
+  "names": [
+   "Cefotaxime",
+   "Chloramphenicol",
+   "Ceftolozane-tazobactam"
+  ],
+  "free": "CTX 30",
+  "angle": 126.66666666666667
+ },
+ {
+  "plate": "1",
+  "disk": 2,
+  "truth": "FOX 30",
+  "want": "Cefoxitin",
+  "read": [
+   [
+    "FOX 30",
+    0.0
+   ],
+   [
+    "F 300",
+    -2.63
+   ],
+   [
+    "FOT 200",
+    -5.88
+   ]
+  ],
+  "names": [
+   "Cefoxitin",
+   "Nitrofurantoin",
+   "Fosfomycin iv"
+  ],
+  "free": "FOX 30",
+  "angle": 20.0
+ },
+ {
+  "plate": "1",
+  "disk": 3,
+  "truth": "AMC 30",
+  "want": "Amoxicillin-clavulanic acid",
+  "read": [
+   [
+    "AMC 30",
+    0.0
+   ],
+   [
+    "AN 30",
+    -1.23
+   ],
+   [
+    "C 30",
+    -3.4
+   ]
+  ],
+  "names": [
+   "Amoxicillin-clavulanic acid",
+   "Amikacin",
+   "Chloramphenicol"
+  ],
+  "free": "AMC 30",
+  "angle": 40.0
+ },
+ {
+  "plate": "1",
+  "disk": 4,
+  "truth": "C 30",
+  "want": "Chloramphenicol",
+  "read": [
+   [
+    "S 10",
+    -3.06
+   ],
+   [
+    "C 30",
+    -3.35
+   ],
+   [
+    "CC 2",
+    -3.85
+   ]
+  ],
+  "names": [
+   "Streptomycin",
+   "Chloramphenicol",
+   "Clindamycin"
+  ],
+  "free": " 0",
+  "angle": 320.0
+ },
+ {
+  "plate": "1",
+  "disk": 5,
+  "truth": "CAZ 30",
+  "want": "Ceftazidime",
+  "read": [
+   [
+    "CAZ 30",
+    0.0
+   ],
+   [
+    "C 30",
+    -4.11
+   ],
+   [
+    "AN 30",
+    -4.57
+   ]
+  ],
+  "names": [
+   "Ceftazidime",
+   "Chloramphenicol",
+   "Amikacin"
+  ],
+  "free": "CAZ 30",
+  "angle": 140.0
+ },
+ {
+  "plate": "1",
+  "disk": 6,
+  "truth": "AMP 10",
+  "want": "Ampicillin",
+  "read": [
+   [
+    "AMP 10",
+    -0.54
+   ],
+   [
+    "P 10",
+    -2.26
+   ],
+   [
+    "S 10",
+    -3.85
+   ]
+  ],
+  "names": [
+   "Ampicillin",
+   "Benzylpenicillin",
+   "Streptomycin"
+  ],
+  "free": "AMP 510",
+  "angle": 266.6666666666667
+ },
+ {
+  "plate": "2",
+  "disk": 0,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "read": [
+   [
+    "TOB 10",
+    0.0
+   ],
+   [
+    "FA 10",
+    -2.96
+   ],
+   [
+    "AM 10",
+    -3.22
+   ]
+  ],
+  "names": [
+   "Tobramycin",
+   "Fusidic acid",
+   "Ampicillin"
+  ],
+  "free": "TOB 10",
+  "angle": 320.0
+ },
+ {
+  "plate": "2",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "read": [
+   [
+    "CN 10",
+    0.0
+   ],
+   [
+    "P 10",
+    -3.41
+   ],
+   [
+    "C 30",
+    -3.54
+   ]
+  ],
+  "names": [
+   "Gentamicin",
+   "Benzylpenicillin",
+   "Chloramphenicol"
+  ],
+  "free": "CN 10",
+  "angle": 140.0
+ },
+ {
+  "plate": "2",
+  "disk": 2,
+  "truth": "TE 30",
+  "want": "Tetracycline",
+  "read": [
+   [
+    "TE 30",
+    0.0
+   ],
+   [
+    "S 10",
+    -2.51
+   ],
+   [
+    "F 100",
+    -3.4
+   ]
+  ],
+  "names": [
+   "Tetracycline",
+   "Streptomycin",
+   "Nitrofurantoin"
+  ],
+  "free": "TE 30",
+  "angle": 300.0
+ },
+ {
+  "plate": "2",
+  "disk": 3,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "read": [
+   [
+    "CIP 5",
+    0.0
+   ],
+   [
+    "S 10",
+    -3.19
+   ],
+   [
+    "C 30",
+    -3.87
+   ]
+  ],
+  "names": [
+   "Ciprofloxacin",
+   "Streptomycin",
+   "Chloramphenicol"
+  ],
+  "free": "CIP 5",
+  "angle": 60.0
+ },
+ {
+  "plate": "2",
+  "disk": 4,
+  "truth": "P 10",
+  "want": "Benzylpenicillin",
+  "read": [
+   [
+    "P 10",
+    0.0
+   ],
+   [
+    "S 10",
+    -3.73
+   ],
+   [
+    "FA 10",
+    -4.23
+   ]
+  ],
+  "names": [
+   "Benzylpenicillin",
+   "Streptomycin",
+   "Fusidic acid"
+  ],
+  "free": "P 10",
+  "angle": 220.0
+ },
+ {
+  "plate": "2",
+  "disk": 5,
+  "truth": "FOX 30",
+  "want": "Cefoxitin",
+  "read": [
+   [
+    "FOX 30",
+    -2.0
+   ],
+   [
+    "OX 1",
+    -4.13
+   ],
+   [
+    "P 1",
+    -4.15
+   ]
+  ],
+  "names": [
+   "Cefoxitin",
+   "Oxacillin",
+   "Benzylpenicillin"
+  ],
+  "free": "FOX 30",
+  "angle": 220.0
+ },
+ {
+  "plate": "2",
+  "disk": 6,
+  "truth": "DA 2",
+  "want": "Clindamycin",
+  "read": [
+   [
+    "DA 2",
+    0.0
+   ],
+   [
+    "P 1",
+    -2.73
+   ],
+   [
+    "W 5",
+    -5.69
+   ]
+  ],
+  "names": [
+   "Clindamycin",
+   "Benzylpenicillin",
+   "Trimethoprim"
+  ],
+  "free": "DA 2",
+  "angle": 60.0
+ },
+ {
+  "plate": "2",
+  "disk": 7,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "read": [
+   [
+    "SXT 25",
+    0.0
+   ],
+   [
+    "S 10",
+    -1.8
+   ],
+   [
+    "P 10",
+    -3.69
+   ]
+  ],
+  "names": [
+   "Trimethoprim-sulfamethoxazole",
+   "Streptomycin",
+   "Benzylpenicillin"
+  ],
+  "free": "SXT 25",
+  "angle": 160.0
+ },
+ {
+  "plate": "3",
+  "disk": 0,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "read": [
+   [
+    "CN 10",
+    -0.96
+   ],
+   [
+    "W 5",
+    -2.99
+   ],
+   [
+    "C 30",
+    -3.09
+   ]
+  ],
+  "names": [
+   "Gentamicin",
+   "Trimethoprim",
+   "Chloramphenicol"
+  ],
+  "free": "C1 ",
+  "angle": 333.3333333333333
+ },
+ {
+  "plate": "3",
+  "disk": 1,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "read": [
+   [
+    "P 1",
+    -4.73
+   ],
+   [
+    "C 30",
+    -5.2
+   ],
+   [
+    "RD 5",
+    -5.22
+   ]
+  ],
+  "names": [
+   "Benzylpenicillin",
+   "Chloramphenicol",
+   "Rifampicin"
+  ],
+  "free": " O",
+  "angle": 40.0
+ },
+ {
+  "plate": "3",
+  "disk": 2,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "read": [
+   [
+    "NA 30",
+    -1.86
+   ],
+   [
+    "C 30",
+    -3.16
+   ],
+   [
+    "P 1",
+    -3.5
+   ]
+  ],
+  "names": [
+   "Nalidixic acid",
+   "Chloramphenicol",
+   "Benzylpenicillin"
+  ],
+  "free": "NA 3",
+  "angle": 260.0
+ },
+ {
+  "plate": "3",
+  "disk": 3,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "read": [
+   [
+    "SXT 25",
+    -2.45
+   ],
+   [
+    "OX 1",
+    -3.69
+   ],
+   [
+    "P 1",
+    -5.07
+   ]
+  ],
+  "names": [
+   "Trimethoprim-sulfamethoxazole",
+   "Oxacillin",
+   "Benzylpenicillin"
+  ],
+  "free": "B1T 25",
+  "angle": 180.0
+ },
+ {
+  "plate": "3",
+  "disk": 4,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "read": [
+   [
+    "CIP 5",
+    0.0
+   ],
+   [
+    "S 10",
+    -1.89
+   ],
+   [
+    "E 15",
+    -4.6
+   ]
+  ],
+  "names": [
+   "Ciprofloxacin",
+   "Streptomycin",
+   "Erythromycin"
+  ],
+  "free": "CIP 5",
+  "angle": 106.66666666666667
+ },
+ {
+  "plate": "3",
+  "disk": 5,
+  "truth": "TE 30",
+  "want": "Tetracycline",
+  "read": [
+   [
+    "TE 30",
+    0.0
+   ],
+   [
+    "W 5",
+    -3.1
+   ],
+   [
+    "P 1",
+    -3.31
+   ]
+  ],
+  "names": [
+   "Tetracycline",
+   "Trimethoprim",
+   "Benzylpenicillin"
+  ],
+  "free": "TE 30",
+  "angle": 300.0
+ },
+ {
+  "plate": "3",
+  "disk": 6,
+  "truth": "C 30",
+  "want": "Chloramphenicol",
+  "read": [
+   [
+    "C 30",
+    0.0
+   ],
+   [
+    "P 10",
+    -2.26
+   ],
+   [
+    "S 10",
+    -3.71
+   ]
+  ],
+  "names": [
+   "Chloramphenicol",
+   "Benzylpenicillin",
+   "Streptomycin"
+  ],
+  "free": "C 30",
+  "angle": 180.0
+ },
+ {
+  "plate": "4",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "read": [
+   [
+    "C 30",
+    -3.61
+   ],
+   [
+    "W 5",
+    -3.97
+   ],
+   [
+    "P 1",
+    -4.88
+   ]
+  ],
+  "names": [
+   "Chloramphenicol",
+   "Trimethoprim",
+   "Benzylpenicillin"
+  ],
+  "free": " 3",
+  "angle": 180.0
+ },
+ {
+  "plate": "4",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "read": [
+   [
+    "CN 10",
+    0.0
+   ],
+   [
+    "CC 2",
+    -4.05
+   ],
+   [
+    "S 10",
+    -4.4
+   ]
+  ],
+  "names": [
+   "Gentamicin",
+   "Clindamycin",
+   "Streptomycin"
+  ],
+  "free": "CN 00",
+  "angle": 240.0
+ },
+ {
+  "plate": "4",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "read": [
+   [
+    "SXT 25",
+    0.0
+   ],
+   [
+    "P 1",
+    -4.11
+   ],
+   [
+    "S 10",
+    -4.12
+   ]
+  ],
+  "names": [
+   "Trimethoprim-sulfamethoxazole",
+   "Benzylpenicillin",
+   "Streptomycin"
+  ],
+  "free": "SXT 25",
+  "angle": 100.0
+ },
+ {
+  "plate": "4",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "read": [
+   [
+    "NA 30",
+    -0.52
+   ],
+   [
+    "W 5",
+    -4.43
+   ],
+   [
+    "S 10",
+    -4.46
+   ]
+  ],
+  "names": [
+   "Nalidixic acid",
+   "Trimethoprim",
+   "Streptomycin"
+  ],
+  "free": "NA 90",
+  "angle": 273.3333333333333
+ },
+ {
+  "plate": "4",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "read": [
+   [
+    "TOB 10",
+    -1.84
+   ],
+   [
+    "S 10",
+    -4.41
+   ],
+   [
+    "P 10",
+    -4.67
+   ]
+  ],
+  "names": [
+   "Tobramycin",
+   "Streptomycin",
+   "Benzylpenicillin"
+  ],
+  "free": "T0B 10",
+  "angle": 320.0
+ },
+ {
+  "plate": "4",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "read": [
+   [
+    "CIP 5",
+    0.0
+   ],
+   [
+    "CPT 5",
+    -7.45
+   ],
+   [
+    "S 10",
+    -8.54
+   ]
+  ],
+  "names": [
+   "Ciprofloxacin",
+   "Ceftaroline",
+   "Streptomycin"
+  ],
+  "free": "CIP 5",
+  "angle": 353.3333333333333
+ },
+ {
+  "plate": "5",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "read": [
+   [
+    "C 30",
+    -3.61
+   ],
+   [
+    "W 5",
+    -3.97
+   ],
+   [
+    "P 1",
+    -4.88
+   ]
+  ],
+  "names": [
+   "Chloramphenicol",
+   "Trimethoprim",
+   "Benzylpenicillin"
+  ],
+  "free": " 3",
+  "angle": 180.0
+ },
+ {
+  "plate": "5",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "read": [
+   [
+    "CN 10",
+    0.0
+   ],
+   [
+    "CC 2",
+    -4.05
+   ],
+   [
+    "S 10",
+    -4.4
+   ]
+  ],
+  "names": [
+   "Gentamicin",
+   "Clindamycin",
+   "Streptomycin"
+  ],
+  "free": "CN 00",
+  "angle": 240.0
+ },
+ {
+  "plate": "5",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "read": [
+   [
+    "SXT 25",
+    0.0
+   ],
+   [
+    "P 1",
+    -4.11
+   ],
+   [
+    "S 10",
+    -4.12
+   ]
+  ],
+  "names": [
+   "Trimethoprim-sulfamethoxazole",
+   "Benzylpenicillin",
+   "Streptomycin"
+  ],
+  "free": "SXT 25",
+  "angle": 100.0
+ },
+ {
+  "plate": "5",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "read": [
+   [
+    "NA 30",
+    -0.52
+   ],
+   [
+    "W 5",
+    -4.43
+   ],
+   [
+    "S 10",
+    -4.46
+   ]
+  ],
+  "names": [
+   "Nalidixic acid",
+   "Trimethoprim",
+   "Streptomycin"
+  ],
+  "free": "NA 90",
+  "angle": 273.3333333333333
+ },
+ {
+  "plate": "5",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "read": [
+   [
+    "TOB 10",
+    -1.84
+   ],
+   [
+    "S 10",
+    -4.41
+   ],
+   [
+    "P 10",
+    -4.67
+   ]
+  ],
+  "names": [
+   "Tobramycin",
+   "Streptomycin",
+   "Benzylpenicillin"
+  ],
+  "free": "T0B 10",
+  "angle": 320.0
+ },
+ {
+  "plate": "5",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "read": [
+   [
+    "CIP 5",
+    0.0
+   ],
+   [
+    "CPT 5",
+    -7.45
+   ],
+   [
+    "S 10",
+    -8.54
+   ]
+  ],
+  "names": [
+   "Ciprofloxacin",
+   "Ceftaroline",
+   "Streptomycin"
+  ],
+  "free": "CIP 5",
+  "angle": 353.3333333333333
+ },
+ {
+  "plate": "7",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "read": [
+   [
+    "C 30",
+    -3.61
+   ],
+   [
+    "W 5",
+    -3.97
+   ],
+   [
+    "P 1",
+    -4.88
+   ]
+  ],
+  "names": [
+   "Chloramphenicol",
+   "Trimethoprim",
+   "Benzylpenicillin"
+  ],
+  "free": " 3",
+  "angle": 180.0
+ },
+ {
+  "plate": "7",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "read": [
+   [
+    "CN 10",
+    0.0
+   ],
+   [
+    "CC 2",
+    -4.05
+   ],
+   [
+    "S 10",
+    -4.4
+   ]
+  ],
+  "names": [
+   "Gentamicin",
+   "Clindamycin",
+   "Streptomycin"
+  ],
+  "free": "CN 00",
+  "angle": 240.0
+ },
+ {
+  "plate": "7",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "read": [
+   [
+    "SXT 25",
+    0.0
+   ],
+   [
+    "P 1",
+    -4.11
+   ],
+   [
+    "S 10",
+    -4.12
+   ]
+  ],
+  "names": [
+   "Trimethoprim-sulfamethoxazole",
+   "Benzylpenicillin",
+   "Streptomycin"
+  ],
+  "free": "SXT 25",
+  "angle": 100.0
+ },
+ {
+  "plate": "7",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "read": [
+   [
+    "NA 30",
+    -0.52
+   ],
+   [
+    "W 5",
+    -4.43
+   ],
+   [
+    "S 10",
+    -4.46
+   ]
+  ],
+  "names": [
+   "Nalidixic acid",
+   "Trimethoprim",
+   "Streptomycin"
+  ],
+  "free": "NA 90",
+  "angle": 273.3333333333333
+ },
+ {
+  "plate": "7",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "read": [
+   [
+    "TOB 10",
+    -1.84
+   ],
+   [
+    "S 10",
+    -4.41
+   ],
+   [
+    "P 10",
+    -4.67
+   ]
+  ],
+  "names": [
+   "Tobramycin",
+   "Streptomycin",
+   "Benzylpenicillin"
+  ],
+  "free": "T0B 10",
+  "angle": 320.0
+ },
+ {
+  "plate": "7",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "read": [
+   [
+    "CIP 5",
+    0.0
+   ],
+   [
+    "CPT 5",
+    -7.45
+   ],
+   [
+    "S 10",
+    -8.54
+   ]
+  ],
+  "names": [
+   "Ciprofloxacin",
+   "Ceftaroline",
+   "Streptomycin"
+  ],
+  "free": "CIP 5",
+  "angle": 353.3333333333333
+ },
+ {
+  "plate": "8",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "read": [
+   [
+    "C 30",
+    -3.61
+   ],
+   [
+    "W 5",
+    -3.97
+   ],
+   [
+    "P 1",
+    -4.88
+   ]
+  ],
+  "names": [
+   "Chloramphenicol",
+   "Trimethoprim",
+   "Benzylpenicillin"
+  ],
+  "free": " 3",
+  "angle": 180.0
+ },
+ {
+  "plate": "8",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "read": [
+   [
+    "CN 10",
+    0.0
+   ],
+   [
+    "CC 2",
+    -4.05
+   ],
+   [
+    "S 10",
+    -4.4
+   ]
+  ],
+  "names": [
+   "Gentamicin",
+   "Clindamycin",
+   "Streptomycin"
+  ],
+  "free": "CN 00",
+  "angle": 240.0
+ },
+ {
+  "plate": "8",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "read": [
+   [
+    "SXT 25",
+    0.0
+   ],
+   [
+    "P 1",
+    -4.11
+   ],
+   [
+    "S 10",
+    -4.12
+   ]
+  ],
+  "names": [
+   "Trimethoprim-sulfamethoxazole",
+   "Benzylpenicillin",
+   "Streptomycin"
+  ],
+  "free": "SXT 25",
+  "angle": 100.0
+ },
+ {
+  "plate": "8",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "read": [
+   [
+    "NA 30",
+    -0.52
+   ],
+   [
+    "W 5",
+    -4.43
+   ],
+   [
+    "S 10",
+    -4.46
+   ]
+  ],
+  "names": [
+   "Nalidixic acid",
+   "Trimethoprim",
+   "Streptomycin"
+  ],
+  "free": "NA 90",
+  "angle": 273.3333333333333
+ },
+ {
+  "plate": "8",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "read": [
+   [
+    "TOB 10",
+    -1.84
+   ],
+   [
+    "S 10",
+    -4.41
+   ],
+   [
+    "P 10",
+    -4.67
+   ]
+  ],
+  "names": [
+   "Tobramycin",
+   "Streptomycin",
+   "Benzylpenicillin"
+  ],
+  "free": "T0B 10",
+  "angle": 320.0
+ },
+ {
+  "plate": "8",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "read": [
+   [
+    "CIP 5",
+    0.0
+   ],
+   [
+    "CPT 5",
+    -7.45
+   ],
+   [
+    "S 10",
+    -8.54
+   ]
+  ],
+  "names": [
+   "Ciprofloxacin",
+   "Ceftaroline",
+   "Streptomycin"
+  ],
+  "free": "CIP 5",
+  "angle": 353.3333333333333
+ },
+ {
+  "plate": "9",
+  "disk": 0,
+  "truth": "AK 30",
+  "want": "Amikacin",
+  "read": [
+   [
+    "C 30",
+    -3.61
+   ],
+   [
+    "W 5",
+    -3.97
+   ],
+   [
+    "P 1",
+    -4.88
+   ]
+  ],
+  "names": [
+   "Chloramphenicol",
+   "Trimethoprim",
+   "Benzylpenicillin"
+  ],
+  "free": " 3",
+  "angle": 180.0
+ },
+ {
+  "plate": "9",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "read": [
+   [
+    "CN 10",
+    0.0
+   ],
+   [
+    "CC 2",
+    -4.05
+   ],
+   [
+    "S 10",
+    -4.4
+   ]
+  ],
+  "names": [
+   "Gentamicin",
+   "Clindamycin",
+   "Streptomycin"
+  ],
+  "free": "CN 00",
+  "angle": 240.0
+ },
+ {
+  "plate": "9",
+  "disk": 2,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "read": [
+   [
+    "SXT 25",
+    0.0
+   ],
+   [
+    "P 1",
+    -4.11
+   ],
+   [
+    "S 10",
+    -4.12
+   ]
+  ],
+  "names": [
+   "Trimethoprim-sulfamethoxazole",
+   "Benzylpenicillin",
+   "Streptomycin"
+  ],
+  "free": "SXT 25",
+  "angle": 100.0
+ },
+ {
+  "plate": "9",
+  "disk": 3,
+  "truth": "NA 30",
+  "want": "Nalidixic acid",
+  "read": [
+   [
+    "NA 30",
+    -0.52
+   ],
+   [
+    "W 5",
+    -4.43
+   ],
+   [
+    "S 10",
+    -4.46
+   ]
+  ],
+  "names": [
+   "Nalidixic acid",
+   "Trimethoprim",
+   "Streptomycin"
+  ],
+  "free": "NA 90",
+  "angle": 273.3333333333333
+ },
+ {
+  "plate": "9",
+  "disk": 4,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "read": [
+   [
+    "TOB 10",
+    -1.84
+   ],
+   [
+    "S 10",
+    -4.41
+   ],
+   [
+    "P 10",
+    -4.67
+   ]
+  ],
+  "names": [
+   "Tobramycin",
+   "Streptomycin",
+   "Benzylpenicillin"
+  ],
+  "free": "T0B 10",
+  "angle": 320.0
+ },
+ {
+  "plate": "9",
+  "disk": 5,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "read": [
+   [
+    "CIP 5",
+    0.0
+   ],
+   [
+    "CPT 5",
+    -7.45
+   ],
+   [
+    "S 10",
+    -8.54
+   ]
+  ],
+  "names": [
+   "Ciprofloxacin",
+   "Ceftaroline",
+   "Streptomycin"
+  ],
+  "free": "CIP 5",
+  "angle": 353.3333333333333
+ },
+ {
+  "plate": "10",
+  "disk": 0,
+  "truth": "TOB 10",
+  "want": "Tobramycin",
+  "read": [
+   [
+    "TOB 10",
+    0.0
+   ],
+   [
+    "FA 10",
+    -2.7
+   ],
+   [
+    "AM 10",
+    -3.72
+   ]
+  ],
+  "names": [
+   "Tobramycin",
+   "Fusidic acid",
+   "Ampicillin"
+  ],
+  "free": "TOB 10",
+  "angle": 320.0
+ },
+ {
+  "plate": "10",
+  "disk": 1,
+  "truth": "CN 10",
+  "want": "Gentamicin",
+  "read": [
+   [
+    "CN 10",
+    0.0
+   ],
+   [
+    "S 10",
+    -3.55
+   ],
+   [
+    "P 10",
+    -3.64
+   ]
+  ],
+  "names": [
+   "Gentamicin",
+   "Streptomycin",
+   "Benzylpenicillin"
+  ],
+  "free": "CN 10",
+  "angle": 140.0
+ },
+ {
+  "plate": "10",
+  "disk": 2,
+  "truth": "TE 30",
+  "want": "Tetracycline",
+  "read": [
+   [
+    "TE 30",
+    0.0
+   ],
+   [
+    "S 10",
+    -1.83
+   ],
+   [
+    "GN 10",
+    -1.96
+   ]
+  ],
+  "names": [
+   "Tetracycline",
+   "Streptomycin",
+   "Gentamicin"
+  ],
+  "free": "TE 30",
+  "angle": 300.0
+ },
+ {
+  "plate": "10",
+  "disk": 3,
+  "truth": "CIP 5",
+  "want": "Ciprofloxacin",
+  "read": [
+   [
+    "CIP 5",
+    0.0
+   ],
+   [
+    "S 10",
+    -3.4
+   ],
+   [
+    "C 30",
+    -4.38
+   ]
+  ],
+  "names": [
+   "Ciprofloxacin",
+   "Streptomycin",
+   "Chloramphenicol"
+  ],
+  "free": "CIP 5",
+  "angle": 60.0
+ },
+ {
+  "plate": "10",
+  "disk": 4,
+  "truth": "P 10",
+  "want": "Benzylpenicillin",
+  "read": [
+   [
+    "P 10",
+    0.0
+   ],
+   [
+    "S 10",
+    -3.41
+   ],
+   [
+    "FA 10",
+    -4.62
+   ]
+  ],
+  "names": [
+   "Benzylpenicillin",
+   "Streptomycin",
+   "Fusidic acid"
+  ],
+  "free": "P 10",
+  "angle": 220.0
+ },
+ {
+  "plate": "10",
+  "disk": 5,
+  "truth": "FOX 30",
+  "want": "Cefoxitin",
+  "read": [
+   [
+    "FOX 30",
+    -1.92
+   ],
+   [
+    "P 1",
+    -4.03
+   ],
+   [
+    "C 30",
+    -4.22
+   ]
+  ],
+  "names": [
+   "Cefoxitin",
+   "Benzylpenicillin",
+   "Chloramphenicol"
+  ],
+  "free": "FOX 3",
+  "angle": 220.0
+ },
+ {
+  "plate": "10",
+  "disk": 6,
+  "truth": "DA 2",
+  "want": "Clindamycin",
+  "read": [
+   [
+    "DA 2",
+    0.0
+   ],
+   [
+    "P 1",
+    -2.82
+   ],
+   [
+    "C 30",
+    -6.08
+   ]
+  ],
+  "names": [
+   "Clindamycin",
+   "Benzylpenicillin",
+   "Chloramphenicol"
+  ],
+  "free": "DA 2",
+  "angle": 80.0
+ },
+ {
+  "plate": "10",
+  "disk": 7,
+  "truth": "SXT 25",
+  "want": "Trimethoprim-sulfamethoxazole",
+  "read": [
+   [
+    "SXT 25",
+    0.0
+   ],
+   [
+    "S 10",
+    -2.38
+   ],
+   [
+    "P 10",
+    -4.03
+   ]
+  ],
+  "names": [
+   "Trimethoprim-sulfamethoxazole",
+   "Streptomycin",
+   "Benzylpenicillin"
+  ],
+  "free": "SXT 25",
+  "angle": 160.0
+ }
+]

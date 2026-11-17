@@ -73,6 +73,18 @@ export class ApiError extends Error {
 
 export interface Download { url: string; filename: string }
 
+/** Antibiotic of one disk (backend/app/identify.py): OCR of the printed code, templates as fallback. */
+export interface Identification {
+  antibiotic_id: number | null;
+  score: number;                          // template matches (0: no template recognised it)
+  source?: "ocr" | "template" | null;
+  review?: boolean;                       // not read with enough confidence: to be checked
+  confidence?: number | null;             // OCR log-likelihood ratio, 0 = perfect
+  code_read?: string | null;
+  text_read?: string | null;
+  suggestions?: { antibiotic_id: number; code: string; confidence: number }[];
+}
+
 export interface Api {
   me(): Promise<User>;
   login(email: string, password: string): Promise<User>;
@@ -100,7 +112,7 @@ export interface Api {
   uploadImage(id: string, stage: "original" | "working", version?: number): Promise<string>;
   process(id: string, crop: Circle | null, autoContrast: boolean): Promise<{ width: number; height: number }>;
   detectDisks(id: string): Promise<{ disks: Circle[] }>;
-  identify(id: string, disks: Circle[]): Promise<{ results: { antibiotic_id: number | null; score: number }[] }>;
+  identify(id: string, disks: Circle[], context?: { family_id: number; standard_id: number }): Promise<{ results: Identification[] }>;
   halos(id: string, data: { disks: Circle[]; antibiotic_ids: number[]; family_id: number; standard_id: number; disk_mm: number }):
     Promise<{ px_per_mm: number; results: HaloResult[] }>;
   savePlate(data: {

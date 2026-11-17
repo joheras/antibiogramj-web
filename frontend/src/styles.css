@@ -168,6 +168,13 @@ th { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: u
 .ab-row.sel { background: var(--accent-soft); }
 .num-badge { min-width: 24px; height: 24px; border-radius: 50%; background: #ff00ff; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 0.8rem; }
 .auto { font-size: 0.7rem; color: var(--accent); border: 1px solid var(--accent); border-radius: 4px; padding: 0 4px; }
+.auto.review { color: var(--i-fg); border-color: var(--i-fg); background: var(--i-bg); }
+.ab-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.ab-line { display: flex; align-items: center; gap: 8px; }
+.ab-line select { min-width: 0; flex: 1; }
+.ab-suggest { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: 0.8rem; color: var(--muted); }
+.chip { font-size: 0.78rem; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); }
+.chip.on { border-color: var(--accent); background: var(--accent-soft); }
 
 .halo-list { display: flex; flex-direction: column; gap: 4px; }
 .halo-item { justify-content: flex-start; width: 100%; padding: 6px 8px; font-size: 0.88rem; }

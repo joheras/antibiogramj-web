@@ -202,7 +202,8 @@ export function enhanceContrast(img: Rgb, saturated = 0.35): Rgb {
   for (hi = 0; hi < 256; hi++) { cum += hist[hi]; if (cum >= n - threshold) break; }
   if (hi <= lo) return { ...img, data: new Uint8Array(d) };
   const lut = new Uint8Array(256);
-  for (let i = 0; i < 256; i++) lut[i] = Math.max(0, Math.min(255, Math.round(((i - lo) * 255) / (hi - lo))));
+  // np.clip(...).astype(np.uint8) truncates
+  for (let i = 0; i < 256; i++) lut[i] = Math.trunc(Math.max(0, Math.min(255, ((i - lo) * 255) / (hi - lo))));
   const out = new Uint8Array(d.length);
   for (let i = 0; i < d.length; i++) out[i] = lut[d[i]];
   return { ...img, data: out };

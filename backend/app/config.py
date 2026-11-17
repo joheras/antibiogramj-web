@@ -27,6 +27,11 @@ class Settings(BaseSettings):
     # Learning: maximum number of learned templates per antibiotic and user
     templates_per_antibiotic: int = 10
 
+    # Disk-code OCR (docs/disk-reading.md): readings with a confidence >= ocr_auto_accept are accepted
+    # without review; below that the templates are used as fallback and the OCR candidates are suggested.
+    ocr_enabled: bool = True
+    ocr_auto_accept: float = -2.0
+
     cors_origins: list[str] = []
 
 

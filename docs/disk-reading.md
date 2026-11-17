@@ -24,6 +24,68 @@ correcciones del usuario.**
 - Coste: un modelo de 10,7 MB (fp32; ~3 MB cuantizado a int8), y ~0,5 s por disco en la CPU del servidor. En WASM
   se esperan ~1–2 s por disco, a medir.
 
+## Estado: integrado en la aplicación (noviembre de 2026)
+
+El lector recomendado está integrado en las dos versiones, con el mismo algoritmo y los mismos resultados:
+
+- **Servidor**: `backend/app/cv/reading.py` (onnxruntime), `backend/app/cv/codes.py` (léxico) y
+  `backend/app/identify.py` (decisión). `POST /api/analysis/uploads/{id}/identify` devuelve, por disco,
+  `antibiotic_id`, `source` (`ocr` | `template`), `review`, `confidence`, `code_read`, `text_read` y hasta 3
+  `suggestions`. Acepta `family_id` y `standard_id` para elegir, entre las filas del catálogo con el mismo nombre,
+  la que tiene puntos de corte.
+- **Navegador**: `frontend/src/browser/ocr.ts` (OpenCV.js + onnxruntime-web 1.31 en el *worker*). El WASM y el
+  modelo se descargan del propio sitio solo al identificar la primera placa. `npm run validate:cv` comprueba en
+  Node, sobre `tests/images/1.tiff`, que los códigos y las confianzas coinciden con Python (±0,1).
+- **Modelo**: `backend/seed/models/ppocr_rec.onnx` (4,6 MB), generado por `backend/scripts/build_ocr_model.py` a
+  partir de `ch_PP-OCRv3_rec` (Apache-2.0). Se recorta la capa de salida a blanco + `0-9 A-Z` y los pesos se
+  guardan en fp16: da las mismas lecturas que el original (10,7 MB). El int8 (2,4 MB) pierde un disco y se
+  descartó. En el navegador el modelo se sirve desde esa misma ruta (`vite.config.ts`), sin copiarlo.
+- **Tabla de códigos**: `backend/seed/disk_codes.json`, exportada al navegador por `export_catalog.py`. Cuatro
+  antibióticos nuevos de EUCAST 16.1 (aztreonam-avibactam, cefepima-enmetazobactam, lefamulina, nitroxolina)
+  siguen sin código. **Los sinónimos siguen sin verificar con los catálogos de los fabricantes.**
+- **Interfaz**: en el paso *Antibiotics*, "auto" = leído por OCR con confianza; "check" = reconocido por
+  plantilla sin lectura segura; debajo, los 3 códigos leídos como botones para elegir con un clic.
+- **Aprendizaje**: al guardar la placa se siguen guardando los recortes como plantillas aprendidas (respaldo del
+  OCR). Los sinónimos por usuario quedan pendientes.
+
+Cambios respecto al prototipo, evaluados con `research/disk_reading/evaluate_app.py` en las mismas 66 fotos:
+
+1. El *prior* de longitud cuenta como caracteres solo las componentes de tinta con al menos el 20 % del área de la
+   mayor. Antes, los fragmentos de las letras inflaban el recuento y bajaban la confianza de lecturas perfectas
+   (p. ej., "CTX 30" leído tal cual daba −7).
+2. El disco se reescala con interpolación bilineal en vez de bicúbica: en OpenCV.js la bicúbica sobre `uint8` no
+   es idéntica a la de OpenCV-Python, y la bilineal sí.
+3. El barrido grueso de orientaciones se detiene cuando una lectura alcanza −0,5. Da la misma precisión y es un
+   20–30 % más rápido. El paso de 30° empeoraba (23/28, top-3 23/28) y se descartó.
+4. El léxico tiene 145 entradas: códigos del catálogo + sinónimos, incluidos los nuevos antibióticos de EUCAST 16.1.
+
+| | 28 distintos | 66 fotos |
+|---|---|---|
+| OCR, primera opción | **24 (86 %)** | 57 (86 %) |
+| OCR, correcto entre las 3 sugerencias | 26 (93 %) | 59 (89 %) |
+| Aceptados automáticamente (`confidence ≥ −2`) | 23, **todos correctos** | 56, **todos correctos** |
+| OCR si `≥ −2`, si no plantillas (flujo de la app) | 27 (96 %)* | 65 (98 %)* |
+| Plantillas solas (antes) | 20 (71 %) | 54 (82 %) |
+
+\* Optimista, porque las plantillas proceden probablemente de estas imágenes.
+
+Margen de la confianza: el error mejor puntuado tiene −3,06 y el acierto peor puntuado −2,45 (con −2,0 el
+siguiente). El umbral −2 (`ABJ_OCR_AUTO_ACCEPT`) deja todos los errores fuera, pero el margen es estrecho y con
+una muestra de 28 discos hay que revisarlo con más placas. Fallos que quedan: el "AK 30" emborronado, un "TE 30",
+el "C 30" casi invisible y un "TOB 10" desenfocado. Las plantillas resuelven los cuatro.
+
+**Velocidad** (placa `1.tiff`, 7 discos):
+
+| | por disco |
+|---|---|
+| Servidor, onnxruntime CPU (4 hilos) | 0,28 s |
+| Node 22, onnxruntime-web WASM, 1 hilo (`validate:cv`) | 1,2 s |
+| Chromium (navegador de escritorio), WASM, 1 hilo, placa de ejemplo | 0,97 s |
+
+GitHub Pages no permite el aislamiento entre orígenes (COOP/COEP), así que el WASM usa un solo hilo. Más o menos
+la mitad del tiempo es la red neuronal (unas 28 ejecuciones por disco) y el resto OpenCV.js y la CTC en JS. Si
+hiciera falta, se puede ganar con una estimación previa de la orientación (la barra impresa) o con WebGPU.
+
 ## Opciones comparadas
 
 | Opción | Precisión (aquí) | Rotación | Tamaño / velocidad | Licencia | Esfuerzo | Valoración |
