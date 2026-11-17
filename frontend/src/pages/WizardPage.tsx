@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
-  api, bacteriaLabel, categorise, CATEGORIES, categoryLabel, type BacteriaIn, type Breakpoint, type Circle,
+  api, bacteriaLabel, categorise, CATEGORIES, categoryLabel, familyLabel, type BacteriaIn, type Breakpoint, type Circle,
   type ExperimentDetail, type UploadResult,
 } from "../api";
 import CategoryBadge from "../components/CategoryBadge";
@@ -310,7 +310,7 @@ function StepOrganism({ exp, target, setTarget, bacteria, setBacteria, file, set
             {exp.antibiograms.map((a) => (
               <label key={a.id} className="check">
                 <input type="radio" checked={target === a.id} onChange={() => setTarget(a.id)} />
-                Add to antibiogram: <b>{bacteriaLabel(a)}</b> {a.qc_strain && <span className="tag">QC</span>} <span className="muted">({a.family.name}, {a.plates.length} plate{a.plates.length === 1 ? "" : "s"})</span>
+                Add to antibiogram: <b>{bacteriaLabel(a)}</b> {a.qc_strain && <span className="tag">QC</span>} <span className="muted">({familyLabel(a.family.name, exp.standard)}, {a.plates.length} plate{a.plates.length === 1 ? "" : "s"})</span>
               </label>
             ))}
             <label className="check"><input type="radio" checked={target === "new"} onChange={() => setTarget("new")} /> New antibiogram (new organism)</label>
@@ -331,7 +331,7 @@ function StepOrganism({ exp, target, setTarget, bacteria, setBacteria, file, set
             <label className="span2">Bacteria family / group (as in the standard)
               <select required value={bacteria.family_id || ""} onChange={set("family_id")}>
                 <option value="" disabled>Choose…</option>
-                {catalog.families.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+                {catalog.families.map((f) => <option key={f.id} value={f.id}>{familyLabel(f.name, exp.standard)}</option>)}
               </select>
             </label>
             <label>Genus<input list="genus-list" value={bacteria.genus} onChange={set("genus")} maxLength={100} /></label>

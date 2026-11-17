@@ -33,7 +33,11 @@ def init_db() -> None:
 # Columns added after the first release: (table, column, DDL type). create_all() does not add columns to
 # existing tables.
 ADDED_COLUMNS = [("antibiograms", "supplementary_tests", "JSON"),
-                 ("antibiograms", "qc_strain", "VARCHAR(50) NOT NULL DEFAULT ''")]
+                 ("antibiograms", "qc_strain", "VARCHAR(50) NOT NULL DEFAULT ''"),
+                 ("experiments", "reinterpreted_from", "VARCHAR(250)"),
+                 ("measurements", "original_standard_id", "INTEGER REFERENCES standards(id)"),
+                 ("measurements", "original_category", "VARCHAR(45)"),
+                 ("measurements", "original_overridden", "BOOLEAN")]
 
 
 def add_missing_columns(bind=None) -> None:
@@ -41,7 +45,7 @@ def add_missing_columns(bind=None) -> None:
     inspector = inspect(bind)
     with bind.begin() as conn:
         for table, column, ddl in ADDED_COLUMNS:
-            if column not in {c["name"] for c in inspector.get_columns(table)}:
+            if inspector.has_table(table) and column not in {c["name"] for c in inspector.get_columns(table)}:
                 conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}"))
 
 

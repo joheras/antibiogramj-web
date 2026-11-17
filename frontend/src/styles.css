@@ -266,3 +266,4 @@ kbd { font: 0.85em ui-monospace, monospace; background: var(--surface-2); border
 @media (max-width: 560px) {
   .topbar-offline { display: none; }
 }
+.original { white-space: nowrap; }

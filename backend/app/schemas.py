@@ -82,6 +82,12 @@ class ExperimentOut(ORM):
     comments: str
     standard_id: int
     created_at: datetime
+    reinterpreted_from: str | None = None
+
+
+class ReinterpretIn(BaseModel):
+    standard_id: int
+    name: str | None = Field(default=None, min_length=1, max_length=100)
 
 
 class ExperimentSummary(ExperimentOut):
@@ -126,6 +132,9 @@ class MeasurementOut(ORM):
     category: str
     microcolonies: bool
     interpretation: str
+    original_standard_id: int | None = None
+    original_category: str | None = None
+    original_overridden: bool | None = None
 
 
 class PlateOut(ORM):

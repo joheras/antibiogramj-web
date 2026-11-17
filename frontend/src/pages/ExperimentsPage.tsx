@@ -111,6 +111,7 @@ export default function ExperimentsPage() {
               {e.comments && <p className="muted clamp">{e.comments}</p>}
               <div className="meta">
                 <span className="tag">{standardName(e.standard_id)}</span>
+                {e.reinterpreted_from && <span className="muted" title={`Reinterpretation of ${e.reinterpreted_from}`}>reinterpretation</span>}
                 <span>{e.antibiogram_count} antibiogram{e.antibiogram_count === 1 ? "" : "s"}</span>
                 <span>{e.plate_count} plate{e.plate_count === 1 ? "" : "s"}</span>
                 <span className="muted">{new Date(e.created_at).toLocaleDateString()}</span>

@@ -149,3 +149,21 @@ def categorise(diameter: float, breakpoint: Breakpoint | None, standard: Standar
     if (standard.resistant_op == "<" and diameter < r) or (standard.resistant_op == "<=" and diameter <= r):
         return RESISTANT
     return INTERMEDIATE
+
+
+# Names the standards adopted later for the same groups (EUCAST and CLSI since 2019); families keep the
+# original names in the database so that every standard shares them.
+_RENAMED_FAMILIES = [("Enterobacteriaceae", "Enterobacterales"), ("Clostridium difficile", "Clostridioides difficile")]
+
+
+def family_label(name: str, standard: Standard | None) -> str:
+    """The name of a bacteria family as the standard calls it (same as familyLabel in frontend/src/api.ts)."""
+    if standard is not None and standard.valid_from is not None and standard.valid_from.isoformat() >= "2019-01-01":
+        for old, new in _RENAMED_FAMILIES:
+            name = name.replace(old, new)
+    return name
+
+
+def pick_breakpoint(candidates: list[Breakpoint], case: str | None) -> Breakpoint | None:
+    """The breakpoint of the same case (e.g. "Uncomplicated UTI") as before, otherwise the first one."""
+    return next((b for b in candidates if case and b.case == case), candidates[0] if candidates else None)

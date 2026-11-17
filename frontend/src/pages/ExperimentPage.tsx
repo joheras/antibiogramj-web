@@ -1,17 +1,22 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { api, bacteriaLabel, download, type Antibiogram, type AntibiogramUpdate, type ExperimentDetail } from "../api";
+import { api, bacteriaLabel, download, familyLabel, standardLabel, type Antibiogram, type AntibiogramUpdate, type ExperimentDetail,
+  type Measurement } from "../api";
 import AsyncImage from "../components/AsyncImage";
 import CategoryBadge from "../components/CategoryBadge";
 import AntibiogramEditor from "../components/AntibiogramEditor";
 import ExpertRulesPanel from "../components/ExpertRulesPanel";
 import { QcCell, QcPanel } from "../components/Qc";
 import { qcStrain } from "../qc";
+import ReinterpretPanel from "../components/ReinterpretPanel";
 import { CATEGORY_NAME, evaluate } from "../expertRules";
+import { useSession } from "../session";
 
 export default function ExperimentPage() {
   const id = Number(useParams().id);
   const navigate = useNavigate();
+  const { catalog } = useSession();
+  const [reinterpreting, setReinterpreting] = useState(false);
   const [exp, setExp] = useState<ExperimentDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<number | null>(null);
@@ -42,6 +47,11 @@ export default function ExperimentPage() {
   if (error) return <div className="page"><p className="error">{error}</p><Link to="/">Back</Link></div>;
   if (!exp) return <div className="page"><p className="muted">Loading…</p></div>;
 
+  const measurements = exp.antibiograms.flatMap((a) => a.plates.flatMap((p) => p.measurements));
+  const reinterpreted = measurements.some((m) => m.original_standard_id != null);
+  const lostBreakpoints = measurements.filter((m) => m.category === "Not available" && m.original_category && m.original_category !== "Not available").length;
+  const originalStandard = (m: Measurement) => catalog.standards.find((s) => s.id === m.original_standard_id);
+
   return (
     <div className="page">
       <nav className="crumbs"><Link to="/">Experiments</Link> / {exp.name}</nav>
@@ -52,14 +62,30 @@ export default function ExperimentPage() {
             <span className="tag">{exp.standard.name} {exp.standard.version}</span>{" "}
             Created {new Date(exp.created_at).toLocaleDateString()}
           </p>
+          {exp.reinterpreted_from && (
+            <p className="note">
+              Reinterpretation of <b>{exp.reinterpreted_from}</b> with the breakpoints of {standardLabel(exp.standard)}: the same
+              diameters, categorised again. That experiment is unchanged; the <b>Original</b> column shows the first
+              interpretation of every result.
+              {lostBreakpoints > 0 && <> {lostBreakpoints} result{lostBreakpoints === 1 ? "" : "s"} with a category in the first
+                interpretation {lostBreakpoints === 1 ? "has" : "have"} no zone-diameter breakpoint in {standardLabel(exp.standard)} for
+                this organism and {lostBreakpoints === 1 ? "is" : "are"} <b>Not available</b>.</>}
+            </p>
+          )}
           {exp.comments && <p>{exp.comments}</p>}
         </div>
         <div className="actions">
           <Link className="button primary" to={`/experiments/${exp.id}/add-plate`}>Add plate</Link>
           <button onClick={() => api.exportExperiment(exp.id, exp.name).then(download).catch((e) => setError(e.message))}>Export to Excel</button>
+          {measurements.length > 0 && <button onClick={() => setReinterpreting(!reinterpreting)}>Reinterpret with…</button>}
           <button className="danger ghost" onClick={removeExperiment}>Delete</button>
         </div>
       </div>
+
+      {reinterpreting && (
+        <ReinterpretPanel experiment={exp} onCancel={() => setReinterpreting(false)}
+          onDone={(copy) => { setReinterpreting(false); navigate(`/experiments/${copy.id}`); }} />
+      )}
 
       {exp.antibiograms.length === 0 ? (
         <div className="empty card">
@@ -75,7 +101,7 @@ export default function ExperimentPage() {
             <div>
               <h2><i>{[a.genus, a.species].filter(Boolean).join(" ") || "Unnamed organism"}</i>{qc && <> <span className="tag" title={qc.name}>QC strain {qc.id}</span></>}</h2>
               <p className="muted">
-                {a.family.name}
+                {familyLabel(a.family.name, exp.standard)}
                 {a.strain && <> · strain {a.strain}</>}
                 {a.sample && <> · sample {a.sample}</>}
                 {" · "}{new Date(a.created_at).toLocaleDateString()}
@@ -104,7 +130,7 @@ export default function ExperimentPage() {
           <div className="table-wrap">
             <table>
               <thead>
-                <tr><th>Antibiotic</th><th>Code</th><th>Plate</th><th className="num">Diameter</th>{qc && <th>QC range</th>}<th>Category</th><th title="Category to report after applying the expert rules">Reported</th><th>Microcolonies</th><th>Interpretation</th></tr>
+                <tr><th>Antibiotic</th><th>Code</th><th>Plate</th><th className="num">Diameter</th>{qc && <th>QC range</th>}<th>Category</th><th title="Category to report after applying the expert rules">Reported</th>{reinterpreted && <th title="Category of the first interpretation, with its standard">Original</th>}<th>Microcolonies</th><th>Interpretation</th></tr>
               </thead>
               <tbody>
                 {a.plates.flatMap((p, i) => p.measurements.map((m) => (
@@ -121,6 +147,11 @@ export default function ExperimentPage() {
                         ? <span className="reported" title={`Changed by ${r.rules.join(", ")}`}><CategoryBadge category={CATEGORY_NAME[r.category]} standard={exp.standard} /> *</span>
                         : <span className="muted">as tested</span>;
                     })()}</td>
+                    {reinterpreted && <td>{m.original_category && (
+                      <span className="original">
+                        <CategoryBadge category={m.original_category} standard={originalStandard(m)} compact />{" "}
+                        <span className="muted small">{standardLabel(originalStandard(m))}{m.original_overridden && <>, <b title="The category was set by hand; it is not carried over">set manually</b></>}</span>
+                      </span>)}</td>}
                     <td>{m.microcolonies ? "Yes" : "No"}</td>
                     <td>{m.interpretation}</td>
                   </tr>
