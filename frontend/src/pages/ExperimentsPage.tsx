@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, download, MODE, type ExperimentSummary } from "../api";
 import { startExample } from "../example";
 import { useSession } from "../session";
+import { DrivePanel } from "virtual:browser-ui";
 
 export default function ExperimentsPage() {
   const { catalog } = useSession();
@@ -73,12 +74,16 @@ export default function ExperimentsPage() {
       </div>
       {MODE === "browser" && (
         <p className="note">
-          This version runs entirely in your browser: images and results never leave this computer. They are kept in this
-          browser's storage, so <b>back up</b> regularly, and before clearing site data or changing computer.
+          This version runs entirely in your browser: images and results are analysed and kept in this browser's storage,
+          and are only sent to your own Google Drive if you connect it. <b>Back up</b> regularly (to a file or to Drive),
+          and before clearing site data or changing computer.
         </p>
       )}
       {notice && <p className="ok">{notice}</p>}
       {error && <p className="error">{error}</p>}
+      {MODE === "browser" && (
+        <Suspense fallback={null}><DrivePanel experimentCount={experiments?.length ?? 0} onImported={() => load()} /></Suspense>
+      )}
 
       {creating && (
         <form className="card form-grid" onSubmit={create}>

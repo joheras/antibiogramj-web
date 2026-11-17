@@ -30,6 +30,8 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "virtual:api-impl": fileURLToPath(new URL(browser ? "./src/browser/localApi.ts" : "./src/http.ts", import.meta.url)),
+        // Google Drive, phone capture and inbox exist only in the browser build.
+        "virtual:browser-ui": fileURLToPath(new URL(browser ? "./src/browser/ui.ts" : "./src/browser/ui.server.ts", import.meta.url)),
       },
     },
     base: browser ? "./" : "/", // the browser build can be hosted under any path

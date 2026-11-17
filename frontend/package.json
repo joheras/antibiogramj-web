@@ -10,7 +10,8 @@
     "build:browser": "tsc -b && vite build --mode browser",
     "preview": "vite preview",
     "validate:cv": "node --experimental-strip-types --no-warnings scripts/validate-cv.mts",
-    "test:rules": "node --experimental-strip-types --no-warnings scripts/test-expert-rules.mts"
+    "test:rules": "node --experimental-strip-types --no-warnings scripts/test-expert-rules.mts",
+    "test:drive": "node --experimental-strip-types --no-warnings scripts/test-drive.mts"
   },
   "dependencies": {
     "@techstark/opencv-js": "4.10.0-release.1",

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { Link, Navigate, Route, Routes } from "react-router-dom";
 import { api, ApiError, MODE, type User } from "./api";
 import { applyUpdate, promptInstall, usePwa } from "./pwa";
@@ -9,6 +9,8 @@ import ExperimentPage from "./pages/ExperimentPage";
 import HelpPage from "./pages/HelpPage";
 import PlatePage from "./pages/PlatePage";
 import WizardPage from "./pages/WizardPage";
+// Google Drive, phone capture and inbox (browser build only; empty in the server build).
+import { CapturePage, DriveStatus, InboxPage, initCloud } from "virtual:browser-ui";
 
 async function loadCatalog(): Promise<Catalog> {
   const [standards, families, antibiotics] = await Promise.all([api.standards(), api.families(), api.antibiotics()]);
@@ -29,6 +31,8 @@ export default function App() {
       setError((e as Error).message);
     }
   }, []);
+
+  useEffect(() => { if (MODE === "browser") initCloud(); }, []);
 
   useEffect(() => {
     api.me().then(onLogin).catch((e) => {
@@ -61,8 +65,10 @@ export default function App() {
         ) : (
           <div className="topbar-user">
             {pwa.canInstall && <button className="small" onClick={promptInstall} title="Install AntibiogramJ as an app on this device">Install</button>}
+            <Link to="/capture" className="topbar-link" title="Take photos with this phone and send them to your Google Drive">Capture</Link>
+            <Link to="/inbox" className="topbar-link" title="Photos waiting to be analysed">Inbox</Link>
             <Link to="/help" className="topbar-link">Help</Link>
-            <span className="tag topbar-offline" title="Images and results are stored only in this browser; nothing is uploaded.">Offline · data stays in this browser</span>
+            <span className="tag topbar-offline" title="Images and results are stored in this browser; they are only sent to your own Google Drive if you connect it.">Data stays in this browser</span>
           </div>
         )}
       </header>
@@ -73,15 +79,25 @@ export default function App() {
         </div>
       )}
       <main>
+        {MODE === "browser" && <Suspense fallback={null}><DriveStatus /></Suspense>}
+        <Suspense fallback={<p className="muted">Loading…</p>}>
         <Routes>
           <Route path="/" element={<ExperimentsPage />} />
           <Route path="/experiments/:id" element={<ExperimentPage />} />
           <Route path="/experiments/:id/add-plate" element={<WizardPage />} />
           <Route path="/plates/:id" element={<PlatePage />} />
           <Route path="/help" element={<HelpPage />} />
+          {MODE === "browser" && <Route path="/capture" element={<CapturePage />} />}
+          {MODE === "browser" && <Route path="/inbox" element={<InboxPage />} />}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
       </main>
+      {MODE === "browser" && (
+        <footer className="footer muted small">
+          AntibiogramJ · <Link to="/help">Help</Link> · <a href="privacy.html">Privacy policy</a>
+        </footer>
+      )}
     </SessionContext.Provider>
   );
 }
