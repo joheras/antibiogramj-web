@@ -175,6 +175,7 @@ npm run dev:browser     # http://localhost:5173, no backend needed
 npm run build:browser   # static site in dist-browser/ (~11 MB, mostly OpenCV.js)
 npm run validate:cv     # checks the OpenCV.js port against the Python results (tests/images/1.tiff)
 npm run test:rules      # checks the EUCAST expert system on synthetic isolates
+npm run test:drive      # checks the Google Drive client against a mocked Drive API
 ```
 
 `dist-browser/` can be published on any static host (GitHub Pages, Netlify, a university web server, an
@@ -183,6 +184,12 @@ internal share served over HTTP(S)); it uses hash URLs, so no rewrite rules are 
 
 * Data lives in the browser's IndexedDB of that site: **Back up** saves everything (experiments, images, learned
   templates) to one `.json` file and **Restore** adds a backup's experiments. Clearing the site data deletes it.
+* **Google Drive (optional)**: save/load experiments to the user's own Drive, phone **Capture** mode that sends
+  photos to `AntibiogramJ/Inbox`, and an **Inbox** on the computer that opens the wizard with them (plus a local
+  multi-photo import queue that needs no cloud). Google Identity Services token model, scope `drive.file` only,
+  token kept in memory; no server of ours is involved. Enabled by `VITE_GOOGLE_CLIENT_ID` in
+  `frontend/.env.browser`; setup and design in [docs/google-drive.md](docs/google-drive.md). Privacy policy:
+  `public-browser/privacy.html`.
 * OpenCV.js lacks `pyrMeanShiftFiltering`; `src/browser/cv.ts` implements it following OpenCV's code and it is
   identical pixel by pixel to `cv2.pyrMeanShiftFiltering`. Plate, disks, codes and halos match the Python backend.
 * Excel files are written by a small dependency-free writer (`src/browser/xlsx.ts`).

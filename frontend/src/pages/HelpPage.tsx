@@ -25,6 +25,7 @@ const SECTIONS = [
   ["standards", "Standards and categories"],
   ["expert", "Expert system"],
   ["data", "Where your data is"],
+  ...(MODE === "browser" ? [["drive", "Google Drive and phone"] as const] : []),
   ["faq", "FAQ and troubleshooting"],
 ] as const;
 
@@ -309,11 +310,13 @@ export default function HelpPage() {
             <h2>Where your data is</h2>
             {MODE === "browser" ? (
               <>
-                <p>This version runs entirely in your browser: images are analysed on your computer and nothing is
-                  uploaded. Experiments, images and learned disk templates are stored in this browser's storage
-                  (IndexedDB), only for this browser profile on this computer.</p>
+                <p>This version runs entirely in your browser: images are analysed on your computer and there is no
+                  AntibiogramJ server that receives them. Experiments, images and learned disk templates are stored in
+                  this browser's storage (IndexedDB), only for this browser profile on this computer. They are sent
+                  only to your own Google Drive, and only if you connect it (see <a href="#drive" onClick={go("drive")}>Google
+                  Drive and phone</a>).</p>
                 <ul>
-                  <li><b>Back up</b> (Experiments page) saves everything to a .json file. Do it regularly.</li>
+                  <li><b>Back up</b> (Experiments page) saves everything to a .json file. Do it regularly, or save to Google Drive.</li>
                   <li><b>Restore</b> adds the experiments of a backup file; use it to move your data to another computer or browser.</li>
                   <li>Clearing the browsing data / site data, using a private window, or uninstalling the browser deletes
                     the data. Some browsers may also evict storage when the disk is almost full.</li>
@@ -325,6 +328,48 @@ export default function HelpPage() {
                 backups.</p>
             )}
           </section>
+
+          {MODE === "browser" && (
+            <section id="drive" className="card">
+              <h2>Google Drive and phone</h2>
+              <p>Connecting your Google Drive is optional. It lets you keep copies of your experiments, open them on
+                another computer, and take photos with your phone to analyse them later on the computer.</p>
+              <h3>Backups in Google Drive</h3>
+              <ul>
+                <li>On the Experiments page click <b>Connect Google Drive</b> and choose your account. AntibiogramJ asks
+                  only for access to the files it creates (it cannot see your other files) and puts them in the folder
+                  <i>AntibiogramJ</i> of your Drive.</li>
+                <li><b>Save all to Drive</b> saves every experiment (with the learned disk codes) to a new file in
+                  <i>AntibiogramJ/Backups</i>. <b>Save to Drive</b> on an experiment saves only that experiment, always
+                  in the same file.</li>
+                <li>Tick the <b>auto-save</b> option to update an experiment's file every time you save a plate. If you
+                  are offline or the Google session has expired (after about one hour) the changes wait and are sent when
+                  you reconnect.</li>
+                <li><b>Load from Drive</b> lists the backups and adds the experiments you choose to this browser. Nothing
+                  is overwritten: an experiment that is already here is added as a copy.</li>
+                <li>If the same experiment is saved from two computers, the second one does not overwrite the first: its
+                  version is stored as a separate <i>conflict copy</i> so that you can choose which one to keep.</li>
+              </ul>
+              <h3>Take photos with the phone, analyse them on the computer</h3>
+              <ol>
+                <li>On the phone, open this same address, tap <b>Capture</b> and connect the same Google account.</li>
+                <li>Type the organism, strain and sample, then <b>Take photo</b> (one plate per photo; several photos per
+                  batch are fine) and <b>Send to the inbox</b>. The photos are reduced to a size that keeps all the detail
+                  the analysis needs (tick <i>Also upload the original</i> to keep the full photo). Without connection
+                  they wait on the phone and are sent automatically later.</li>
+                <li>On the computer, open <b>Inbox</b>, choose the experiment and click <b>Analyse</b>: the usual steps
+                  open with the photo and the organism already filled in. When the plate is saved the photo is moved to
+                  <i>AntibiogramJ/Inbox/Processed</i>.</li>
+              </ol>
+              <p>Without Google Drive, copy the photos to the computer (cable, AirDrop, USB stick…) and use <b>Inbox →
+                Photos on this computer → Add photos</b> to queue several photos and analyse them one by one.</p>
+              <p className="warn">Privacy: your data goes only to your own Google Drive; neither the developers nor
+                anyone else receives it. Do not type patient names or other identifying data: use your laboratory's
+                sample codes, and follow your institution's rules about storing images in cloud services.
+                Read the <a href="privacy.html" target="_blank" rel="noreferrer">privacy policy</a>. You can remove
+                AntibiogramJ's access at any time with <b>Disconnect</b> or in your Google account settings.</p>
+            </section>
+          )}
 
           <section id="faq" className="card faq">
             <h2>FAQ and troubleshooting</h2>

@@ -266,3 +266,41 @@ kbd { font: 0.85em ui-monospace, monospace; background: var(--surface-2); border
 @media (max-width: 560px) {
   .topbar-offline { display: none; }
 }
+
+/* ------------------------------------------------- Google Drive, capture and inbox (browser build) */
+.footer { text-align: center; padding: 16px 24px 28px; }
+.footer a { color: var(--muted); }
+.drive-panel { margin-bottom: 18px; }
+.drive-panel .section-head { flex-wrap: wrap; }
+.drive-banner { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 0 0 12px; }
+.drive-inline { flex-basis: 100%; margin: 4px 0 0; font-size: 0.85rem; }
+.tag-warn { background: var(--i-bg); color: var(--i-fg); margin-left: 6px; }
+.inbox-target { margin-bottom: 14px; max-width: 520px; }
+.inbox-section { margin-bottom: 18px; }
+.inbox-section.dragging { border-color: var(--accent); border-style: dashed; }
+.inbox-list, .capture-queue { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 8px; }
+.inbox-list li, .capture-queue li { display: flex; gap: 12px; align-items: center; padding: 8px; border: 1px solid var(--border); border-radius: 8px; }
+.inbox-list img, .capture-queue img, .inbox-list .img-placeholder { width: 72px; height: 72px; min-height: 0; object-fit: cover; border-radius: 6px; flex: none; background: var(--surface-2); }
+.inbox-list .grow, .capture-queue .grow { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.capture { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+.capture .page-head { margin-bottom: 0; }
+.capture-connect { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.capture-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.capture-form .wide { grid-column: 1 / -1; }
+.capture-form input, .capture-form select, .capture-form textarea { font-size: 16px; } /* no zoom on focus in iOS */
+.capture-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+.capture-btn { display: flex; justify-content: center; align-items: center; min-height: 52px; font-size: 1rem; cursor: pointer; flex-direction: row; color: inherit; }
+.capture-btn.primary { color: var(--accent-text); }
+.capture-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin: 10px 0; }
+.capture-thumb { position: relative; margin: 0; }
+.capture-thumb img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; display: block; }
+.capture-thumb button { position: absolute; top: 4px; right: 4px; padding: 2px 8px; }
+.capture-send { width: 100%; min-height: 50px; font-size: 1rem; }
+.status-done { color: var(--s-fg); }
+.status-error { color: var(--danger); }
+@media (max-width: 560px) {
+  .capture-form { grid-template-columns: 1fr; }
+  main { padding: 14px; }
+  .topbar { padding: 10px 14px; }
+  .topbar-user { gap: 10px; }
+}

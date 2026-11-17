@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { api, bacteriaLabel, download, type Antibiogram, type AntibiogramUpdate, type ExperimentDetail } from "../api";
+import { api, bacteriaLabel, download, MODE, type Antibiogram, type AntibiogramUpdate, type ExperimentDetail } from "../api";
 import AsyncImage from "../components/AsyncImage";
 import CategoryBadge from "../components/CategoryBadge";
 import AntibiogramEditor from "../components/AntibiogramEditor";
@@ -8,6 +8,7 @@ import ExpertRulesPanel from "../components/ExpertRulesPanel";
 import { QcCell, QcPanel } from "../components/Qc";
 import { qcStrain } from "../qc";
 import { CATEGORY_NAME, evaluate } from "../expertRules";
+import { SaveExperimentButton } from "virtual:browser-ui";
 
 export default function ExperimentPage() {
   const id = Number(useParams().id);
@@ -57,6 +58,7 @@ export default function ExperimentPage() {
         <div className="actions">
           <Link className="button primary" to={`/experiments/${exp.id}/add-plate`}>Add plate</Link>
           <button onClick={() => api.exportExperiment(exp.id, exp.name).then(download).catch((e) => setError(e.message))}>Export to Excel</button>
+          {MODE === "browser" && <Suspense fallback={null}><SaveExperimentButton experimentId={exp.id} /></Suspense>}
           <button className="danger ghost" onClick={removeExperiment}>Delete</button>
         </div>
       </div>

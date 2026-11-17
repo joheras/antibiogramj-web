@@ -40,7 +40,11 @@ const now = () => new Date().toISOString();
 const newKey = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
 
 // -------------------------------------------------------------------- records
-interface ExperimentRec { id: number; name: string; comments: string; standard_id: number; created_at: string }
+interface ExperimentRec {
+  id: number; name: string; comments: string; standard_id: number; created_at: string;
+  /** Stable identity across browsers (Google Drive sync); older records get one when first synced. */
+  uid?: string;
+}
 interface AntibiogramRec {
   id: number; experiment_id: number; family_id: number; genus: string; species: string; strain: string;
   sample: string; comments: string; created_at: string; supplementary_tests?: Record<string, string>;
@@ -199,7 +203,7 @@ export const localApi: Api = {
   async experiments() {
     const [experiments, antibiograms, plates] = await Promise.all([
       db.getAll<ExperimentRec>("experiments"), db.getAll<AntibiogramRec>("antibiograms"), db.getAll<PlateRec>("plates")]);
-    return experiments.map((e): ExperimentSummary => ({
+    return experiments.map(({ uid: _uid, ...e }): ExperimentSummary => ({
       ...e,
       antibiogram_count: antibiograms.filter((a) => a.experiment_id === e.id).length,
       plate_count: plates.filter((p) => p.experiment_id === e.id).length,
@@ -212,9 +216,10 @@ export const localApi: Api = {
     const standard = data.standard_id === null ? catalog.standards.find((s) => s.is_default) : standardById.get(data.standard_id);
     if (!standard) throw invalid("Unknown standard");
     if (!data.name.trim()) throw invalid("The name is required");
-    const rec: Omit<ExperimentRec, "id"> = { name: data.name.slice(0, 100), comments: data.comments.slice(0, 1000), standard_id: standard.id, created_at: now() };
+    const rec: Omit<ExperimentRec, "id"> = { name: data.name.slice(0, 100), comments: data.comments.slice(0, 1000), standard_id: standard.id, created_at: now(), uid: newKey() };
     const id = await db.write(["experiments"], (tx) => db.put(tx, "experiments", rec));
-    return { ...rec, id, antibiogram_count: 0, plate_count: 0 };
+    const { uid: _uid, ...summary } = rec;
+    return { ...summary, id, antibiogram_count: 0, plate_count: 0 };
   },
 
   async deleteExperiment(id) {
@@ -400,70 +405,120 @@ export const localApi: Api = {
 
   // ---------------------------------------------------------------- backup
   async exportBackup(): Promise<Download> {
-    const [experiments, antibiograms, plates, templates] = await Promise.all([
-      db.getAll<ExperimentRec>("experiments"), db.getAll<AntibiogramRec>("antibiograms"),
-      db.getAll<PlateRec>("plates"), db.getAll<TemplateRec>("templates")]);
-    const blobs: Record<string, string> = {};
-    const keys = [...plates.flatMap((p) => [p.image_key, p.annotated_key]), ...templates.map((t) => t.blob_key)];
-    for (const key of keys) {
-      const blob = await db.get<Blob>("blobs", key);
-      if (blob) blobs[key] = await toDataUrl(blob);
-    }
-    const backup: Backup = { format: "antibiogramj-backup", version: 1, exported_at: now(), experiments, antibiograms, plates, templates, blobs };
-    const blob = new Blob([JSON.stringify(backup)], { type: "application/json" });
+    const blob = await backupBlob();
     return { url: URL.createObjectURL(blob), filename: `antibiogramj-backup-${now().slice(0, 10)}.json` };
   },
 
   /** Adds the experiments of a backup to the current data (never overwrites). Returns how many were added. */
-  async importBackup(file) {
-    let backup: Backup;
-    try {
-      backup = JSON.parse(await file.text());
-    } catch {
-      throw invalid("The file is not an AntibiogramJ backup");
-    }
-    if (backup?.format !== "antibiogramj-backup" || backup.version !== 1) throw invalid("The file is not an AntibiogramJ backup");
-    for (const p of backup.plates) {
-      for (const m of p.measurements) {
-        if (!antibioticById.has(m.antibiotic_id) || !standardById.has(m.standard_id)) throw invalid("The backup uses an unknown catalogue");
-      }
-    }
-    const blobs = new Map<string, Blob>();
-    for (const [key, url] of Object.entries(backup.blobs)) blobs.set(key, await fromDataUrl(url));
-
-    const existingTemplates = await db.getAll<TemplateRec>("templates");
-    const counts = new Map<number, number>();
-    for (const t of existingTemplates) counts.set(t.antibiotic_id, (counts.get(t.antibiotic_id) ?? 0) + 1);
-
-    await db.write(["experiments", "antibiograms", "plates", "blobs", "templates"], async (tx) => {
-      const expIds = new Map<number, number>(), abgIds = new Map<number, number>();
-      const putBlob = async (key: string) => {
-        const blob = blobs.get(key);
-        if (!blob) throw invalid("The backup is incomplete");
-        const newBlobKey = newKey();
-        await db.put(tx, "blobs", blob, newBlobKey);
-        return newBlobKey;
-      };
-      for (const { id, ...e } of backup.experiments) expIds.set(id, await db.put(tx, "experiments", e));
-      for (const { id, ...a } of backup.antibiograms) {
-        const experimentId = expIds.get(a.experiment_id);
-        if (experimentId !== undefined) abgIds.set(id, await db.put(tx, "antibiograms", { ...a, experiment_id: experimentId }));
-      }
-      for (const { id: _id, ...p } of backup.plates) {
-        const antibiogramId = abgIds.get(p.antibiogram_id);
-        if (antibiogramId === undefined) continue;
-        await db.put(tx, "plates", { ...p, antibiogram_id: antibiogramId, experiment_id: expIds.get(p.experiment_id)!,
-          image_key: await putBlob(p.image_key), annotated_key: await putBlob(p.annotated_key) });
-      }
-      for (const t of backup.templates) {
-        if (!antibioticById.has(t.antibiotic_id) || (counts.get(t.antibiotic_id) ?? 0) >= TEMPLATES_PER_ANTIBIOTIC) continue;
-        counts.set(t.antibiotic_id, (counts.get(t.antibiotic_id) ?? 0) + 1);
-        await db.put(tx, "templates", { antibiotic_id: t.antibiotic_id, blob_key: await putBlob(t.blob_key) });
-      }
-    });
-    templatesReady = null; // reload with the imported templates
-    return backup.experiments.length;
-  },
+  importBackup: async (file) => (await importBackupFile(file)).count,
 };
+
+// ------------------------------------------------- Google Drive sync (cloud.ts)
+
+/**
+ * Adds the experiments of a backup to the current data (never overwrites). ``kept`` are the uids of the
+ * experiments added with their own identity (not as copies of an experiment already in this browser).
+ */
+export async function importBackupFile(file: Blob): Promise<{ count: number; kept: string[] }> {
+  let backup: Backup;
+  try {
+    backup = JSON.parse(await file.text());
+  } catch {
+    throw invalid("The file is not an AntibiogramJ backup");
+  }
+  if (backup?.format !== "antibiogramj-backup" || backup.version !== 1) throw invalid("The file is not an AntibiogramJ backup");
+  for (const p of backup.plates) {
+    for (const m of p.measurements) {
+      if (!antibioticById.has(m.antibiotic_id) || !standardById.has(m.standard_id)) throw invalid("The backup uses an unknown catalogue");
+    }
+  }
+  const blobs = new Map<string, Blob>();
+  for (const [key, url] of Object.entries(backup.blobs)) blobs.set(key, await fromDataUrl(url));
+
+  const existingTemplates = await db.getAll<TemplateRec>("templates");
+  const kept: string[] = [];
+  const uids = new Set((await db.getAll<ExperimentRec>("experiments")).map((e) => e.uid));
+  const counts = new Map<number, number>();
+  for (const t of existingTemplates) counts.set(t.antibiotic_id, (counts.get(t.antibiotic_id) ?? 0) + 1);
+
+  await db.write(["experiments", "antibiograms", "plates", "blobs", "templates"], async (tx) => {
+    const expIds = new Map<number, number>(), abgIds = new Map<number, number>();
+    const putBlob = async (key: string) => {
+      const blob = blobs.get(key);
+      if (!blob) throw invalid("The backup is incomplete");
+      const newBlobKey = newKey();
+      await db.put(tx, "blobs", blob, newBlobKey);
+      return newBlobKey;
+    };
+    // An experiment already in this browser is added as a copy, with an identity of its own.
+    for (const { id, ...e } of backup.experiments) {
+      const uid = e.uid && !uids.has(e.uid) ? e.uid : newKey();
+      if (uid === e.uid) kept.push(uid);
+      uids.add(uid);
+      expIds.set(id, await db.put(tx, "experiments", { ...e, uid }));
+    }
+    for (const { id, ...a } of backup.antibiograms) {
+      const experimentId = expIds.get(a.experiment_id);
+      if (experimentId !== undefined) abgIds.set(id, await db.put(tx, "antibiograms", { ...a, experiment_id: experimentId }));
+    }
+    for (const { id: _id, ...p } of backup.plates) {
+      const antibiogramId = abgIds.get(p.antibiogram_id);
+      if (antibiogramId === undefined) continue;
+      await db.put(tx, "plates", { ...p, antibiogram_id: antibiogramId, experiment_id: expIds.get(p.experiment_id)!,
+        image_key: await putBlob(p.image_key), annotated_key: await putBlob(p.annotated_key) });
+    }
+    for (const t of backup.templates) {
+      if (!antibioticById.has(t.antibiotic_id) || (counts.get(t.antibiotic_id) ?? 0) >= TEMPLATES_PER_ANTIBIOTIC) continue;
+      counts.set(t.antibiotic_id, (counts.get(t.antibiotic_id) ?? 0) + 1);
+      await db.put(tx, "templates", { antibiotic_id: t.antibiotic_id, blob_key: await putBlob(t.blob_key) });
+    }
+  });
+  templatesReady = null; // reload with the imported templates
+  return { count: backup.experiments.length, kept };
+}
+
+/** The backup file of the given experiments (all of them, with the learned templates, when omitted). */
+export async function backupBlob(experimentIds?: number[]): Promise<Blob> {
+  const only = experimentIds && new Set(experimentIds);
+  // Give an identity to experiments created before uids existed, so that copies made from this file are related.
+  const missing = (await db.getAll<ExperimentRec>("experiments")).filter((e) => !e.uid);
+  if (missing.length) {
+    await db.write(["experiments"], async (tx) => {
+      for (const e of missing) await db.put(tx, "experiments", { ...e, uid: newKey() });
+    });
+  }
+  const [allExperiments, allAntibiograms, allPlates, allTemplates] = await Promise.all([
+    db.getAll<ExperimentRec>("experiments"), db.getAll<AntibiogramRec>("antibiograms"),
+    db.getAll<PlateRec>("plates"), db.getAll<TemplateRec>("templates")]);
+  const experiments = only ? allExperiments.filter((e) => only.has(e.id)) : allExperiments;
+  const antibiograms = only ? allAntibiograms.filter((a) => only.has(a.experiment_id)) : allAntibiograms;
+  const plates = only ? allPlates.filter((p) => only.has(p.experiment_id)) : allPlates;
+  const templates = only ? [] : allTemplates;
+  const blobs: Record<string, string> = {};
+  const keys = [...plates.flatMap((p) => [p.image_key, p.annotated_key]), ...templates.map((t) => t.blob_key)];
+  for (const key of keys) {
+    const blob = await db.get<Blob>("blobs", key);
+    if (blob) blobs[key] = await toDataUrl(blob);
+  }
+  const backup: Backup = { format: "antibiogramj-backup", version: 1, exported_at: now(), experiments, antibiograms, plates, templates, blobs };
+  return new Blob([JSON.stringify(backup)], { type: "application/json" });
+}
+
+/** The stable identity of an experiment (assigned now to experiments created before it existed). */
+export async function experimentUid(id: number): Promise<{ uid: string; name: string }> {
+  return db.write(["experiments"], async (tx) => {
+    const e = await db.txGet<ExperimentRec>(tx, "experiments", id);
+    if (!e) throw notFound();
+    if (!e.uid) await db.put(tx, "experiments", { ...e, uid: newKey() });
+    const saved = (await db.txGet<ExperimentRec>(tx, "experiments", id))!;
+    return { uid: saved.uid!, name: saved.name };
+  });
+}
+
+/** Experiments in this browser by uid (to tell which experiments of a backup are already here). */
+export async function experimentUids(): Promise<Map<string, number>> {
+  const all = await db.getAll<ExperimentRec>("experiments");
+  return new Map(all.filter((e) => e.uid).map((e) => [e.uid!, e.id]));
+}
 
 export default localApi;

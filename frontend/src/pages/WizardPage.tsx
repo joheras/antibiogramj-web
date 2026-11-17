@@ -6,6 +6,7 @@ import {
 } from "../api";
 import CategoryBadge from "../components/CategoryBadge";
 import { exampleBacteria, exampleFile } from "../example";
+import { clearHandoff, currentHandoff, plateSaved } from "../handoff";
 import { genusSuggestions, speciesSuggestions } from "../expertRules";
 import { useImageUrl } from "../components/AsyncImage";
 import ImageEditor, { type EditorCircle } from "../components/ImageEditor";
@@ -36,7 +37,10 @@ export default function WizardPage() {
   const experimentId = Number(useParams().id);
   const navigate = useNavigate();
   const { catalog } = useSession();
-  const isExample = useSearchParams()[0].get("example") === "1";
+  const [params] = useSearchParams();
+  const isExample = params.get("example") === "1";
+  // A photo chosen in the Inbox (Google Drive or the local import queue).
+  const [handoff] = useState(() => (params.get("from") === "inbox" ? currentHandoff() : null));
 
   const [exp, setExp] = useState<ExperimentDetail | null>(null);
   const [step, setStep] = useState(0);
@@ -68,6 +72,18 @@ export default function WizardPage() {
     api.experiment(experimentId).then((e) => {
       setExp(e);
       if (e.antibiograms.length) setTarget(e.antibiograms[e.antibiograms.length - 1].id);
+      if (handoff) {
+        setFile(handoff.file);
+        const b = handoff.bacteria;
+        const same = (x?: string, y?: string) => (x ?? "").trim().toLowerCase() === (y ?? "").trim().toLowerCase();
+        const match = b.genus?.trim() && e.antibiograms.find((a) => same(a.genus, b.genus) && same(a.species, b.species)
+          && same(a.strain, b.strain) && same(a.sample, b.sample));
+        if (match) setTarget(match.id);
+        else {
+          setTarget("new");
+          setBacteria((cur) => ({ ...cur, ...b, family_id: b.family_id || cur.family_id }));
+        }
+      }
     }).catch((e) => setError(e.message));
   }, [experimentId]);
 
@@ -154,6 +170,11 @@ export default function WizardPage() {
         interpretation: readings[i].interpretation,
       })),
     });
+    if (handoff) {
+      await handoff.onSaved?.();
+      clearHandoff(handoff);
+    }
+    plateSaved(exp!.id);
     navigate(`/plates/${plate.id}`);
   });
 
@@ -175,6 +196,9 @@ export default function WizardPage() {
           <b>Example plate.</b> The organism and the image are already filled in: press <b>Next</b> at every step and
           compare with the worked example in <Link to="/help#example">Help</Link>.
         </p>
+      )}
+      {handoff && step === 0 && (
+        <p className="note">{handoff.label} Check the organism data and press <b>Next</b>.</p>
       )}
       {error && <p className="error">{error}</p>}
       {busy && <div className="busy"><div className="spinner" />{busy}</div>}
