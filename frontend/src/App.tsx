@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, Route, Routes } from "react-router-dom";
 import { api, ApiError, MODE, type User } from "./api";
+import { applyUpdate, promptInstall, usePwa } from "./pwa";
 import { type Catalog, SessionContext } from "./session";
 import AuthPage from "./pages/AuthPage";
 import ExperimentsPage from "./pages/ExperimentsPage";
@@ -18,6 +19,7 @@ export default function App() {
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [catalog, setCatalog] = useState<Catalog | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const pwa = usePwa();
 
   const onLogin = useCallback(async (u: User) => {
     try {
@@ -58,11 +60,18 @@ export default function App() {
           </div>
         ) : (
           <div className="topbar-user">
+            {pwa.canInstall && <button className="small" onClick={promptInstall} title="Install AntibiogramJ as an app on this device">Install</button>}
             <Link to="/help" className="topbar-link">Help</Link>
             <span className="tag topbar-offline" title="Images and results are stored only in this browser; nothing is uploaded.">Offline · data stays in this browser</span>
           </div>
         )}
       </header>
+      {pwa.updateAvailable && (
+        <div className="update-banner" role="status">
+          A new version of AntibiogramJ is available.
+          <button className="small primary" onClick={applyUpdate}>Reload</button>
+        </div>
+      )}
       <main>
         <Routes>
           <Route path="/" element={<ExperimentsPage />} />

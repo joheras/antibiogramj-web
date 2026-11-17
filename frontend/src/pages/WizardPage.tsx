@@ -12,6 +12,7 @@ import ImageEditor, { type EditorCircle } from "../components/ImageEditor";
 import PhotoQualityNotice from "../components/PhotoQuality";
 import { QcCell, QcStrainSelect } from "../components/Qc";
 import { qcFamily, qcResult, qcStrain, QC_SOURCE } from "../qc";
+import { onProgress } from "../progress";
 import { useSession } from "../session";
 import { Legend } from "./PlatePage";
 
@@ -161,6 +162,8 @@ export default function WizardPage() {
   const workingSrc = useImageUrl(upload && working ? () => api.uploadImage(upload.upload_id, "working", working.version) : null,
     [upload?.upload_id, working?.version]) ?? "";
 
+  const selectedIndex = disks.findIndex((d) => d.id === selected);
+
   if (!exp) return <div className="page">{error ? <p className="error">{error}</p> : <p className="muted">Loading…</p>}</div>;
 
 
@@ -170,6 +173,7 @@ export default function WizardPage() {
       <ol className="stepper">
         {STEPS.map((s, i) => <li key={s} className={i === step ? "current" : i < step ? "done" : ""}><span>{i + 1}</span>{s}</li>)}
       </ol>
+      <p className="stepper-compact" aria-hidden>Step {step + 1}/{STEPS.length} · <b>{STEPS[step]}</b></p>
       {isExample && (
         <p className="note">
           <b>Example plate.</b> The organism and the image are already filled in: press <b>Next</b> at every step and
@@ -177,12 +181,12 @@ export default function WizardPage() {
         </p>
       )}
       {error && <p className="error">{error}</p>}
-      {busy && <div className="busy"><div className="spinner" />{busy}</div>}
+      {busy && <Busy message={busy} />}
 
       {step === 0 && (
         <StepOrganism
           exp={exp} target={target} setTarget={setTarget} bacteria={bacteria} setBacteria={setBacteria}
-          file={file} setFile={setFile} onNext={toPreprocessing} onExample={loadExample}
+          file={file} setFile={setFile} onNext={toPreprocessing} onExample={loadExample} busy={!!busy}
         />
       )}
 
@@ -232,9 +236,9 @@ export default function WizardPage() {
             }
           }} tabIndex={-1}>
             <h2>Antibiotic disks</h2>
-            <p className="help">{disks.length} disk(s) detected. Check that every disk is marked and fits its border: drag to move, use the handle to resize.</p>
+            <p className="help">{disks.length} disk(s) detected. Check that every disk is marked and fits its border: drag to move, use the handle to resize. Pinch or use + to zoom in.</p>
             <div className="btn-row">
-              <button className={addMode ? "primary" : ""} onClick={() => setAddMode(!addMode)}>{addMode ? "Click on the image…" : "Add disk"}</button>
+              <button className={addMode ? "primary" : ""} onClick={() => setAddMode(!addMode)}>{addMode ? "Tap the image…" : "Add disk"}</button>
               <button disabled={!selected} onClick={() => { setDisks((ds) => ds.filter((d) => d.id !== selected)); setSelected(null); }}>Delete disk</button>
             </div>
             <button className="link" onClick={() => run("Detecting antibiotic disks…", async () => {
@@ -246,7 +250,9 @@ export default function WizardPage() {
               <input type="number" min={1} max={50} step={0.5} value={diskMm} onChange={(e) => setDiskMm(Number(e.target.value) || 6)} />
             </label>
             {disks.length > 0 && <p className="muted small">Mean disk diameter {(2 * mean(disks.map((d) => d.r))).toFixed(1)} px → {(2 * mean(disks.map((d) => d.r)) / diskMm).toFixed(2)} px/mm</p>}
-            <Nav onBack={() => setStep(1)} onNext={toAntibiotics} busy={!!busy} />
+            <Nav onBack={() => setStep(1)} onNext={toAntibiotics} busy={!!busy}>
+              <span className="nav-info">{disks.length} disk{disks.length === 1 ? "" : "s"}</span>
+            </Nav>
           </aside>
         </div>
       )}
@@ -272,7 +278,12 @@ export default function WizardPage() {
                 </div>
               ))}
             </div>
-            <Nav onBack={() => setStep(2)} onNext={toHalos} busy={!!busy} />
+            <Nav onBack={() => setStep(2)} onNext={toHalos} busy={!!busy}>
+              {selectedIndex >= 0 && (
+                <span className="nav-info"><span className="num-badge">{selectedIndex + 1}</span>
+                  {antibioticIds[selectedIndex] !== null ? catalog.antibioticById.get(antibioticIds[selectedIndex]!)?.name : "—"}</span>
+              )}
+            </Nav>
           </aside>
         </div>
       )}
@@ -289,10 +300,10 @@ export default function WizardPage() {
 }
 
 // ------------------------------------------------------------------ step 0
-function StepOrganism({ exp, target, setTarget, bacteria, setBacteria, file, setFile, onNext, onExample }: {
+function StepOrganism({ exp, target, setTarget, bacteria, setBacteria, file, setFile, onNext, onExample, busy }: {
   exp: ExperimentDetail; target: "new" | number; setTarget: (t: "new" | number) => void;
   bacteria: BacteriaIn; setBacteria: (b: BacteriaIn) => void; file: File | null; setFile: (f: File | null) => void;
-  onNext: () => void; onExample: () => void;
+  onNext: () => void; onExample: () => void; busy: boolean;
 }) {
   const { catalog } = useSession();
   const set = (k: keyof BacteriaIn) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -350,11 +361,22 @@ function StepOrganism({ exp, target, setTarget, bacteria, setBacteria, file, set
           <input type="file" accept="image/*,.tif,.tiff" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
           {preview ? <img src={preview} alt="" /> : <span>{file ? file.name : "Choose or drop an image (JPEG, PNG, TIFF…)"}</span>}
         </label>
+        <div className="photo-buttons">
+          {/* On phones and tablets, opens the rear camera directly. */}
+          <label className="button primary camera-button">
+            <input type="file" accept="image/*" capture="environment" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+            📷 Take photo
+          </label>
+          <label className="button">
+            <input type="file" accept="image/*,.tif,.tiff" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+            Choose file
+          </label>
+        </div>
         <p className="muted small">
           No photo at hand? <button className="link" onClick={onExample}>Use the example plate</button> (E. coli, 7 disks).
           See <Link to="/help#photos">how to take good photos</Link>.
         </p>
-        <div className="nav"><span /><button className="primary" onClick={onNext}>Next</button></div>
+        <div className="nav"><span className="nav-info">{file ? file.name : ""}</span><button className="primary" onClick={onNext} disabled={busy}>Next</button></div>
       </section>
     </div>
   );
@@ -395,6 +417,7 @@ function HaloStep({ src, width, height, disks, antibioticIds, readings, setReadi
   const bp = (r: Reading) => r.breakpoints.find((b) => b.id === r.breakpoint_id) ?? null;
   const category = (r: Reading) => r.categoryOverride ?? categorise(diam(r), bp(r), exp.standard);
   const update = (patch: Partial<Reading>) => setReadings((rs) => rs.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
+  const setDiameter = (mm: number) => update({ halo_r: Math.max(disk.r, (Math.round(mm * 10) / 10 * pxPerMm) / 2) });
 
   const circles: EditorCircle[] = [];
   disks.forEach((d, i) => {
@@ -470,10 +493,12 @@ function HaloStep({ src, width, height, disks, antibioticIds, readings, setReadi
 
           <label>Inhibition zone diameter (mm)
             <div className="slider-row">
+              <button type="button" className="step-btn" aria-label="0.5 mm smaller" onClick={() => setDiameter(diam(reading) - 0.5)}>−</button>
               <input type="range" min={Math.min(diskMm, diam(reading))} max={maxMm} step={0.1} value={diam(reading)}
                 onChange={(e) => update({ halo_r: (Number(e.target.value) * pxPerMm) / 2 })} />
+              <button type="button" className="step-btn" aria-label="0.5 mm larger" onClick={() => setDiameter(diam(reading) + 0.5)}>+</button>
               <input type="number" min={diskMm} max={150} step={0.1} value={diam(reading)}
-                onChange={(e) => update({ halo_r: Math.max(disk.r, (Number(e.target.value) * pxPerMm) / 2) })} />
+                onChange={(e) => setDiameter(Number(e.target.value))} />
             </div>
           </label>
           <label>Category
@@ -493,7 +518,13 @@ function HaloStep({ src, width, height, disks, antibioticIds, readings, setReadi
 
         <div className="nav">
           <button onClick={onBack} disabled={busy}>Back</button>
-          <span className="muted small">{readings.filter((r) => r.checked).length}/{readings.length} checked</span>
+          <span className="nav-info">
+            <span className="nav-wide muted small">{readings.filter((r) => r.checked).length}/{readings.length} checked</span>
+            <span className="nav-narrow">
+              <b>{catalog.antibioticById.get(antibioticIds[idx])?.code}</b> {diam(reading).toFixed(1)} mm{" "}
+              <CategoryBadge category={category(reading)} standard={exp.standard} compact />
+            </span>
+          </span>
           <button className="primary" onClick={onSave} disabled={busy}>Save plate</button>
         </div>
       </aside>
@@ -501,11 +532,32 @@ function HaloStep({ src, width, height, disks, antibioticIds, readings, setReadi
   );
 }
 
-function Nav({ onBack, onNext, busy }: { onBack: () => void; onNext: () => void; busy: boolean }) {
+/** Back / Next; on phones it is a bar fixed at the bottom of the screen. */
+function Nav({ onBack, onNext, busy, children }: { onBack: () => void; onNext: () => void; busy: boolean; children?: React.ReactNode }) {
   return (
     <div className="nav">
       <button onClick={onBack} disabled={busy}>Back</button>
+      {children ?? <span />}
       <button className="primary" onClick={onNext} disabled={busy}>Next</button>
+    </div>
+  );
+}
+
+/** Overlay shown while computing, with the progress reported by the analysis. */
+function Busy({ message }: { message: string }) {
+  const [detail, setDetail] = useState<string | null>(null);
+  const [seconds, setSeconds] = useState(0);
+  useEffect(() => {
+    const off = onProgress(setDetail);
+    const start = Date.now();
+    const timer = setInterval(() => setSeconds(Math.floor((Date.now() - start) / 1000)), 500);
+    return () => { off(); clearInterval(timer); };
+  }, [message]);
+  return (
+    <div className="busy" role="status" aria-live="polite">
+      <div className="spinner" />
+      <span>{message}</span>
+      {(detail || seconds >= 2) && <span className="busy-detail">{detail}{seconds >= 2 ? ` (${seconds} s)` : ""}</span>}
     </div>
   );
 }

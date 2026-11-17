@@ -4,6 +4,7 @@ import { MODE } from "../api";
 import CategoryBadge from "../components/CategoryBadge";
 import { startExample } from "../example";
 import { QC_SOURCE, QC_TABLES } from "../qc";
+import { isStandalone, promptInstall, usePersistentStorage, usePwa } from "../pwa";
 import { useSession } from "../session";
 import { Legend } from "./PlatePage";
 // Screenshots of the example plate (src/assets/example-plate.jpg) at each step, taken from the browser build.
@@ -25,8 +26,10 @@ const SECTIONS = [
   ["standards", "Standards and categories"],
   ["expert", "Expert system"],
   ["data", "Where your data is"],
+  ["install", "Phones, tablets and offline use"],
   ["faq", "FAQ and troubleshooting"],
 ] as const;
+const sections = SECTIONS.filter(([id]) => id !== "install" || MODE === "browser");
 
 // Results of the example plate with EUCAST 16.1 (see the screenshots).
 const EXAMPLE_RESULTS: [string, string, string, string, string][] = [
@@ -84,7 +87,7 @@ export default function HelpPage() {
 
       <div className="help-page">
         <nav className="help-toc" aria-label="Help contents">
-          {SECTIONS.map(([id, title]) => <a key={id} href={`#${id}`} onClick={go(id)}>{title}</a>)}
+          {sections.map(([id, title]) => <a key={id} href={`#${id}`} onClick={go(id)}>{title}</a>)}
         </nav>
 
         <div className="help-body">
@@ -326,6 +329,8 @@ export default function HelpPage() {
             )}
           </section>
 
+          {MODE === "browser" && <InstallSection />}
+
           <section id="faq" className="card faq">
             <h2>FAQ and troubleshooting</h2>
             <details>
@@ -376,5 +381,53 @@ export default function HelpPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function InstallSection() {
+  const pwa = usePwa();
+  const [persisted, requestPersistence] = usePersistentStorage();
+  const standalone = isStandalone();
+  return (
+    <section id="install" className="card">
+      <h2>Phones, tablets and offline use</h2>
+      <p>AntibiogramJ works on phones and tablets: in step 1, <b>Take photo</b> opens the camera. In the editor,
+        pinch with two fingers (or use the <b>+</b> button) to zoom in, drag with one finger to move around, and tap
+        near a disk to select it. Large photos are reduced to 4000 pixels before the analysis.</p>
+      <p>You can also <b>install</b> it as an app: it then opens from the home screen in its own window and works
+        without an internet connection (everything it needs, about 12 MB, is downloaded once).</p>
+      {standalone ? (
+        <p className="ok">You are using the installed app.</p>
+      ) : pwa.canInstall ? (
+        <p><button className="primary" onClick={promptInstall}>Install AntibiogramJ</button></p>
+      ) : null}
+      <div className="install-steps">
+        <div>
+          <h3>iPhone and iPad (Safari)</h3>
+          <ol>
+            <li>Open this page in <b>Safari</b>.</li>
+            <li>Tap the <b>Share</b> button (square with an arrow).</li>
+            <li>Choose <b>Add to Home Screen</b> and confirm.</li>
+          </ol>
+        </div>
+        <div>
+          <h3>Android (Chrome) and computers (Chrome, Edge)</h3>
+          <ol>
+            <li>Open the browser menu (⋮).</li>
+            <li>Choose <b>Install app</b> or <b>Add to Home screen</b>.</li>
+          </ol>
+        </div>
+      </div>
+      <p className="warn"><b>On iPhone and iPad, install the app to keep your data.</b> Safari deletes the data of web
+        sites that have not been used for 7 days; the experiments of an app added to the Home Screen are not deleted
+        that way. The installed app has its own storage, separate from Safari's: to move experiments between the two,
+        use Back up and Restore (Experiments page).</p>
+      <p className="small muted">
+        Storage of this browser:{" "}
+        {persisted === null ? "unknown" : persisted ? <b>persistent</b> : <>best effort (may be cleared when the device is low on space){" "}
+          <button className="link" onClick={requestPersistence}>ask to keep it</button></>}.
+        {" "}When a new version is published, a <b>Reload</b> banner appears at the top.
+      </p>
+    </section>
   );
 }

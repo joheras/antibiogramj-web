@@ -9,12 +9,20 @@ import * as C from "./cv";
 export interface Annotation { disk: C.Circle; halo_r: number; code: string; category: string; s_r: number | null; r_r: number | null }
 
 const MAX_PIXELS = 40_000_000;
+/** Photos are reduced to this size as soon as they are decoded: phone cameras give 12-50 MP
+ * images that would exhaust the memory of a phone (and iOS limits canvases to 16.7 MP).
+ * The working image is at most 1600 px anyway; 4000 px leaves room to crop a plate that fills
+ * only part of the photo without losing resolution (disk-code reading suffers below 1600 px). */
+const MAX_SIDE = 4000;
+
+type Report = (message: string) => void;
 
 // The OpenCV.js module object is a "thenable" (Emscripten adds a `then` method), so it
 // must never be the resolution value of a promise: resolving with it loops forever.
 // It is therefore wrapped in an object.
 let cvReady: Promise<{ cv: C.CV }> | null = null;
-function loadCv(): Promise<{ cv: C.CV }> {
+function loadCv(report?: Report): Promise<{ cv: C.CV }> {
+  if (!cvReady && !(cvModule as C.CV).Mat) report?.("Starting the image-analysis engine…");
   cvReady ??= new Promise((resolve) => {
     const cv: C.CV = cvModule;
     if (cv.Mat) resolve({ cv });
@@ -35,7 +43,13 @@ function rgbaToRgb(rgba: Uint8Array | Uint8ClampedArray, width: number, height: 
   return { width, height, data };
 }
 
-async function decode(blob: Blob): Promise<C.Rgb> {
+function fitSize(width: number, height: number, maxSide: number) {
+  const scale = Math.min(1, maxSide / Math.max(width, height));
+  return { width: Math.round(width * scale), height: Math.round(height * scale), scale };
+}
+
+/** Decodes an image file; with `maxSide`, large images are reduced while decoding. */
+async function decode(blob: Blob, maxSide = Infinity): Promise<C.Rgb> {
   const head = new Uint8Array(await blob.slice(0, 4).arrayBuffer());
   const isTiff = (head[0] === 0x49 && head[1] === 0x49 && head[2] === 0x2a) || (head[0] === 0x4d && head[1] === 0x4d && head[3] === 0x2a);
   if (isTiff) {
@@ -45,18 +59,25 @@ async function decode(blob: Blob): Promise<C.Rgb> {
     const ifd = ifds[0];
     if (ifd.width * ifd.height > MAX_PIXELS) throw new Error("The image resolution is too large");
     UTIF.decodeImage(buf, ifd);
-    return rgbaToRgb(UTIF.toRGBA8(ifd), ifd.width, ifd.height);
+    const rgb = rgbaToRgb(UTIF.toRGBA8(ifd), ifd.width, ifd.height);
+    const size = fitSize(rgb.width, rgb.height, maxSide);
+    if (size.scale === 1) return rgb;
+    const { cv } = await loadCv();
+    return C.resizeRgb(cv, rgb, size.width, size.height);
   }
   let bitmap: ImageBitmap;
   try {
-    bitmap = await createImageBitmap(blob);
+    bitmap = await createImageBitmap(blob, { imageOrientation: "from-image" });
   } catch {
     throw new Error("The file is not a supported image");
   }
-  if (bitmap.width * bitmap.height > MAX_PIXELS) throw new Error("The image resolution is too large");
-  const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+  if (bitmap.width * bitmap.height > 4 * MAX_PIXELS) throw new Error("The image resolution is too large");
+  // The full-resolution pixels are never copied: the bitmap is drawn reduced.
+  const size = fitSize(bitmap.width, bitmap.height, maxSide);
+  const canvas = new OffscreenCanvas(size.width, size.height);
   const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(bitmap, 0, 0);
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(bitmap, 0, 0, size.width, size.height);
   bitmap.close();
   return rgbaToRgb(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
 }
@@ -135,17 +156,23 @@ const commands = {
     return templates.length;
   },
 
-  async open(args: { uploadId: string; file: Blob }) {
-    const { cv } = await loadCv();
-    const original = await decode(args.file);
-    sessions.clear(); // one plate at a time
+  async open(args: { uploadId: string; file: Blob }, report: Report) {
+    const { cv } = await loadCv(report);
+    sessions.clear(); // one plate at a time: free the previous images first
+    report("Reading the image…");
+    const original = await decode(args.file, MAX_SIDE);
     sessions.set(args.uploadId, { original });
+    report("Locating the plate…");
     const plate = C.detectPlate(cv, original);
-    return { width: original.width, height: original.height, plate, quality: C.photoQuality(cv, original, plate), png: await encode(original) };
+    report("Checking the photo quality…");
+    const quality = C.photoQuality(cv, original, plate);
+    // Only displayed (the analysis uses the pixels kept here): JPEG is much faster than PNG.
+    return { width: original.width, height: original.height, plate, quality, png: await encode(original, "image/jpeg", 0.9) };
   },
 
-  async process(args: { uploadId: string; crop: C.Circle | null; autoContrast: boolean; maxSide: number }) {
-    const { cv } = await loadCv();
+  async process(args: { uploadId: string; crop: C.Circle | null; autoContrast: boolean; maxSide: number }, report: Report) {
+    const { cv } = await loadCv(report);
+    report("Pre-processing the image…");
     const s = session(args.uploadId);
     let img = s.original;
     if (args.crop) {
@@ -159,16 +186,18 @@ const commands = {
     return { width: img.width, height: img.height, png: await encode(img) };
   },
 
-  async disks(args: { uploadId: string }) {
-    const { cv } = await loadCv();
+  async disks(args: { uploadId: string }, report: Report) {
+    const { cv } = await loadCv(report);
+    report("Detecting antibiotic disks…");
     return C.detectDisks(cv, working(args.uploadId));
   },
 
-  async identify(args: { uploadId: string; disks: C.Circle[] }) {
-    const { cv } = await loadCv();
+  async identify(args: { uploadId: string; disks: C.Circle[] }, report: Report) {
+    const { cv } = await loadCv(report);
     if (!templates) throw new Error("Templates not loaded");
     const img = working(args.uploadId);
-    return args.disks.map((d) => {
+    return args.disks.map((d, i) => {
+      report(`Reading the code of disk ${i + 1} of ${args.disks.length}…`);
       const c = C.diskCrop(img, d);
       return c ? C.bestMatch(cv, c, templates!) : { antibioticId: null, score: 0 };
     });
@@ -203,8 +232,9 @@ export type Commands = typeof commands;
 
 self.onmessage = async (e: MessageEvent<{ id: number; cmd: keyof Commands; args: never }>) => {
   const { id, cmd, args } = e.data;
+  const report: Report = (progress) => self.postMessage({ id, progress });
   try {
-    const result = await commands[cmd](args);
+    const result = await commands[cmd](args, report);
     self.postMessage({ id, result });
   } catch (err) {
     self.postMessage({ id, error: err instanceof Error ? err.message : String(err) });
