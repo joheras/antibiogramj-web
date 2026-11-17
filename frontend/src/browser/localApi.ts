@@ -12,6 +12,7 @@ import type { Annotation, Commands } from "./worker";
 import { experimentWorkbook } from "../excel";
 import { SUPPLEMENTARY_TESTS } from "../expertRules";
 import { qcStrain } from "../qc";
+import { reportProgress } from "../progress";
 
 // ------------------------------------------------------------------ catalogue
 const catalog = catalogJson as unknown as {
@@ -176,7 +177,8 @@ const pending = new Map<number, { resolve: (v: unknown) => void; reject: (e: Err
 function call<K extends keyof Commands>(cmd: K, args: Parameters<Commands[K]>[0]): ReturnType<Commands[K]> {
   if (!worker) {
     worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
-    worker.onmessage = (e: MessageEvent<{ id: number; result?: unknown; error?: string }>) => {
+    worker.onmessage = (e: MessageEvent<{ id: number; result?: unknown; error?: string; progress?: string }>) => {
+      if (e.data.progress !== undefined) return reportProgress(e.data.progress);
       const p = pending.get(e.data.id);
       pending.delete(e.data.id);
       if (e.data.error !== undefined) p?.reject(new ApiError(422, e.data.error));

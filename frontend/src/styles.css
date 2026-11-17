@@ -152,8 +152,11 @@ th { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: u
 .dropzone img { max-width: 100%; max-height: 320px; }
 
 .step-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 18px; align-items: start; }
-.editor { background: #111; border-radius: var(--radius); overflow: hidden; line-height: 0; }
-.editor svg { width: 100%; height: auto; max-height: calc(100vh - 210px); display: block; user-select: none; }
+.editor { position: relative; background: #111; border-radius: var(--radius); overflow: hidden; line-height: 0; }
+.editor svg { width: 100%; height: auto; max-height: calc(100vh - 210px); display: block; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.zoom-buttons { position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column; gap: 6px; line-height: 1.2; }
+.zoom-buttons button { width: 38px; height: 38px; padding: 0; justify-content: center; font-size: 1.2rem; font-weight: 700; background: rgba(20, 25, 30, 0.72); color: #fff; border-color: rgba(255, 255, 255, 0.35); }
+.zoom-buttons button:disabled { opacity: 0.35; }
 .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 10px; position: sticky; top: 70px; max-height: calc(100vh - 90px); overflow-y: auto; outline: none; }
 .help { color: var(--muted); font-size: 0.88rem; }
 .btn-col { display: flex; flex-direction: column; gap: 6px; }
@@ -175,7 +178,19 @@ th { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: u
 .limits { font-size: 0.88rem; }
 .slider-row { display: flex; gap: 8px; align-items: center; }
 .slider-row input[type="range"] { flex: 1; padding: 0; accent-color: var(--accent); }
-.slider-row input[type="number"] { width: 90px; }
+.slider-row input[type="number"] { width: 80px; }
+.step-btn { width: 36px; height: 36px; padding: 0; justify-content: center; font-size: 1.15rem; font-weight: 700; flex: none; }
+.nav-info { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85rem; color: var(--muted); }
+.nav-info .num-badge { min-width: 20px; height: 20px; font-size: 0.72rem; }
+.nav-narrow { display: none; }
+.stepper-compact { display: none; }
+.photo-buttons { display: flex; gap: 8px; margin-top: 10px; }
+.photo-buttons label { position: relative; overflow: hidden; display: inline-flex; flex-direction: row; color: inherit; font-size: inherit; }
+.photo-buttons label.primary { color: var(--accent-text); }
+.photo-buttons input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+/* With a mouse the file chooser is enough. */
+@media (hover: hover) and (pointer: fine) { .camera-button { display: none !important; } }
+.busy-detail { font-weight: 400; font-size: 0.9rem; opacity: 0.85; }
 details summary { cursor: pointer; color: var(--muted); font-size: 0.85rem; }
 
 .busy { position: fixed; inset: 0; background: rgba(10, 15, 20, 0.45); z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: #fff; font-weight: 600; }
@@ -265,5 +280,35 @@ kbd { font: 0.85em ui-monospace, monospace; background: var(--surface-2); border
 }
 @media (max-width: 560px) {
   .topbar-offline { display: none; }
+  main { padding: 12px; }
+  /* Not sticky on phones: the image of the wizard sticks to the top instead. */
+  .topbar { position: static; padding: 8px 12px; padding-top: max(8px, env(safe-area-inset-top)); }
+  .card { padding: 14px; }
+
+  /* Wizard: compact stepper, image kept visible while editing, actions in a bottom bar. */
+  .wizard { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+  .wizard .crumbs { margin-bottom: 4px; }
+  .wizard .stepper { display: none; }
+  .stepper-compact { display: block; margin: 0 0 10px; font-size: 0.9rem; color: var(--muted); }
+  .stepper-compact b { color: var(--text); }
+  .step-layout { gap: 12px; }
+  .step-layout > :first-child { position: sticky; top: env(safe-area-inset-top); z-index: 5; background: var(--bg); padding-bottom: 6px; }
+  .step-layout .editor svg { max-height: 46vh; }
+  .step-layout .legend { margin-top: 4px; gap: 8px; font-size: 0.72rem; }
+  .panel { padding: 12px; }
+  .wizard .nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; margin: 0; border-top: 1px solid var(--border);
+    background: var(--surface); padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+  }
+  .wizard .nav button { min-height: 44px; padding: 8px 18px; }
+  .nav-wide { display: none; }
+  .nav-narrow { display: inline-flex; align-items: center; gap: 4px; color: var(--text); }
+  .dropzone { min-height: 160px; }
+  .photo-buttons label { flex: 1; justify-content: center; min-height: 44px; }
+  .halo-item, .ab-row select { min-height: 40px; }
 }
 .original { white-space: nowrap; }
+
+/* --------------------------------------------------------------------- pwa */
+.update-banner { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 8px 16px; background: var(--accent-soft); border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+.install-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }

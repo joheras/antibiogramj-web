@@ -1,13 +1,14 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import pwa from "./pwa/plugin";
 
 // `vite --mode browser` builds the version that runs entirely in the user's browser
 // (OpenCV.js + IndexedDB, see src/browser/); the default mode uses the FastAPI backend.
 export default defineConfig(({ mode }) => {
   const browser = mode === "browser";
   return {
-    plugins: [react()],
+    plugins: browser ? [react(), pwa()] : [react()], // installable app + offline cache
     resolve: {
       alias: {
         "virtual:api-impl": fileURLToPath(new URL(browser ? "./src/browser/localApi.ts" : "./src/http.ts", import.meta.url)),
