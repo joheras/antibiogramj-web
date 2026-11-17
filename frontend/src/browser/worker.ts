@@ -1,10 +1,12 @@
 /// <reference lib="webworker" />
-// Web Worker running the image analysis (OpenCV.js) off the main thread.
+// Web Worker running the image analysis (OpenCV.js, onnxruntime-web) off the main thread.
 // It keeps the images of the plate being analysed in memory, keyed by upload id.
 
 import cvModule from "@techstark/opencv-js";
+import ortWasmUrl from "onnxruntime-web/ort-wasm-simd-threaded.wasm?url";
 import UTIF from "utif";
 import * as C from "./cv";
+import { DiskReader, type LexiconEntry, type OcrReading } from "./ocr";
 
 export interface Annotation { disk: C.Circle; halo_r: number; code: string; category: string; s_r: number | null; r_r: number | null }
 
@@ -25,6 +27,22 @@ function loadCv(): Promise<{ cv: C.CV }> {
 
 const sessions = new Map<string, { original: C.Rgb; working?: C.Rgb }>();
 let templates: C.Template[] | null = null;
+
+// The OCR engine (onnxruntime-web, ~11 MB of WASM, and the 4.6 MB model) is only downloaded when the
+// first plate is identified; both come from this site and stay in the browser's cache.
+let ocrReady: Promise<DiskReader> | null = null;
+function loadOcr(cv: C.CV, modelUrl: string, lexicon: LexiconEntry[]): Promise<DiskReader> {
+  ocrReady ??= (async () => {
+    const ort = await import("onnxruntime-web/wasm");
+    ort.env.wasm.wasmPaths = { wasm: new URL(ortWasmUrl, self.location.href).href };
+    ort.env.wasm.numThreads = self.crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 1) : 1;
+    const res = await fetch(modelUrl);
+    if (!res.ok) throw new Error("Cannot load the text-recognition model");
+    const session = await ort.InferenceSession.create(new Uint8Array(await res.arrayBuffer()), { executionProviders: ["wasm"] });
+    return new DiskReader(cv, ort, session, lexicon);
+  })().catch((e) => { ocrReady = null; throw e; });
+  return ocrReady;
+}
 
 // ------------------------------------------------------------------ image I/O
 function rgbaToRgb(rgba: Uint8Array | Uint8ClampedArray, width: number, height: number): C.Rgb {
@@ -164,14 +182,28 @@ const commands = {
     return C.detectDisks(cv, working(args.uploadId));
   },
 
-  async identify(args: { uploadId: string; disks: C.Circle[] }) {
+  /** Templates and, if a model is given, OCR of every disk (the decision is taken in localApi.ts). */
+  async identify(args: { uploadId: string; disks: C.Circle[]; ocr: { modelUrl: string; lexicon: LexiconEntry[] } | null }) {
     const { cv } = await loadCv();
     if (!templates) throw new Error("Templates not loaded");
     const img = working(args.uploadId);
-    return args.disks.map((d) => {
+    let reader: DiskReader | null = null;
+    if (args.ocr) {
+      try {
+        reader = await loadOcr(cv, args.ocr.modelUrl, args.ocr.lexicon);
+      } catch (e) {
+        console.warn("OCR not available, using the templates only", e);
+      }
+    }
+    const out: { antibioticId: number | null; score: number; ocr: OcrReading | null; ms: number }[] = [];
+    for (const d of args.disks) {
       const c = C.diskCrop(img, d);
-      return c ? C.bestMatch(cv, c, templates!) : { antibioticId: null, score: 0 };
-    });
+      if (!c) { out.push({ antibioticId: null, score: 0, ocr: null, ms: 0 }); continue; }
+      const t0 = performance.now();
+      const ocr = reader ? await reader.read(c) : null;
+      out.push({ ...C.bestMatch(cv, c, templates!), ocr, ms: performance.now() - t0 });
+    }
+    return out;
   },
 
   async halos(args: { uploadId: string; disks: C.Circle[] }) {

@@ -1,8 +1,10 @@
 """Export the reference data for the in-browser version of AntibiogramJ.
 
 Loads the seed standards exactly as the server does (same ids) and writes
-  frontend/src/browser/catalog.json          standards, families, antibiotics, breakpoints, templates
+  frontend/src/browser/catalog.json          standards, families, antibiotics, breakpoints, templates,
+                                             disk_codes (OCR lexicon, from seed/disk_codes.json)
   frontend/public-browser/templates/*.png    bundled antibiotic-code templates
+The OCR model (seed/models/ppocr_rec.onnx) is served to the browser by vite.config.ts.
 
 Run from backend/:  .venv/bin/python scripts/export_catalog.py
 """
@@ -19,6 +21,7 @@ BACKEND = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BACKEND))
 
 from app.config import settings  # noqa: E402
+from app.cv.codes import build_lexicon, load_synonyms, printed_content  # noqa: E402
 from app.db import Base  # noqa: E402
 from app.main import SEED_STANDARDS  # noqa: E402
 from app.models import Antibiotic, Breakpoint, Family, Standard  # noqa: E402
@@ -53,6 +56,13 @@ def main() -> None:
                                                  "available", "susceptible", "resistant", "comments"]),
             "templates": [],
         }
+        antibiotics = list(db.scalars(select(Antibiotic).order_by(Antibiotic.id)))
+        lexicon = build_lexicon([(a.name, a.code, a.disk_content) for a in antibiotics],
+                                load_synonyms(settings.seed_dir / "disk_codes.json"))
+        catalog["disk_codes"] = {
+            "lexicon": [{"name": e.name, "letters": e.letters, "content": e.content} for e in lexicon],
+            "printed": {a.id: printed_content(a.disk_content) for a in antibiotics},
+        }
 
         out_dir = FRONTEND / "public-browser" / "templates"
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -73,7 +83,8 @@ def main() -> None:
 
     target = FRONTEND / "src" / "browser" / "catalog.json"
     target.write_text(json.dumps(catalog, ensure_ascii=False, separators=(",", ":")))
-    print(f"{len(catalog['breakpoints'])} breakpoints, {len(catalog['templates'])} templates -> {target}")
+    print(f"{len(catalog['breakpoints'])} breakpoints, {len(catalog['templates'])} templates, "
+          f"{len(catalog['disk_codes']['lexicon'])} disk codes -> {target}")
 
 
 if __name__ == "__main__":

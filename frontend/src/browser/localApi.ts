@@ -3,11 +3,12 @@
 
 import {
   ApiError, categorise, CATEGORIES, type Antibiogram, type Antibiotic, type Api, type Breakpoint, type Circle,
-  type Download, type ExperimentDetail, type ExperimentSummary, type Family, type HaloResult,
+  type Download, type ExperimentDetail, type ExperimentSummary, type Family, type HaloResult, type Identification,
   type Plate, type Standard, type User,
 } from "../api";
 import catalogJson from "./catalog.json";
 import * as db from "./db";
+import type { LexiconEntry } from "./ocr";
 import type { Annotation, Commands } from "./worker";
 import { experimentWorkbook } from "../excel";
 import { SUPPLEMENTARY_TESTS } from "../expertRules";
@@ -17,6 +18,7 @@ import { qcStrain } from "../qc";
 const catalog = catalogJson as unknown as {
   standards: Standard[]; families: Family[]; antibiotics: Antibiotic[]; breakpoints: Breakpoint[];
   templates: { antibiotic_id: number; path: string }[];
+  disk_codes: { lexicon: LexiconEntry[]; printed: Record<string, string> };
 };
 const standardById = new Map(catalog.standards.map((s) => [s.id, s]));
 const familyById = new Map(catalog.families.map((f) => [f.id, f]));
@@ -25,6 +27,7 @@ const breakpointById = new Map(catalog.breakpoints.map((b) => [b.id, b]));
 
 const WORKING_MAX_SIDE = 1600;
 const TEMPLATES_PER_ANTIBIOTIC = 10;
+const OCR_AUTO_ACCEPT = -2; // as settings.ocr_auto_accept in the backend
 
 const LOCAL_USER: User = { id: 0, email: "", name: "Local workspace", lab: "", city: "", country: "" };
 
@@ -144,6 +147,39 @@ function call<K extends keyof Commands>(cmd: K, args: Parameters<Commands[K]>[0]
     pending.set(id, { resolve, reject });
     worker!.postMessage({ id, cmd, args });
   }) as ReturnType<Commands[K]>;
+}
+
+/** Lexicon entry -> catalogue antibiotic: same printed content, then with breakpoints, then lowest id
+ *  (resolve in backend/app/identify.py). */
+function resolveEntry(entry: LexiconEntry, withBreakpoints: Set<number>): number | null {
+  const rows = catalog.antibiotics.filter((a) => a.name === entry.name);
+  const key = (a: Antibiotic) => [catalog.disk_codes.printed[a.id] !== entry.content ? 1 : 0, withBreakpoints.has(a.id) ? 0 : 1, a.id];
+  rows.sort((a, b) => { const ka = key(a), kb = key(b); return ka[0] - kb[0] || ka[1] - kb[1] || ka[2] - kb[2]; });
+  return rows[0]?.id ?? null;
+}
+
+/** OCR if confident, otherwise templates (to be reviewed); OCR candidates as suggestions (identify_disks). */
+function decide(r: Awaited<ReturnType<Commands["identify"]>>[number], context?: { family_id: number; standard_id: number }): Identification {
+  if (!r.ocr) return { antibiotic_id: r.antibioticId, score: r.score, source: r.antibioticId !== null ? "template" : null, review: false, suggestions: [] };
+  const withBreakpoints = new Set(context ? catalog.breakpoints
+    .filter((b) => b.standard_id === context.standard_id && b.family_id === context.family_id).map((b) => b.antibiotic_id) : []);
+  const suggestions: NonNullable<Identification["suggestions"]> = [];
+  for (const c of r.ocr.candidates) {
+    const entry = catalog.disk_codes.lexicon[c.entry];
+    const aid = resolveEntry(entry, withBreakpoints);
+    if (aid !== null && !suggestions.some((s) => s.antibiotic_id === aid))
+      suggestions.push({ antibiotic_id: aid, code: `${entry.letters} ${entry.content}`, confidence: c.confidence });
+  }
+  const best = r.ocr.candidates[0];
+  const bestEntry = best ? catalog.disk_codes.lexicon[best.entry] : null;
+  const out: Identification = {
+    antibiotic_id: null, score: r.score, source: null, review: true, suggestions,
+    code_read: bestEntry ? `${bestEntry.letters} ${bestEntry.content}` : null, text_read: r.ocr.freeText || null,
+    confidence: best ? best.confidence : null,
+  };
+  if (best && suggestions.length && best.confidence >= OCR_AUTO_ACCEPT) Object.assign(out, { antibiotic_id: suggestions[0].antibiotic_id, source: "ocr", review: false });
+  else if (r.antibioticId !== null) Object.assign(out, { antibiotic_id: r.antibioticId, source: "template" });
+  return out;
 }
 
 let templatesReady: Promise<number> | null = null;
@@ -303,10 +339,13 @@ export const localApi: Api = {
 
   detectDisks: async (id) => ({ disks: await call("disks", { uploadId: id }) }),
 
-  async identify(id, disks) {
+  async identify(id, disks, context) {
     await loadTemplates();
-    const res = await call("identify", { uploadId: id, disks });
-    return { results: res.map((r) => ({ antibiotic_id: r.antibioticId, score: r.score })) };
+    const modelUrl = new URL("models/ppocr_rec.onnx", new URL(import.meta.env.BASE_URL, document.baseURI)).href;
+    const res = await call("identify", { uploadId: id, disks, ocr: { modelUrl, lexicon: catalog.disk_codes.lexicon } });
+    const ms = res.filter((r) => r.ocr).map((r) => r.ms);
+    if (ms.length) console.info(`OCR: ${Math.round(ms.reduce((a, b) => a + b, 0) / ms.length)} ms per disk (${ms.length} disks)`);
+    return { results: res.map((r) => decide(r, context)) };
   },
 
   async halos(id, data) {

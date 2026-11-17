@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
-  api, bacteriaLabel, categorise, CATEGORIES, categoryLabel, type BacteriaIn, type Breakpoint, type Circle,
+  api, bacteriaLabel, categorise, CATEGORIES, categoryLabel, type BacteriaIn, type Breakpoint, type Circle, type Identification,
   type ExperimentDetail, type UploadResult,
 } from "../api";
 import CategoryBadge from "../components/CategoryBadge";
@@ -59,7 +59,7 @@ export default function WizardPage() {
   const [diskMm, setDiskMm] = useState(6);
   // Step 3
   const [antibioticIds, setAntibioticIds] = useState<(number | null)[]>([]);
-  const [autoIds, setAutoIds] = useState<(number | null)[]>([]);
+  const [idents, setIdents] = useState<Identification[]>([]);
   // Step 4
   const [readings, setReadings] = useState<Reading[]>([]);
   const [pxPerMm, setPxPerMm] = useState(1);
@@ -114,11 +114,11 @@ export default function WizardPage() {
 
   const toAntibiotics = () => run("Reading the antibiotic codes…", async () => {
     if (!disks.length) throw new Error("Add at least one disk");
-    const res = await api.identify(upload!.upload_id, disks);
+    const res = await api.identify(upload!.upload_id, disks, familyId && exp ? { family_id: familyId, standard_id: exp.standard.id } : undefined);
     const ids = res.results.map((r) => r.antibiotic_id);
     // Keep the user's previous choices when coming back to this step.
     setAntibioticIds(ids.map((id, i) => (antibioticIds.length === disks.length && antibioticIds[i] !== null ? antibioticIds[i] : id)));
-    setAutoIds(ids);
+    setIdents(res.results);
     setStep(3);
   });
 
@@ -262,15 +262,35 @@ export default function WizardPage() {
           />
           <aside className="panel">
             <h2>Antibiotics</h2>
-            <p className="help">The codes printed on the disks are read automatically. Correct any mistake: AntibiogramJ learns from your confirmed choices.</p>
+            <p className="help">The codes printed on the disks are read automatically. Check the ones marked “check” and correct any mistake: AntibiogramJ learns from your confirmed choices.</p>
             <div className="ab-list">
-              {disks.map((d, i) => (
-                <div key={d.id} className={`ab-row ${selected === d.id ? "sel" : ""}`} onClick={() => setSelected(d.id)}>
-                  <span className="num-badge">{i + 1}</span>
-                  <AntibioticSelect value={antibioticIds[i]} onChange={(v) => setAntibioticIds((xs) => xs.map((x, j) => (j === i ? v : x)))} />
-                  {autoIds[i] !== null && autoIds[i] === antibioticIds[i] && <span className="auto" title="Recognised automatically">auto</span>}
-                </div>
-              ))}
+              {disks.map((d, i) => {
+                const r = idents[i];
+                const choose = (v: number | null) => setAntibioticIds((xs) => xs.map((x, j) => (j === i ? v : x)));
+                const auto = r && r.antibiotic_id !== null && r.antibiotic_id === antibioticIds[i];
+                return (
+                  <div key={d.id} className={`ab-row ${selected === d.id ? "sel" : ""}`} onClick={() => setSelected(d.id)}>
+                    <span className="num-badge">{i + 1}</span>
+                    <div className="ab-main">
+                      <div className="ab-line">
+                        <AntibioticSelect value={antibioticIds[i]} onChange={choose} />
+                        {auto && !r.review && <span className="auto" title={r.code_read ? `Code read: ${r.code_read}` : "Recognised automatically"}>auto</span>}
+                        {auto && r.review && <span className="auto review" title="Recognised by a stored template; the printed code could not be read with confidence">check</span>}
+                      </div>
+                      {r?.review && !!r.suggestions?.length && (
+                        <div className="ab-suggest">
+                          <span>Read as</span>
+                          {r.suggestions.map((s) => (
+                            <button key={s.antibiotic_id} type="button" className={`chip ${antibioticIds[i] === s.antibiotic_id ? "on" : ""}`}
+                              title={`${catalog.antibioticById.get(s.antibiotic_id)?.name ?? ""} (confidence ${s.confidence})`}
+                              onClick={(e) => { e.stopPropagation(); choose(s.antibiotic_id); }}>{s.code}</button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
             <Nav onBack={() => setStep(2)} onNext={toHalos} busy={!!busy} />
           </aside>

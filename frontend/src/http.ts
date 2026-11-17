@@ -53,7 +53,7 @@ export const httpApi: Api = {
   process: (id, crop, autoContrast) =>
     request("POST", `/api/analysis/uploads/${id}/process`, { crop, auto_contrast: autoContrast }),
   detectDisks: (id) => request("POST", `/api/analysis/uploads/${id}/disks`),
-  identify: (id, disks) => request("POST", `/api/analysis/uploads/${id}/identify`, { disks }),
+  identify: (id, disks, context) => request("POST", `/api/analysis/uploads/${id}/identify`, { disks, ...context }),
   halos: (id, data) => request("POST", `/api/analysis/uploads/${id}/halos`, data),
   savePlate: (data) => request("POST", "/api/plates", data),
 };

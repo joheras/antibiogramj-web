@@ -9,8 +9,9 @@ on the disk.
    (min of G and B, so red print counts as ink), after flat-fielding.
 2. ``text_mask``: ink without specks, the orientation bar and dirt far from
    the centre. Its number of components estimates the number of characters.
-3. Orientations every ``step`` degrees, then +-step/3 around the best one.
-   In each, the text block is cut as one line and as two lines.
+3. Orientations every ``step`` degrees (stopping early at a near-perfect
+   reading), then +-step/3 around the best one. In each, the text block is
+   cut as one line and as two lines.
 4. The recogniser gives per-time-step character probabilities (CTC).
 5. Lexicon decoding: ``log P(code | image)`` of every lexicon entry with the
    CTC forward algorithm, minus the likelihood of the free (greedy) reading
@@ -36,6 +37,7 @@ from .codes import Entry
 SIZE = 400                 # disks are resampled to SIZE x SIZE pixels
 LINE_HEIGHT = 48           # recogniser input height
 LENGTH_WEIGHT = 1.0
+STOP_AT = -0.5             # stop the coarse orientation sweep at a reading this good (same accuracy, faster)
 GLYPH_FRACTION = 0.2       # ink components smaller than this fraction of the largest are fragments, not glyphs
 ALLOWED = set("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
@@ -121,7 +123,8 @@ def ctc_batch(logp: np.ndarray, labels: list[list[int]]) -> np.ndarray:
 # ------------------------------------------------------------------ preprocessing
 def _min_gb(disk_bgr: np.ndarray) -> np.ndarray:
     g = np.minimum(disk_bgr[:, :, 0], disk_bgr[:, :, 1])
-    return cv2.resize(g, (SIZE, SIZE), interpolation=cv2.INTER_CUBIC).astype(np.float32)
+    # Bilinear on uint8 is bit-exact in OpenCV.js too (bicubic is not), so both versions read alike.
+    return cv2.resize(g, (SIZE, SIZE), interpolation=cv2.INTER_LINEAR).astype(np.float32)
 
 
 def _background(g: np.ndarray) -> np.ndarray:
@@ -258,7 +261,11 @@ class DiskReader:
                 here = max(here, float(scores.max()))
             return here
 
-        coarse = {a: evaluate(float(a)) for a in range(0, 360, step)}
+        coarse: dict[int, float] = {}
+        for a in range(0, 360, step):
+            coarse[a] = evaluate(float(a))
+            if coarse[a] >= STOP_AT:   # a (nearly) perfect reading: no need to try the other orientations
+                break
         a0 = max(coarse, key=coarse.__getitem__)
         for d in (-step / 3, step / 3):
             evaluate(float((a0 + d) % 360))

@@ -9,7 +9,7 @@ It comes in two flavours built from the same React frontend:
 
 | | **Server** (multi-user service) | **Browser** (runs entirely on the user's computer) |
 |---|---|---|
-| Analysis | Python + OpenCV in `backend/` | OpenCV.js (WebAssembly) in a Web Worker, `frontend/src/browser/` |
+| Analysis | Python + OpenCV + onnxruntime in `backend/` | OpenCV.js + onnxruntime-web (WebAssembly) in a Web Worker, `frontend/src/browser/` |
 | Data | PostgreSQL/SQLite + image files, per account | IndexedDB in the user's browser; backup/restore to a file |
 | Accounts | e-mail + password | none: nothing leaves the computer |
 | Build | `npm run build` + backend | `npm run build:browser` → static site in `frontend/dist-browser/` |
@@ -26,7 +26,7 @@ It comes in two flavours built from the same React frontend:
 | Users / labs (no password) | Accounts with e-mail + password (bcrypt), lab, city, country |
 | Experiments → antibiograms → plates | Same model; one owner per experiment |
 | Wizard: bacteria data, crop, brightness/contrast, disks, disk size, codes, halos, annotation | Same 5 steps; annotated image generated on save |
-| Template learning in `antibiotics/<id>/` | Bundled templates shared by all + up to 10 learned templates per antibiotic **per user** |
+| Disk codes recognised by templates in `antibiotics/<id>/` | **OCR of the printed code** (any antibiotic of the catalogue, other manufacturers' codes) with a confidence; bundled + learned templates (up to 10 per antibiotic **per user**) as fallback |
 | Standards EUCAST 6.0 + CLSI 2015 (AntibiogramJXML) | Same files + **EUCAST 16.1** (default for new experiments) |
 | Export experiment to Excel | `.xlsx` with a summary sheet + one sheet per antibiogram |
 | Expert-rules system (stub: intrinsic resistance, exceptional phenotypes, interpretive rules) | **EUCAST expert system** (see below) |
@@ -66,8 +66,8 @@ breakpoints are never modified), and new standards are always appended to `SEED_
   except Clostridium difficile* families (the species is in the case, e.g. "Bacteroides spp."). New organism
   groups (Aeromonas, Vibrio, Kingella kingae, Bacillus, Brucella, ...) are new families.
 * Antibiotics with the same name, disk content and class as in EUCAST 6.0 are shared, so the bundled disk code
-  templates still recognise them; new agents/disks (cefiderocol, ceftazidime-avibactam, temocillin, ...) have no
-  bundled templates yet (the app learns them when you identify them manually).
+  templates still recognise them. New agents/disks (cefiderocol, ceftazidime-avibactam, temocillin, ...) have no
+  bundled templates, but the OCR reads their codes (see below).
 
 **S/I/R with EUCAST.** Since 2019 (v 9.0) EUCAST defines **I as "Susceptible, increased exposure"**: the organism
 is susceptible when the exposure to the agent is increased (higher dose or concentration at the site of infection),
@@ -143,8 +143,14 @@ Deliberate differences:
   instead of using each disk's own size.
 * After cropping, images are analysed at most at 1600 px (configurable).
 
-[docs/disk-reading.md](docs/disk-reading.md) studies reading disk codes without templates (PP-OCR text
-recognition constrained to a lexicon of disk codes); prototypes in `research/disk_reading/`, not used by the app.
+**Reading the disk codes.** The code printed on each disk (`AK 30`, `CIP 5`...) is read with PaddleOCR's PP-OCRv3
+text recogniser (`backend/seed/models/ppocr_rec.onnx`, 4.6 MB) and decoded against a lexicon: the catalogue codes
+plus other manufacturers' codes and printed contents (`backend/seed/disk_codes.json`). A reading with confidence
+≥ −2 is accepted ("auto"); otherwise the templates are used and the disk is marked "check", with the OCR's three
+best codes as one-click suggestions. On the sample plates the OCR reads 24 of 28 distinct disks (57/66 photos),
+every auto-accepted reading is right, and with the templates as fallback 27/28 are right. The study, the
+alternatives and the numbers are in [docs/disk-reading.md](docs/disk-reading.md); prototypes in
+`research/disk_reading/`.
 
 ## Development
 
@@ -172,8 +178,8 @@ set `ABJ_DATABASE_URL` for PostgreSQL. Images are stored under `backend/data/`.
 ```bash
 cd frontend
 npm run dev:browser     # http://localhost:5173, no backend needed
-npm run build:browser   # static site in dist-browser/ (~11 MB, mostly OpenCV.js)
-npm run validate:cv     # checks the OpenCV.js port against the Python results (tests/images/1.tiff)
+npm run build:browser   # static site in dist-browser/ (~31 MB: OpenCV.js, onnxruntime-web and the OCR model)
+npm run validate:cv     # checks the OpenCV.js and OCR ports against the Python results (tests/images/1.tiff)
 npm run test:rules      # checks the EUCAST expert system on synthetic isolates
 ```
 
@@ -185,10 +191,13 @@ internal share served over HTTP(S)); it uses hash URLs, so no rewrite rules are 
   templates) to one `.json` file and **Restore** adds a backup's experiments. Clearing the site data deletes it.
 * OpenCV.js lacks `pyrMeanShiftFiltering`; `src/browser/cv.ts` implements it following OpenCV's code and it is
   identical pixel by pixel to `cv2.pyrMeanShiftFiltering`. Plate, disks, codes and halos match the Python backend.
+* The OCR (`src/browser/ocr.ts`, onnxruntime-web on one WASM thread) and its model are downloaded from the site
+  itself the first time a plate is identified, and then cached by the browser. It takes about 1 s per disk.
 * Excel files are written by a small dependency-free writer (`src/browser/xlsx.ts`).
-* The catalogue (standards, breakpoints) and the bundled templates are generated from the backend seed with
-  `backend/.venv/bin/python backend/scripts/export_catalog.py` (writes `src/browser/catalog.json` and
+* The catalogue (standards, breakpoints, OCR lexicon) and the bundled templates are generated from the backend
+  seed with `backend/.venv/bin/python backend/scripts/export_catalog.py` (writes `src/browser/catalog.json` and
   `public-browser/templates/`); `backend/scripts/cv_reference.py` regenerates the reference of `validate:cv`.
+  The OCR model is not copied: `vite.config.ts` serves it from `backend/seed/models/`.
 
 ## Production (server version)
 
