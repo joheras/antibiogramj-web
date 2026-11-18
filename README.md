@@ -248,3 +248,15 @@ to the public, also consider:
 * `ABJ_ALLOW_REGISTRATION=false` if accounts should be created only by the operator;
 * backups of the PostgreSQL volume **and** the `files` volume (images);
 * a privacy notice: users upload clinical/laboratory images.
+
+## License and citation
+
+AntibiogramJ Web is released under the [MIT License](LICENSE). Third-party components (OpenCV.js, ONNX Runtime,
+the PaddleOCR-based OCR model…) and the bundled EUCAST data keep their own licences and terms: see
+[NOTICE.md](NOTICE.md).
+
+If you use it in your work, please cite it — GitHub's *Cite this repository* button and
+[CITATION.cff](CITATION.cff) give the reference. Releases are archived in Zenodo with a DOI.
+
+AntibiogramJ Web is a research and teaching tool, not a certified medical device: every result must be checked by
+qualified personnel.

@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+title: "AntibiogramJ Web"
+abstract: >-
+  Web application for the analysis of disk-diffusion antibiogram images: detection of the Petri dish and the
+  antibiotic disks, OCR of the disk codes, measurement of inhibition zones, S/I/R categorisation with
+  EUCAST/CLSI breakpoints, EUCAST expert rules and quality control. It runs entirely in the web browser
+  (OpenCV.js and ONNX Runtime Web) or as a multi-user server (FastAPI).
+type: software
+authors:
+  - family-names: Heras
+    given-names: Jónathan
+    email: joheras@gmail.com
+    affiliation: "University of La Rioja"
+license: MIT
+version: 2.0.0
+date-released: "2026-11-18"
+repository-code: "https://github.com/joheras/antibiogramj-web"
+url: "https://joheras.github.io/antibiogramj-web/"
+keywords:
+  - antibiogram
+  - antimicrobial susceptibility testing
+  - disk diffusion
+  - Kirby-Bauer
+  - image analysis
+  - EUCAST
+  - OpenCV
+  - OCR
+  - web application
