@@ -13,6 +13,14 @@ authors:
     email: joheras@gmail.com
     affiliation: "University of La Rioja"
 license: MIT
+doi: 10.5281/zenodo.24337999
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.24337999
+    description: "Concept DOI: all versions of AntibiogramJ Web (resolves to the latest)."
+  - type: doi
+    value: 10.5281/zenodo.24338000
+    description: "Version 2.0.0."
 version: 2.0.0
 date-released: "2026-11-18"
 repository-code: "https://github.com/joheras/antibiogramj-web"

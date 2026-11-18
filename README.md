@@ -1,5 +1,8 @@
 # AntibiogramJ Web
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24337999.svg)](https://doi.org/10.5281/zenodo.24337999)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Web version of AntibiogramJ (the Java desktop application by J. Heras, C. Domínguez, E. Mata and V. Pascual,
 University of La Rioja) — analysis of
 disk-diffusion antibiogram images: detection of antibiotic disks, recognition of the printed codes, measurement
@@ -256,7 +259,13 @@ the PaddleOCR-based OCR model…) and the bundled EUCAST data keep their own lic
 [NOTICE.md](NOTICE.md).
 
 If you use it in your work, please cite it — GitHub's *Cite this repository* button and
-[CITATION.cff](CITATION.cff) give the reference. Releases are archived in Zenodo with a DOI.
+[CITATION.cff](CITATION.cff) give the reference. Releases are archived in Zenodo:
+
+* all versions (always resolves to the latest): [10.5281/zenodo.24337999](https://doi.org/10.5281/zenodo.24337999)
+* version 2.0.0: [10.5281/zenodo.24338000](https://doi.org/10.5281/zenodo.24338000)
+
+> Heras, J. (2026). *AntibiogramJ Web* (Version 2.0.0) [Computer software]. Zenodo.
+> https://doi.org/10.5281/zenodo.24337999
 
 AntibiogramJ Web is a research and teaching tool, not a certified medical device: every result must be checked by
 qualified personnel.
