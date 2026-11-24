@@ -231,6 +231,10 @@ details summary { cursor: pointer; color: var(--muted); font-size: 0.85rem; }
 .rule-kind { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
 .reported { white-space: nowrap; }
 .supplementary { margin: 0 0 12px; }
+.phenotypes details summary { cursor: pointer; color: var(--muted, inherit); }
+.phenotypes .evidence, .phenotypes .phenotype-notes { margin: 4px 0 0; padding-left: 18px; }
+.phenotypes .phenotype-notes li { color: var(--muted, inherit); }
+.phenotypes table.pairs { margin: 4px 0 8px; }
 .supplementary summary { cursor: pointer; font-weight: 600; margin-bottom: 8px; }
 .antibiogram-editor { margin: 12px 0; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); }
 .antibiogram-editor .actions { margin-top: 10px; }

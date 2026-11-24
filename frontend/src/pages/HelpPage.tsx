@@ -25,6 +25,7 @@ const SECTIONS = [
   ["qc", "Quality control"],
   ["standards", "Standards and categories"],
   ["expert", "Expert system"],
+  ["phenotypes", "Resistance phenotypes (ESBL, AmpC, carbapenemases)"],
   ["data", "Where your data is"],
   ["install", "Phones, tablets and offline use"],
   ...(MODE === "browser" ? [["drive", "Google Drive and phone"] as const] : []),
@@ -306,19 +307,66 @@ export default function HelpPage() {
           <section id="expert" className="card">
             <h2>Expert system</h2>
             <p>For each antibiogram the expert system checks the results of all its plates against the EUCAST expected
-              resistant and susceptible phenotypes, the EUCAST expert rules and the resistance-mechanism screening
-              guidelines. It shows messages such as:</p>
+              resistant and susceptible phenotypes and the EUCAST expert rules (resistance mechanisms are in the
+              {" "}<a href="#phenotypes" onClick={go("phenotypes")}>Resistance phenotypes</a> panel). It shows messages such as:</p>
             <ul>
               <li><b>Unexpected susceptible / resistant</b>: a result that contradicts the intrinsic phenotype of the species; check the identification and the test.</li>
-              <li><b>Resistance mechanism</b>: e.g. a zone below the ESBL or carbapenemase screening cut-off, with the confirmation test to perform.</li>
+              <li><b>Resistance mechanism</b>: e.g. a positive cefoxitin screen in staphylococci (methicillin resistance).</li>
               <li><b>Inference</b>: categories that can be deduced for agents not tested (e.g. ampicillin R → piperacillin R).</li>
               <li><b>Technical uncertainty</b>: the zone falls in an EUCAST Area of Technical Uncertainty.</li>
             </ul>
             <p>Some rules need the genus and species (use <b>Edit</b> on the antibiogram) or the result of a
               supplementary test (open <b>Supplementary tests</b> and record it). Rules never change the measurements: they
               suggest the category to report, shown in the <b>Reported</b> column with an asterisk. In the example,
-              the low cefotaxime and ceftazidime zones trigger the ESBL screening message, and ampicillin R infers
-              piperacillin R. The expert rules are decision support and must be reviewed by a microbiologist.</p>
+              ampicillin R infers piperacillin R (and the low cefotaxime and ceftazidime zones give a positive ESBL
+              screening in the Resistance phenotypes panel). The expert rules are decision support and must be reviewed by a microbiologist.</p>
+          </section>
+
+          <section id="phenotypes" className="card">
+            <h2>Resistance phenotypes (ESBL, AmpC, carbapenemases)</h2>
+            <p>Under the expert system, the <b>Resistance phenotypes</b> panel applies the{" "}
+              <a href="https://www.eucast.org/bacteria/important-additional-information/resistance-detection/" target="_blank" rel="noreferrer">EUCAST
+              guidelines for detection of resistance mechanisms v2.01 (July 2017)</a> and the EUCAST guidance on the combination
+              disk test for ESBL (2019) to all the plates of the antibiogram. Each phenotype shows its result, the step
+              reached and, under <b>Why</b>, the zones that triggered it with the cut-off and section of the guideline.</p>
+            <ul>
+              <li><b>Screening</b> uses the routine disks: a zone below the screening cut-off means "investigate", not "detected".
+                ESBL (Enterobacterales): cefotaxime 5 µg &lt; 21, ceftriaxone 30 µg &lt; 23, ceftazidime 10 µg &lt; 22 or
+                cefpodoxime 10 µg &lt; 21 mm (section 3.4.1). Carbapenemases: meropenem 10 µg &lt; 28 mm (25-27 mm only if
+                resistant to piperacillin-tazobactam and/or temocillin; ertapenem &lt; 25 mm as an alternative) (section 2.4.1).
+                AmpC (<i>E. coli</i>, <i>K. pneumoniae</i>, <i>P. mirabilis</i>, <i>Salmonella</i>, <i>Shigella</i>): cefoxitin 30 µg &lt; 19 mm
+                with cefotaxime or ceftazidime R (section 4.4). MRSA: <i>S. aureus</i> with cefoxitin 30 µg &lt; 22 mm (section 7.4.1).</li>
+              <li><b>Confirmation</b> uses combination disks, which are in the antibiotic list of the wizard under
+                <i> Resistance mechanism tests</i> (they have no breakpoints, so their category is <i>Not available</i>).
+                Each one is compared with its plain disk (same content) on the same plate, or on another plate of the same
+                antibiogram; the panel lists the pairs and the zone increase.
+                <ul>
+                  <li>ESBL: cefotaxime 5 µg and ceftazidime 10 µg ± clavulanic acid 10 µg; positive if the zone increases
+                    ≥ 5 mm for one or both. Species with chromosomal AmpC (<i>Enterobacter</i>, <i>C. freundii</i>, <i>M. morganii</i>,
+                    <i>Providencia</i>, <i>Serratia</i>, <i>H. alvei</i>) and cefoxitin-resistant isolates need cefepime 30 µg ±
+                    clavulanic acid. A double-disk synergy test is recorded under <b>Supplementary tests</b>.</li>
+                  <li>Carbapenemases: meropenem 10 µg ± dipicolinic acid or EDTA (metallo-β-lactamase), ± boronic acid
+                    (KPC/class A), ± cloxacillin (AmpC + porin loss) and temocillin 30 µg (no synergy and zone &lt; 11 mm:
+                    OXA-48-like; ≥ 11 mm: ESBL + porin loss), as in Table 2 of the guideline. EUCAST leaves the definition
+                    of synergy to the package insert of each product: choose its cut-off under <b>Supplementary tests</b>
+                    (<i>Synergy cut-off of the meropenem inhibitor disks</i>); until then the increases are shown but not classified.</li>
+                  <li>AmpC: record the cloxacillin/boronic acid synergy test under Supplementary tests.</li>
+                </ul></li>
+              <li><b>Indeterminate</b> means that the tests done do not allow a conclusion (a required combination disk is
+                missing, no clear synergy, synergy with several inhibitors); the panel says which test to add. Results of
+                other methods (gradient, colorimetric, immunochromatographic, molecular) are recorded under Supplementary tests and
+                take precedence.</li>
+            </ul>
+            <p><b>Worked example.</b> An <i>E. coli</i> with cefotaxime 5 µg 15 mm and ceftazidime 10 µg 18 mm is <i>ESBL screening
+              positive</i>. Adding cefotaxime-clavulanic acid 5-10 µg (24 mm) and ceftazidime-clavulanic acid 10-10 µg (20 mm)
+              gives +9 and +2 mm: <i>ESBL producer (presumptive)</i>, because cefotaxime increased ≥ 5 mm. A <i>K. pneumoniae</i> with
+              meropenem 18 mm (&lt; 25 mm, always investigate) and meropenem + dipicolinic acid 25 mm (+7), + boronic acid
+              19 mm (+1), + cloxacillin 18 mm (0) is, with a synergy cut-off of 5 mm from the package insert, a
+              <i> metallo-β-lactamase (presumptive)</i>.</p>
+            <p>Phenotypes are presumptive results for infection control and surveillance: they never change the categories,
+              and must be confirmed, genotypically for carbapenemases and whenever the result is unclear. They are in the
+              Excel export (a section per antibiogram and a <i>Phenotypes</i> sheet) and their inputs (measurements and
+              supplementary tests) are in the backups.</p>
           </section>
 
           <section id="data" className="card">

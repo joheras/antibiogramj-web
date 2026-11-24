@@ -23,9 +23,9 @@ sys.path.insert(0, str(BACKEND))
 from app.config import settings  # noqa: E402
 from app.cv.codes import build_lexicon, load_synonyms, printed_content  # noqa: E402
 from app.db import Base  # noqa: E402
-from app.main import SEED_STANDARDS  # noqa: E402
+from app.main import SEED_DISKS, SEED_DISKS_AFTER, SEED_STANDARDS  # noqa: E402
 from app.models import Antibiotic, Breakpoint, Family, Standard  # noqa: E402
-from app.standards import load_standard  # noqa: E402
+from app.standards import load_standard, load_supplementary_disks  # noqa: E402
 
 FRONTEND = BACKEND.parent / "frontend"
 
@@ -43,8 +43,10 @@ def main() -> None:
     Base.metadata.create_all(engine)
     with Session(engine) as db:
         legacy_ids: dict = {}
-        for filename, is_default in SEED_STANDARDS:
+        for i, (filename, is_default) in enumerate(SEED_STANDARDS):
             load_standard(db, settings.seed_dir / "standards" / filename, is_default, legacy_ids)
+            if i + 1 == SEED_DISKS_AFTER:  # same order as app.main.seed_standards (same ids)
+                load_supplementary_disks(db, settings.seed_dir / SEED_DISKS)
         db.commit()
 
         catalog = {

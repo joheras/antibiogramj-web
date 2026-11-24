@@ -6,6 +6,8 @@ import AsyncImage from "../components/AsyncImage";
 import CategoryBadge from "../components/CategoryBadge";
 import AntibiogramEditor from "../components/AntibiogramEditor";
 import ExpertRulesPanel from "../components/ExpertRulesPanel";
+import PhenotypesPanel from "../components/PhenotypesPanel";
+import { detectPhenotypes } from "../phenotypes";
 import { QcCell, QcPanel } from "../components/Qc";
 import { qcStrain } from "../qc";
 import ReinterpretPanel from "../components/ReinterpretPanel";
@@ -167,6 +169,7 @@ export default function ExperimentPage() {
               onEdit={() => setEditing(a.id)}
               onTests={(supplementary_tests) => updateAntibiogram(a, { supplementary_tests }).catch((e) => setError(e.message))} />
           )}
+          {!qc && <PhenotypesPanel report={detectPhenotypes(a)} />}
         </section>
         );
       })}

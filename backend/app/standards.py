@@ -5,6 +5,7 @@ Ported from workspace/xml/ReadXMLFile.java and AntibioticReading.setHalosize.
 
 from __future__ import annotations
 
+import json
 import xml.etree.ElementTree as ET
 from datetime import date
 from pathlib import Path
@@ -136,6 +137,24 @@ def load_standard(db: Session, path: Path, is_default: bool = False,
                               resistant=r_value, comments=" ".join(_text(bp, "comments").split())))
     db.flush()
     return standard
+
+
+def load_supplementary_disks(db: Session, path: Path) -> list[Antibiotic]:
+    """Append the disks used only to detect resistance mechanisms (seed/supplementary_disks.json).
+
+    They have no breakpoints (their measurements are "Not available"); idempotent: existing rows are kept.
+    """
+    data = json.loads(path.read_text(encoding="utf-8"))
+    existing = {(a.name, a.drug_class, a.disk_content): a for a in db.scalars(select(Antibiotic))}
+    added = []
+    for disk in data["disks"]:
+        key = (disk["name"], data["drug_class"], disk["disk_content"])
+        if key not in existing:
+            antibiotic = existing[key] = Antibiotic(name=key[0], drug_class=key[1], disk_content=key[2], code=disk["code"])
+            db.add(antibiotic)
+            db.flush()
+            added.append(antibiotic)
+    return added
 
 
 def categorise(diameter: float, breakpoint: Breakpoint | None, standard: Standard) -> str:

@@ -32,7 +32,7 @@ It comes in two flavours built from the same React frontend:
 | Disk codes recognised by templates in `antibiotics/<id>/` | **OCR of the printed code** (any antibiotic of the catalogue, other manufacturers' codes) with a confidence; bundled + learned templates (up to 10 per antibiotic **per user**) as fallback |
 | Standards EUCAST 6.0 + CLSI 2015 (AntibiogramJXML) | Same files + **EUCAST 16.1** (default for new experiments) |
 | Export experiment to Excel | `.xlsx` with a summary sheet + one sheet per antibiogram |
-| Expert-rules system (stub: intrinsic resistance, exceptional phenotypes, interpretive rules) | **EUCAST expert system** (see below) |
+| Expert-rules system (stub: intrinsic resistance, exceptional phenotypes, interpretive rules) | **EUCAST expert system** and **resistance phenotypes** (ESBL, AmpC, carbapenemases MBL/KPC/OXA-48-like, MRSA) with combination disks (see below) |
 | – | **Quality control** with the EUCAST QC strains (QC Tables v 16.0) and **photo quality checks** (see below) |
 | – | **Reinterpretation** of an experiment with another standard or version, keeping the original results (see below) |
 | Desktop only | **Phones and tablets**: touch editing (pinch-zoom, larger handles), camera capture, compact layout; the browser version installs as an app (PWA) and works offline |
@@ -131,7 +131,8 @@ builds in the browser in both flavours (`frontend/src/excel.ts`; the server endp
 **Supplementary tests.** Results that cannot be read from the disks are recorded per antibiogram (**Supplementary
 tests** in the panel; only the tests relevant to the organism are offered) and used by the rules: D-test (inducible
 clindamycin resistance → clindamycin R), mecA/mecC or PBP2a (→ MRSA), vanA/vanB (→ vancomycin/teicoplanin),
-ESBL confirmation, carbapenemase (KPC, MBL, OXA-48) and beta-lactamase of *H. influenzae* (→ ampicillin,
+ESBL confirmation, ESBL double-disk synergy, AmpC confirmation, the synergy cut-off of the carbapenemase
+inhibitor disks, carbapenemase (KPC, MBL, OXA-48) and beta-lactamase of *H. influenzae* (→ ampicillin,
 amoxicillin, piperacillin R). **Edit** on an antibiogram changes genus, species, strain, sample and comments
 (the family selects the breakpoints and cannot change); the genus/species fields suggest the organisms the rules
 know.
@@ -141,7 +142,6 @@ know.
 | [Expected Resistant Phenotypes v1.2](https://www.eucast.org/bacteria/important-additional-information/expected-phenotypes/) (2023), tables 1-5 | Susceptible result for an agent the species is expected to be resistant to → *unexpected susceptible*, report R; untestable (no breakpoint) → report R without testing |
 | [Expected Susceptible Phenotypes v1.1](https://www.eucast.org/bacteria/important-additional-information/expected-phenotypes/) (2022) | Resistant result where resistance is not expected (e.g. linezolid-R *S. aureus*, ampicillin-R *E. faecalis*) → *unexpected resistant*: check identification/test, reference lab |
 | [Expert Rules](https://www.eucast.org/bacteria/important-additional-information/expert-rules/): Enterobacterales v3.3 (2024); *Staphylococcus*, *Enterococcus*, *Streptococcus*, *S. pneumoniae* (Nov 2025); *Haemophilus*, *Moraxella*, *Salmonella*, *Campylobacter*, *Corynebacterium* v3.2 (2019) | Inferences (ampicillin → piperacillin, ciprofloxacin → all fluoroquinolones, cefoxitin screen → MRSA and all beta-lactams, norfloxacin/nalidixic acid/pefloxacin/oxacillin/benzylpenicillin screens, tetracycline → doxycycline/minocycline, ...) and warnings (inducible MLSB/D-test, AmpC derepression, ESBL phenotypes, vanB, high-level aminoglycoside resistance, ...) |
-| [Detection of resistance mechanisms v2.0](https://www.eucast.org/bacteria/important-additional-information/resistance-detection/) (2017) | Enterobacterales: ESBL screening cut-offs (cefotaxime <21, ceftriaxone <23, ceftazidime <22, cefpodoxime <21 mm) and carbapenemase screening (meropenem <28 mm, 25-27 mm exception with piperacillin-tazobactam; temocillin <11 mm → OXA-48) |
 | Breakpoint notes of the standard | Zone diameter inside an Area of Technical Uncertainty (ATU) |
 
 Rules never change the stored measurements: they add messages and a suggested reported category. Rules applied
@@ -152,6 +152,33 @@ the group rules are applied and the panel asks for them. Rules that need an MIC 
 diameter breakpoints) are reported as warnings that ask for it. The engine is
 decision support and does not replace the validation of the results by a microbiologist.
 `npm run test:rules` runs the rules on synthetic isolates.
+
+### Resistance phenotypes (ESBL, AmpC, carbapenemases, MRSA)
+
+`frontend/src/phenotypes.ts` detects resistance-mechanism phenotypes from the zones of all the plates of an
+antibiogram, following the [EUCAST guidelines for detection of resistance mechanisms and specific resistances of
+clinical and/or epidemiological importance v2.01](https://www.eucast.org/bacteria/important-additional-information/resistance-detection/)
+(July 2017, the current version) and the EUCAST technical guidance on the combination disk test for confirmation of
+ESBL (February 2019). Every cut-off in the code cites its section. It runs in the browser in both flavours, is shown
+in the **Resistance phenotypes** panel of the experiment and plate pages, and is exported to Excel (a section per
+antibiogram and a *Phenotypes* sheet). Results are **presumptive**: they never change the categories, and must be
+confirmed (genotypically for carbapenemases and whenever unclear).
+
+| Phenotype | Screening (routine disks) | Phenotypic confirmation |
+|---|---|---|
+| ESBL, Enterobacterales (chapter 3) | cefotaxime 5 µg <21, ceftriaxone 30 µg <23, ceftazidime 10 µg <22, cefpodoxime 10 µg <21 mm (Table 1) | combination disks ± clavulanic acid 10 µg: increase ≥5 mm (3.4.2 A; CDT 2019). Cefotaxime 5 + ceftazidime 10 µg (group 1); cefepime 30 µg for species with chromosomal AmpC and cefoxitin <19 mm (3.4.1 B, 3.4.3); DDST recorded by the user. False positives (K1 of *K. oxytoca*, ...) and masking by MBL/KPC are noted |
+| AmpC, *E. coli*, *K. pneumoniae*, *P. mirabilis*, *Salmonella*, *Shigella* (chapter 4) | cefoxitin 30 µg <19 mm with cefotaxime/ceftazidime R; without cefoxitin, cefepime S (less specific) (4.4) | cloxacillin/boronic acid synergy recorded by the user; *E. coli*/*Shigella* need PCR to tell acquired from chromosomal AmpC |
+| Carbapenemases, Enterobacterales (chapter 2) | meropenem 10 µg <28 mm; 25-27 mm only with piperacillin-tazobactam and/or temocillin R; ertapenem <25 mm as an alternative (2.4.1, Table 1) | meropenem 10 µg ± dipicolinic acid/EDTA (MBL), boronic acid (KPC), both (MBL + KPC), cloxacillin (AmpC + porin loss); no synergy + temocillin 30 µg <11 mm → OXA-48-like, ≥11 mm → ESBL + porin loss (2.4.2, Figure 1, Table 2). The synergy cut-off comes from the package insert and is chosen per antibiogram (EUCAST does not define it) |
+| MRSA, *S. aureus* (chapter 7) | cefoxitin 30 µg <22 mm (7.4.1 B) | mecA/mecC or PBP2a recorded by the user |
+
+The combination disks are appended to the catalogue (`backend/seed/supplementary_disks.json`, class *Resistance
+mechanism tests*, ids 89-96, no breakpoints) after the seed standards, so existing ids never change; their codes
+(e.g. `CTXCV`, `MRPDP`) are in the OCR lexicon. Each one is paired with its plain disk of the same content on the
+same plate, or on another plate of the antibiogram. Outcomes are *detected*, *not detected*, *screening positive*
+(confirmation needed) or *indeterminate* (the panel names the missing test). The results of other methods are
+recorded under Supplementary tests and take precedence. The phenotypes are computed from the stored measurements
+and supplementary tests, so backups and Drive copies carry them without format changes.
+`npm run test:phenotypes` runs 59 synthetic cases (positive, negative and indeterminate outcomes of each phenotype).
 
 ### Algorithms
 
@@ -203,6 +230,7 @@ npm run dev:browser     # http://localhost:5173, no backend needed
 npm run build:browser   # static site in dist-browser/ (~31 MB: OpenCV.js, onnxruntime-web and the OCR model)
 npm run validate:cv     # checks the OpenCV.js and OCR ports against the Python results (tests/images/1.tiff)
 npm run test:rules      # checks the EUCAST expert system on synthetic isolates
+npm run test:phenotypes # checks the resistance phenotypes (ESBL, AmpC, carbapenemases, MRSA)
 npm run test:drive      # checks the Google Drive client against a mocked Drive API
 ```
 

@@ -3,6 +3,7 @@
 // a summary sheet with one row per measurement, then one sheet per antibiogram.
 import { categoryLabel, familyLabel, standardLabel, type Download, type ExperimentDetail, type Measurement, type Standard } from "./api";
 import { CATEGORY_NAME, evaluate, EXPERT_SYSTEM_SOURCES, SUPPLEMENTARY_TESTS } from "./expertRules";
+import { detectPhenotypes, PHENOTYPE_SOURCES, STAGE_LABEL, STATUS_LABEL as PHENOTYPE_STATUS, type PhenotypeStatus } from "./phenotypes";
 import { QC_SOURCE, qcResult, qcStrain, rangeLabel, STATUS_LABEL, type QcStrain } from "./qc";
 import { workbook, type Cell, type Sheet } from "./xlsx";
 
@@ -37,6 +38,11 @@ export function experimentSheets(e: ExperimentDetail, standards: Standard[] = []
       "Original standard", "Original category"),
   ];
   const sheets: Sheet[] = [{ name: "Summary", rows: summary }];
+  const phenotypeStyle: Record<PhenotypeStatus, "S" | "I" | "R"> = { positive: "R", "screen-positive": "I", indeterminate: "I", negative: "S" };
+  const phenotypeRows: Cell[][] = [
+    ["Resistance phenotypes (presumptive, must be confirmed)"], ["Sources", PHENOTYPE_SOURCES],
+    h("Antibiogram", "Genus", "Species", "Strain", "Sample", "Mechanism", "Status", "Stage", "Result", "Evidence", "Notes"),
+  ];
   e.antibiograms.forEach((a, i) => {
     const evaluation = evaluate(a, e.standard);
     const qc = qcStrain(a.qc_strain);
@@ -71,12 +77,30 @@ export function experimentSheets(e: ExperimentDetail, standards: Standard[] = []
       rows.push([], [{ v: "Supplementary tests", s: "bold" }]);
       for (const t of tests) rows.push([t.label, t.options.find((o) => o.value === a.supplementary_tests[t.key])?.label ?? a.supplementary_tests[t.key]]);
     }
+    const phenotypes = qc ? null : detectPhenotypes(a);
+    if (phenotypes && (phenotypes.phenotypes.length || phenotypes.pairs.length)) {
+      rows.push([], [{ v: "Resistance phenotypes", s: "bold" }], h("Mechanism", "Status", "Stage", "Result", "Evidence", "Notes", "Source"));
+      for (const p of phenotypes.phenotypes) {
+        const status: Cell = { v: PHENOTYPE_STATUS[p.status], s: phenotypeStyle[p.status] };
+        rows.push([p.mechanism, status, STAGE_LABEL[p.stage], p.result, p.evidence.join(" | "), p.notes.join(" | "), p.source]);
+        phenotypeRows.push([a.id, a.genus, a.species, a.strain, a.sample, p.mechanism, status, STAGE_LABEL[p.stage], p.result,
+          p.evidence.join(" | "), p.notes.join(" | ")]);
+      }
+      if (phenotypes.pairs.length) {
+        rows.push([], h("Combination disk", "Zone (mm)", "Plain disk", "Zone (mm)", "Increase (mm)", "Same plate"));
+        for (const p of phenotypes.pairs) rows.push([`${p.combination.antibiotic.name} ${p.combination.antibiotic.disk_content}`,
+          Math.round(p.combination.diameter_mm), `${p.base.antibiotic.name} ${p.base.antibiotic.disk_content}`, Math.round(p.base.diameter_mm),
+          p.increase, p.samePlate ? "Yes" : "No"]);
+      }
+      for (const m of phenotypes.unpaired) rows.push([`${m.antibiotic.name} ${m.antibiotic.disk_content}`, "No plain disk to compare with"]);
+    }
     rows.push([], [{ v: "Expert system", s: "bold" }], h("Type", "Message", "Source", "Grade"));
     if (!evaluation.rules.length) rows.push(["", "No expert rules apply to these results."]);
     for (const r of evaluation.rules) rows.push([r.kind, r.message, r.source, r.grade ?? ""]);
     rows.push(["", `Decision support only. Sources: ${EXPERT_SYSTEM_SOURCES}.`]);
     sheets.push({ name: `Antibiogram ${i + 1}`, rows });
   });
+  if (phenotypeRows.length > 3) sheets.push({ name: "Phenotypes", rows: phenotypeRows });
   return sheets;
 }
 

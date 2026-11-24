@@ -8,12 +8,13 @@
 //         S. pneumoniae (November 2025); Haemophilus, Moraxella, Salmonella, Campylobacter, Corynebacterium
 //         v3.2 (June 2019)
 //  * SCR  EUCAST phenotypic screening tests to detect / exclude resistance (2022)
-//  * MECH EUCAST guidelines for detection of resistance mechanisms v2.0 (2017): ESBL and carbapenemase screening
 //  * ATU  Areas of Technical Uncertainty copied from the breakpoint notes of the standard in use
 //
 // Only rules that can be evaluated from disk-diffusion categories/diameters are implemented; rules that need
 // MICs or molecular tests are reported as a warning that asks for them. Rules never change the stored
 // measurements: they produce messages and a suggested "reported" category per measurement.
+// Screening and phenotypic confirmation of resistance mechanisms (ESBL, AmpC, carbapenemases, MRSA) are in
+// phenotypes.ts.
 
 import type { Antibiogram, Measurement, Standard } from "./api";
 
@@ -45,21 +46,18 @@ export interface Evaluation {
 
 const URL_ER = "https://www.eucast.org/bacteria/important-additional-information/expert-rules/";
 const URL_EXP = "https://www.eucast.org/bacteria/important-additional-information/expected-phenotypes/";
-const URL_RES = "https://www.eucast.org/bacteria/important-additional-information/resistance-detection/";
 const ERP = "EUCAST Expected Resistant Phenotypes v1.2 (2023)";
 const ESP = "EUCAST Expected Susceptible Phenotypes v1.1 (2022)";
-const MECH = "EUCAST guidelines for detection of resistance mechanisms v2.0 (2017)";
 
 export const EXPERT_SYSTEM_SOURCES =
   "EUCAST Expert Rules (Enterobacterales v3.3 2024; Staphylococcus, Enterococcus, Streptococcus, S. pneumoniae 2025; " +
-  "other groups v3.2 2019), Expected Resistant Phenotypes v1.2, Expected Susceptible Phenotypes v1.1, " +
-  "guidelines for detection of resistance mechanisms v2.0";
+  "other groups v3.2 2019), Expected Resistant Phenotypes v1.2, Expected Susceptible Phenotypes v1.1";
 
 // ------------------------------------------------------------------ organisms
 
-interface Organism { family: string; genus: string; species: string }
+export interface Organism { family: string; genus: string; species: string }
 
-function organismOf(a: Pick<Antibiogram, "family" | "genus" | "species">): Organism {
+export function organismOf(a: Pick<Antibiogram, "family" | "genus" | "species">): Organism {
   let genus = a.genus.trim().toLowerCase().replace(/\s+/g, " ");
   let species = a.species.trim().toLowerCase().replace(/\s+/g, " ");
   if (!genus && species.includes(" ")) [genus, species] = [species.split(" ")[0], species.split(" ").slice(1).join(" ")];
@@ -71,7 +69,7 @@ function organismOf(a: Pick<Antibiogram, "family" | "genus" | "species">): Organ
 }
 
 /** "genus" or "genus species" (species may be followed by more words, e.g. "pneumoniae complex"). */
-const is = (o: Organism, ...names: string[]) => names.some((n) => {
+export const is = (o: Organism, ...names: string[]) => names.some((n) => {
   const [g, s] = n.split(" ");
   return o.genus === g && (!s || o.species === s || o.species.startsWith(`${s} `));
 });
@@ -80,9 +78,9 @@ const fam = (o: Organism, prefix: string) => o.family.startsWith(prefix);
 const ENTEROBACTERALES = ["escherichia", "klebsiella", "enterobacter", "citrobacter", "proteus", "morganella",
   "providencia", "serratia", "salmonella", "shigella", "hafnia", "raoultella", "yersinia", "cronobacter", "pantoea",
   "leclercia", "plesiomonas", "edwardsiella", "kluyvera"];
-const enterobacterales = (o: Organism) => fam(o, "enterobacteriaceae") || ENTEROBACTERALES.includes(o.genus);
+export const enterobacterales = (o: Organism) => fam(o, "enterobacteriaceae") || ENTEROBACTERALES.includes(o.genus);
 const staphylococci = (o: Organism) => fam(o, "staphylococcus") || o.genus === "staphylococcus";
-const sAureus = (o: Organism) => is(o, "staphylococcus aureus");
+export const sAureus = (o: Organism) => is(o, "staphylococcus aureus");
 const cons = (o: Organism) => staphylococci(o) && !sAureus(o) && o.species !== ""
   && !is(o, "staphylococcus pseudintermedius", "staphylococcus intermedius", "staphylococcus schleiferi", "staphylococcus coagulans");
 const enterococci = (o: Organism) => fam(o, "enterococcus") || o.genus === "enterococcus";
@@ -123,8 +121,16 @@ export const SUPPLEMENTARY_TESTS: SupplementaryTest[] = [
   { key: "mec", label: "mecA/mecC gene or PBP2a", options: POS_NEG, applies: staphylococci },
   { key: "van", label: "Glycopeptide resistance gene", applies: enterococci,
     options: [{ value: "vanA", label: "vanA detected" }, { value: "vanB", label: "vanB detected" }, { value: "negative", label: "Not detected" }] },
-  { key: "esbl", label: "ESBL confirmation test", options: POS_NEG, applies: enterobacterales },
-  { key: "carbapenemase", label: "Carbapenemase test", applies: (o) => enterobacterales(o) || nonFermenters(o),
+  { key: "esbl", label: "ESBL confirmation (gradient, broth or molecular test)", options: POS_NEG, applies: enterobacterales },
+  { key: "esbl_ddst", label: "ESBL double-disk synergy test (DDST)", applies: enterobacterales,
+    options: [...POS_NEG, { value: "indeterminate", label: "Indeterminate (no clear synergy)" }] },
+  { key: "ampc_confirmation", label: "AmpC confirmation (cloxacillin or boronic acid synergy)", options: POS_NEG, applies: enterobacterales },
+  // EUCAST resistance-mechanism guidelines v2.01, section 2.4.2 Table 2: "The exact definitions of synergy are
+  // provided in package inserts" - the cut-off is the laboratory's, not a default of this application.
+  { key: "carbapenemase_synergy_mm", label: "Synergy cut-off of the meropenem inhibitor disks (package insert)",
+    applies: enterobacterales,
+    options: [2, 3, 4, 5, 6, 7, 8, 9, 10].map((mm) => ({ value: String(mm), label: `Zone increase ≥ ${mm} mm` })) },
+  { key: "carbapenemase", label: "Carbapenemase test (colorimetric, immunochromatographic or molecular)", applies: (o) => enterobacterales(o) || nonFermenters(o),
     options: [{ value: "KPC", label: "KPC / class A" }, { value: "MBL", label: "Metallo-beta-lactamase" },
       { value: "OXA-48", label: "OXA-48-like" }, { value: "positive", label: "Positive (type not known)" },
       { value: "negative", label: "Negative" }] },
@@ -799,56 +805,6 @@ function otherGroupsRules(ctx: Context) {
       message: "Resistant to erythromycin and susceptible to clindamycin: test for inducible clindamycin resistance (ermX); if inducible, report clindamycin resistant." });
 }
 
-// ---- Resistance mechanisms in Enterobacterales (EUCAST guidelines v2.0)
-
-function mechanisms(ctx: Context) {
-  const { iso } = ctx;
-  const below = (key: string, cut: number) => { const d = iso.diameter(key); return d !== null && Math.round(d) < cut; };
-  const esbl = ([["cefotaxime", 21], ["ceftriaxone", 23], ["ceftazidime", 22], ["cefpodoxime", 21]] as const)
-    .filter(([k, cut]) => below(k, cut)).map(([k]) => iso.label(k));
-  const esblTest = ctx.tests.esbl;
-  if (esblTest === "positive") ctx.fire({ id: "MECH ESBL", kind: "mechanism", source: `${MECH}, ESBL`, url: URL_RES,
-    message: "ESBL production confirmed. Report the beta-lactams according to the expert rules above; for infection " +
-      "control and surveillance, flag the isolate as an ESBL producer." });
-  else if (esblTest === "negative" && esbl.length) ctx.fire({ id: "MECH ESBL", kind: "inference", source: `${MECH}, ESBL`,
-    url: URL_RES, agents: esbl,
-    message: `ESBL screen positive (${list(esbl)}) but confirmation negative: consider AmpC (cefoxitin) or other mechanisms.` });
-  else if (esbl.length) ctx.fire({ id: "MECH ESBL", kind: "mechanism", source: `${MECH}, ESBL screening`, url: URL_RES, agents: esbl,
-    message: `Zone below the ESBL screening cut-off for ${list(esbl)} (cefotaxime <21, ceftriaxone <23, ceftazidime <22, ` +
-      "cefpodoxime <21 mm): perform an ESBL confirmation test (clavulanic acid synergy; use cefepime in species with " +
-      "chromosomal AmpC) and record it under Supplementary tests." });
-  const carba = ctx.tests.carbapenemase;
-  if (carba && carba !== "negative") {
-    ctx.fire({ id: "MECH CPE", kind: "mechanism", source: `${MECH}, carbapenemases`, url: URL_RES,
-      message: `Carbapenemase producer${carba === "positive" ? "" : ` (${carba})`}: report the beta-lactams as tested, ` +
-        "notify infection control and follow the national surveillance requirements." +
-        (carba === "MBL" ? " Metallo-beta-lactamases do not hydrolyse aztreonam but are not inhibited by avibactam." : "") });
-    return;
-  }
-  if (carba === "negative" && iso.diameter("meropenem") !== null && Math.round(iso.diameter("meropenem")!) < 28) {
-    ctx.fire({ id: "MECH CPE", kind: "inference", source: `${MECH}, carbapenemases`, url: URL_RES,
-      message: "Reduced carbapenem susceptibility without carbapenemase: most often ESBL or AmpC with porin loss." });
-    return;
-  }
-  const mem = iso.diameter("meropenem"), etp = iso.diameter("ertapenem");
-  const tzpNotR = iso.notR("piperacillin-tazobactam");
-  const temocillinHigh = below("temocillin", 11);
-  if (mem !== null && Math.round(mem) < 28) {
-    const d = Math.round(mem);
-    if (d >= 25 && tzpNotR && !iso.R("temocillin"))
-      ctx.fire({ id: "MECH CPE", kind: "inference", source: `${MECH}, carbapenemase screening`, url: URL_RES, agents: [iso.label("meropenem")],
-        message: `Meropenem ${d} mm (25-27 mm) with piperacillin-tazobactam not resistant: no further testing for carbapenemases is needed.` });
-    else ctx.fire({ id: "MECH CPE", kind: "mechanism", source: `${MECH}, carbapenemase screening`, url: URL_RES, agents: [iso.label("meropenem")],
-      message: `Meropenem ${d} mm, below the carbapenemase screening cut-off (<28 mm): investigate carbapenemase production ` +
-        "(combination disk, colorimetric, immunochromatographic or molecular tests) and record it under Supplementary tests." +
-        (temocillinHigh ? " High-level temocillin resistance (<11 mm) suggests OXA-48." : "") });
-  } else if (mem === null && etp !== null && Math.round(etp) < 25) {
-    ctx.fire({ id: "MECH CPE", kind: "mechanism", source: `${MECH}, carbapenemase screening`, url: URL_RES, agents: [iso.label("ertapenem")],
-      message: `Ertapenem ${Math.round(etp)} mm (<25 mm): possible carbapenemase producer. Ertapenem is sensitive but not ` +
-        "specific (ESBL/AmpC with porin loss); test meropenem (screening cut-off <28 mm) to confirm." });
-  }
-}
-
 // ---- Areas of Technical Uncertainty, from the breakpoint notes
 
 const ATU = /(?:Area of Technical Uncertainty \(ATU\):|ATU of)\s*(\d+)(?:\s*-\s*(\d+))?\s*mm/i;
@@ -882,7 +838,6 @@ export function evaluate(a: Pick<Antibiogram, "family" | "genus" | "species" | "
   if (enterobacterales(o)) {
     enterobacteralesRules(ctx);
     if (salmonella(o)) salmonellaRules(ctx);
-    mechanisms(ctx);
   }
   if (staphylococci(o)) staphylococcusRules(ctx);
   if (enterococci(o)) enterococcusRules(ctx);

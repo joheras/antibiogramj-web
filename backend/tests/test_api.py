@@ -385,3 +385,58 @@ def test_photo_quality():
     for d in detect_disks(image):
         cv2.circle(disks, (int(d.cx), int(d.cy)), int(d.r), (255, 255, 255), -1)
     assert warnings(disks) == []
+
+
+def test_phenotype_disks(alice):
+    """Combination disks for resistance phenotypes: appended to the catalogue (same ids as the in-browser
+    catalogue), without breakpoints, idempotent, and their supplementary tests are accepted."""
+    import json
+
+    from pydantic import ValidationError
+    from sqlalchemy import create_engine, func, select
+    from sqlalchemy.orm import Session
+
+    from app.db import Base
+    from app.main import seed_standards
+    from app.models import Antibiotic, Breakpoint
+    from app.schemas import AntibiogramUpdate
+    from app.standards import load_standard
+
+    seed = json.loads((settings.seed_dir / "supplementary_disks.json").read_text(encoding="utf-8"))
+    browser = json.loads((Path(__file__).parents[2] / "frontend/src/browser/catalog.json").read_text(encoding="utf-8"))
+    expected = {(d["name"], d["disk_content"]) for d in seed["disks"]}
+    in_browser = {(a["name"], a["disk_content"]): a["id"] for a in browser["antibiotics"] if a["drug_class"] == seed["drug_class"]}
+    assert set(in_browser) == expected and min(in_browser.values()) == 89  # appended after the 88 original disks
+
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+    with Session(engine) as db:
+        seed_standards(db)  # fresh database: the same ids as the browser catalogue
+        rows = {(a.name, a.disk_content): a.id for a in db.scalars(select(Antibiotic).where(Antibiotic.drug_class == seed["drug_class"]))}
+        assert rows == in_browser
+        assert db.scalar(select(func.count()).select_from(Breakpoint).where(Breakpoint.antibiotic_id.in_(rows.values()))) == 0
+        for name, content in [p for d in seed["disks"] for p in [tuple(d["pairs_with"])]]:
+            assert db.scalar(select(Antibiotic).where(Antibiotic.name == name, Antibiotic.disk_content == content)) is not None
+
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+    with Session(engine) as db:  # an existing database (all standards loaded) gets the disks appended, once
+        legacy_ids: dict = {}
+        for filename, is_default in [("EUCAST-6.0.xml", False), ("CLSI-2015.xml", False), ("EUCAST-16.1.xml", True)]:
+            load_standard(db, settings.seed_dir / "standards" / filename, is_default, legacy_ids)
+        db.commit()
+        before = {a.id: a.name for a in db.scalars(select(Antibiotic))}
+        seed_standards(db)
+        seed_standards(db)
+        after = {a.id: a.name for a in db.scalars(select(Antibiotic))}
+        assert {k: after[k] for k in before} == before and len(after) == len(before) + len(expected)
+
+    catalogue = {(a["name"], a["disk_content"]) for a in alice.get("/api/catalog/antibiotics").json()}
+    assert expected <= catalogue
+
+    ok = AntibiogramUpdate(supplementary_tests={"esbl_ddst": "indeterminate", "ampc_confirmation": "positive",
+                                                "carbapenemase_synergy_mm": "5"})
+    assert ok.supplementary_tests["carbapenemase_synergy_mm"] == "5"
+    for bad in [{"carbapenemase_synergy_mm": "1"}, {"esbl_ddst": "maybe"}, {"ampc_confirmation": "indeterminate"}]:
+        with pytest.raises(ValidationError):
+            AntibiogramUpdate(supplementary_tests=bad)

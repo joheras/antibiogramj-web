@@ -60,16 +60,16 @@ function check(title: string, a: Antibiogram, expectRules: string[], expectRepor
 check("E. coli ESBL + FQ resistance", isolate("Enterobacteriaceae", "Escherichia", "coli", [
   ["Ampicillin", 6], ["Amoxicillin-clavulanic acid", 22, "iv"], ["Piperacillin-tazobactam", 22], ["Piperacillin", 25],
   ["Cefotaxime", 12], ["Ceftazidime", 19], ["Cefepime", 26], ["Meropenem", 26], ["Ciprofloxacin", 12], ["Levofloxacin", 23],
-]), ["ER Enterobacterales 1", "ER Enterobacterales 6", "ER Enterobacterales 7", "ER Enterobacterales 8", "MECH ESBL", "MECH CPE"],
+]), ["ER Enterobacterales 1", "ER Enterobacterales 6", "ER Enterobacterales 7", "ER Enterobacterales 8"],
 { Piperacillin: "R", Levofloxacin: "R" });
 
 check("E. coli in the ATU of amoxicillin-clavulanic acid", isolate("Enterobacteriaceae", "", "Escherichia coli", [
   ["Amoxicillin-clavulanic acid", 19.4, "iv"], ["Ampicillin", 20],
-]), ["ATU", "ER Enterobacterales 1"], {}, ["MECH ESBL"]);
+]), ["ATU", "ER Enterobacterales 1"]);
 
 check("K. pneumoniae susceptible to ampicillin (unexpected)", isolate("Enterobacteriaceae", "Klebsiella", "pneumoniae", [
   ["Ampicillin", 20], ["Piperacillin", 25], ["Meropenem", 20], ["Temocillin", 9],
-]), ["ERP 1.7", "ER Enterobacterales 2", "MECH CPE"], { Ampicillin: "R", Piperacillin: "R" });
+]), ["ERP 1.7", "ER Enterobacterales 2"], { Ampicillin: "R", Piperacillin: "R" });
 
 check("Enterobacter cloacae: AmpC rules", isolate("Enterobacteriaceae", "Enterobacter", "cloacae", [
   ["Cefoxitin", 25], ["Cefotaxime", 25], ["Cefuroxime iv", 22],
@@ -115,7 +115,7 @@ check("Group A streptococcus resistant to penicillin (unexpected)", isolate("Str
 
 check("No rules for an unremarkable isolate", isolate("Enterobacteriaceae", "Escherichia", "coli", [
   ["Ampicillin", 20], ["Cefotaxime", 28], ["Ciprofloxacin", 30], ["Meropenem", 30],
-]), ["ER Enterobacterales 1"], {}, ["MECH ESBL", "MECH CPE", "ER Enterobacterales 8"]);
+]), ["ER Enterobacterales 1"], {}, ["ER Enterobacterales 8"]);
 
 check("Positive D-test makes clindamycin resistant", isolate("Staphylococcus spp.", "Staphylococcus", "aureus", [
   ["Erythromycin", 10], ["Clindamycin", 25], ["Cefoxitin", 26, "S. aureus"],
@@ -130,9 +130,10 @@ check("H. influenzae beta-lactamase positive", isolate("Haemophilus influenzae",
   ["Ampicillin", 20],
 ], { beta_lactamase: "positive" }), ["BP Haemophilus beta-lactamase"], { Ampicillin: "R" });
 
-check("Confirmed ESBL and OXA-48", isolate("Enterobacteriaceae", "Klebsiella", "pneumoniae", [
+// Resistance mechanisms (ESBL, AmpC, carbapenemases) are in phenotypes.ts: scripts/test-phenotypes.mts
+check("Mechanisms are not expert rules", isolate("Enterobacteriaceae", "Klebsiella", "pneumoniae", [
   ["Cefotaxime", 12], ["Meropenem", 24],
-], { esbl: "positive", carbapenemase: "OXA-48" }), ["MECH ESBL", "MECH CPE"]);
+], { esbl: "positive", carbapenemase: "OXA-48" }), [], {}, ["MECH ESBL", "MECH CPE"]);
 
 check("Tests that do not apply to the organism are ignored", isolate("Enterobacteriaceae", "Escherichia", "coli", [
   ["Ampicillin", 20],

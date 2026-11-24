@@ -1,0 +1,26 @@
+{
+  "_comment": [
+    "Disks used only to detect resistance mechanisms (no S/I/R breakpoints): appended to the antibiotic catalogue",
+    "after the seed standards (see app/main.py SEED_DISKS_AFTER). Never remove or reorder entries: the in-browser",
+    "catalogue (frontend/src/browser/catalog.json) keeps their ids. 'pairs_with' is the plain disk the zone of the",
+    "combination disk is compared with (frontend/src/phenotypes.ts COMBINATIONS lists the same pairs).",
+    "Sources: EUCAST guidelines for detection of resistance mechanisms and specific resistances of clinical and/or",
+    "epidemiological importance v2.01 (July 2017), section 2.4.2 Table 2 (meropenem 10 ug disk/tablet with inhibitors),",
+    "section 3.4.2 Tables 2-3 (cephalosporin +/- clavulanic acid 10 ug), and EUCAST technical guidance on the",
+    "combination disk test for confirmation of ESBL (12 February 2019): cefotaxime 5 ug and ceftazidime 10 ug +/-",
+    "clavulanic acid 10 ug. Inhibitor amounts of the meropenem combinations depend on the manufacturer.",
+    "Codes: catalogue labels (MRPxx in the style of Rosco tablet codes, not verified; CTXCV/CAZCV/FEPCV for the CDT disks), read by the OCR like any",
+    "catalogue code. Other manufacturers' codes can be added to seed/disk_codes.json (none added: not verified)."
+  ],
+  "drug_class": "Resistance mechanism tests",
+  "disks": [
+    {"name": "Cefotaxime-clavulanic acid", "disk_content": "5-10", "code": "CTXCV 5-10", "pairs_with": ["Cefotaxime", "5"]},
+    {"name": "Ceftazidime-clavulanic acid", "disk_content": "10-10", "code": "CAZCV 10-10", "pairs_with": ["Ceftazidime", "10"]},
+    {"name": "Cefepime-clavulanic acid", "disk_content": "30-10", "code": "FEPCV 30-10", "pairs_with": ["Cefepime", "30"]},
+    {"name": "Meropenem-EDTA", "disk_content": "10", "code": "MRPED 10", "pairs_with": ["Meropenem", "10"]},
+    {"name": "Meropenem-dipicolinic acid", "disk_content": "10", "code": "MRPDP 10", "pairs_with": ["Meropenem", "10"]},
+    {"name": "Meropenem-boronic acid", "disk_content": "10", "code": "MRPBO 10", "pairs_with": ["Meropenem", "10"]},
+    {"name": "Meropenem-dipicolinic acid-boronic acid", "disk_content": "10", "code": "MRPDB 10", "pairs_with": ["Meropenem", "10"]},
+    {"name": "Meropenem-cloxacillin", "disk_content": "10", "code": "MRPCX 10", "pairs_with": ["Meropenem", "10"]}
+  ]
+}

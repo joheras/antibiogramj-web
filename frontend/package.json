@@ -12,6 +12,7 @@
     "preview": "vite preview",
     "validate:cv": "node --experimental-strip-types --no-warnings scripts/validate-cv.mts",
     "test:rules": "node --experimental-strip-types --no-warnings scripts/test-expert-rules.mts",
+    "test:phenotypes": "node --experimental-strip-types --no-warnings scripts/test-phenotypes.mts",
     "test:drive": "node --experimental-strip-types --no-warnings scripts/test-drive.mts"
   },
   "dependencies": {

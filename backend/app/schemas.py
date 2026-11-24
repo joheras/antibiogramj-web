@@ -157,6 +157,10 @@ SUPPLEMENTARY_TESTS: dict[str, set[str]] = {
     "esbl": {"positive", "negative"},
     "carbapenemase": {"KPC", "MBL", "OXA-48", "positive", "negative"},
     "beta_lactamase": {"positive", "negative"},
+    # resistance phenotypes (frontend/src/phenotypes.ts)
+    "esbl_ddst": {"positive", "negative", "indeterminate"},
+    "ampc_confirmation": {"positive", "negative"},
+    "carbapenemase_synergy_mm": {str(mm) for mm in range(2, 11)},
 }
 
 

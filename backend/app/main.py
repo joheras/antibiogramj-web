@@ -11,13 +11,17 @@ from .config import BASE_DIR, settings
 from .db import Base, SessionLocal, engine
 from .models import Standard
 from .routers import analysis, auth, catalog, experiments
-from .standards import load_standard, standard_key
+from .standards import load_standard, load_supplementary_disks, standard_key
 
 # Loaded on first start, in the same order as the desktop application so the
 # antibiotic ids of the bundled templates (seed/templates/<id>) match. New standards
 # are appended (never inserted) so existing ids do not change; the flag marks the
 # default standard for new experiments.
 SEED_STANDARDS = [("EUCAST-6.0.xml", False), ("CLSI-2015.xml", False), ("EUCAST-16.1.xml", True)]
+# Disks without breakpoints used to detect resistance mechanisms (combination disks with inhibitors). They are
+# loaded after the first SEED_DISKS_AFTER standards, so standards appended later never change their ids.
+SEED_DISKS = "supplementary_disks.json"
+SEED_DISKS_AFTER = 3
 FRONTEND_DIST = Path(BASE_DIR.parent / "frontend" / "dist")
 
 
@@ -56,11 +60,13 @@ def seed_standards(db) -> None:
     legacy_ids: dict | None = {} if fresh else None  # template ids only on a first load
     loaded = {(s.name, s.version) for s in db.scalars(select(Standard))}
     added = False
-    for filename, is_default in SEED_STANDARDS:
+    for i, (filename, is_default) in enumerate(SEED_STANDARDS):
         path = settings.seed_dir / "standards" / filename
         if fresh or standard_key(path) not in loaded:
             load_standard(db, path, is_default, legacy_ids)
             added = added or is_default
+        if i + 1 == SEED_DISKS_AFTER:
+            load_supplementary_disks(db, settings.seed_dir / SEED_DISKS)
     if added:  # a newly seeded default replaces the previous one
         default = next(f for f, d in SEED_STANDARDS if d)
         key = standard_key(settings.seed_dir / "standards" / default)

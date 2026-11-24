@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { api, download, standardLabel, type Plate } from "../api";
+import { api, download, standardLabel, type Antibiogram, type Plate } from "../api";
 import { useImageUrl } from "../components/AsyncImage";
 import CategoryBadge from "../components/CategoryBadge";
+import PhenotypesPanel from "../components/PhenotypesPanel";
+import { detectPhenotypes } from "../phenotypes";
 import { QcCell } from "../components/Qc";
 import { qcStrain, qcResult, type QcStrain } from "../qc";
 import { useSession } from "../session";
@@ -15,12 +17,15 @@ export default function PlatePage() {
   const [annotated, setAnnotated] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [qc, setQc] = useState<QcStrain | undefined>(undefined);
+  const [antibiogram, setAntibiogram] = useState<Antibiogram | undefined>(undefined);
   useEffect(() => {
     api.plate(id).then(async (p) => {
       setPlate(p);
       // The QC strain is a property of the antibiogram of the plate.
       const exp = await api.experiment(p.experiment_id);
-      setQc(qcStrain(exp.antibiograms.find((a) => a.id === p.antibiogram_id)?.qc_strain));
+      const a = exp.antibiograms.find((x) => x.id === p.antibiogram_id);
+      setAntibiogram(a);
+      setQc(qcStrain(a?.qc_strain));
     }).catch((e) => setError(e.message));
   }, [id]);
 
@@ -95,6 +100,11 @@ export default function PlatePage() {
               ))}
             </tbody>
           </table>
+          {antibiogram && !qc && <>
+            <PhenotypesPanel report={detectPhenotypes(antibiogram)} compact />
+            {antibiogram.plates.length > 1 && <p className="muted small">Phenotypes of the whole antibiogram ({antibiogram.plates.length} plates); the
+              supplementary tests are recorded in the <Link to={`/experiments/${plate.experiment_id}`}>experiment</Link>.</p>}
+          </>}
         </div>
       </div>
     </div>
