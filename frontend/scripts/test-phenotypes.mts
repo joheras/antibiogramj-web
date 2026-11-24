@@ -165,6 +165,16 @@ check("CPE: dipicolinic acid only, no synergy, boronic acid missing -> indetermi
 check("CPE: recorded OXA-48 test", kpn([["Meropenem", 24]], { carbapenemase: "OXA-48" }), { Carbapenemase: ["positive", "recorded"] });
 check("CPE: recorded negative test", kpn([["Meropenem", 24]], { carbapenemase: "negative" }), { Carbapenemase: "negative" });
 
+for (const t of ["KPC", "OXA-48"]) check(`CPE: recorded ${t} takes precedence over MBL disks`, kpn(MBL, { ...SYN5, carbapenemase: t }), { Carbapenemase: ["positive", t] });
+check("CPE: recorded negative takes precedence over MBL disks", kpn(MBL, { ...SYN5, carbapenemase: "negative" }), { Carbapenemase: ["negative", "recorded"] });
+check("CPE: recorded positive, the disks give the type", kpn(MBL, { ...SYN5, carbapenemase: "positive" }), { Carbapenemase: ["positive", "Metallo"] });
+check("CPE: recorded positive is not undone by the disks", kpn([...NOSYN, ["Temocillin", 15]], { ...SYN5, carbapenemase: "positive" }), { Carbapenemase: ["positive", "type not known"] });
+const dualDisks = (dpa: number, apba: number, clx?: number): [string, number][] => [["Meropenem", 8], ["Meropenem-dipicolinic acid", dpa],
+  ["Meropenem-boronic acid", apba], ["Meropenem-dipicolinic acid-boronic acid", 18], ...(clx === undefined ? [] : [["Meropenem-cloxacillin", clx] as [string, number]])];
+for (const [d, b] of [[16, 9], [9, 16], [16, 16]]) check(`CPE: double inhibitor + single inhibitors ${d}/${b} mm -> MBL + KPC`, kpn(dualDisks(d, b, 8), SYN5), { Carbapenemase: ["positive", "MBL + KPC"] });
+check("CPE: double inhibitor without cloxacillin -> indeterminate", kpn(dualDisks(16, 9), SYN5), { Carbapenemase: ["indeterminate", "Double"] });
+check("CPE: double inhibitor and cloxacillin synergy -> indeterminate", kpn(dualDisks(9, 16, 16), SYN5), { Carbapenemase: ["indeterminate", "Double"] });
+
 // ---- MRSA (chapter 7)
 const sau = (r: [string, number][], t: Record<string, string> = {}) => isolate("Staphylococcus spp.", "Staphylococcus", "aureus", r, t);
 check("MRSA: cefoxitin 21 mm -> MRSA", sau([["Cefoxitin", 21]]), { MRSA: "positive" });

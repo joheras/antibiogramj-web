@@ -300,7 +300,7 @@ function ampc(r: Results, o: Organism, tests: Record<string, string>): Phenotype
 
 type Syn = boolean | null; // null: not tested
 
-function carbapenemase(r: Results, tests: Record<string, string>, pairs: Pair[]): Phenotype | null {
+function classifyCarbapenemase(r: Results, tests: Record<string, string>, pairs: Pair[]): Phenotype | null {
   const evidence: string[] = [], notes: string[] = [];
   const mem = r.first("Meropenem", "10"), etp = r.first("Ertapenem", "10"), tem = r.first("Temocillin", "30");
   const inhib = pairs.filter((p) => p.base.antibiotic.name === "Meropenem");
@@ -364,11 +364,29 @@ function carbapenemase(r: Results, tests: Record<string, string>, pairs: Pair[])
   const classified = (status: PhenotypeStatus, result: string, ...extra: string[]): Phenotype =>
     ({ ...base, status, stage: "confirmation", evidence, notes: [...notes, ...extra, ...caveats], result });
 
+  // A result recorded by the user takes precedence; the disks remain as evidence
+  if (recorded && (recorded !== "positive" || !inhib.length) && recorded !== "negative") {
+    const type = { KPC: "KPC / class A carbapenemase", MBL: "Metallo-β-lactamase", "OXA-48": "OXA-48-like carbapenemase", positive: "Carbapenemase (type not known)" }[recorded] ?? recorded;
+    if (inhib.length) notes.push("The recorded test takes precedence over the combination disks: check that they agree.");
+    return { ...base, status: "positive", stage: "recorded", evidence, notes: [...notes, PRESUMPTIVE], result: `${type} (recorded test)` };
+  }
+  if (recorded === "negative") {
+    if (inhib.length) notes.push("The recorded test takes precedence over the combination disks: check that they agree.");
+    if (screen === "positive") notes.push("Reduced carbapenem susceptibility without carbapenemase: most often ESBL or AmpC with porin loss (sections 2.3, 2.4.2).");
+    return { ...base, status: "negative", stage: "recorded", evidence, notes, result: "Carbapenemase not detected (recorded test)" };
+  }
   if (inhib.length && cutoff === null) {
     notes.push("Choose the synergy cut-off of your combination disks (package insert) under Supplementary tests to classify the carbapenemase (section 2.4.2, Table 2).");
   } else if (inhib.length) {
-    if (dual === true && mbl !== true && apba !== true)
-      return classified("positive", "MBL + KPC (presumptive)", "Double-inhibitor tablets lack multi-centre validation; this combination is rare outside Greece (Table 2 footnote 2).");
+    // Table 2: the MBL + KPC row is the only one with double-inhibitor synergy (single inhibitors variable, cloxacillin -)
+    if (dual === true && clx === false)
+      return classified("positive", "MBL + KPC (presumptive)",
+        "Double-inhibitor tablets lack multi-centre validation; this combination is rare outside Greece (Table 2 footnote 2).",
+        ...(mbl === true || apba === true ? ["Synergy also with a single inhibitor: confirm both enzymes with molecular tests."] : []));
+    if (dual === true)
+      return classified("indeterminate", "Double-inhibitor synergy, phenotype not classifiable", clx === null
+        ? "Test meropenem + cloxacillin: MBL + KPC requires no cloxacillin synergy (Table 2)."
+        : "Synergy with the double inhibitor and cloxacillin is not in Table 2: use molecular methods.");
     if (mbl === true && apba === true)
       return classified("indeterminate", "Possible combination of carbapenemases (e.g. MBL + KPC)", "Synergy with both inhibitors: molecular testing is usually necessary (Figure 1 footnote 1).");
     if (mbl === true && clx !== true)
@@ -379,7 +397,7 @@ function carbapenemase(r: Results, tests: Record<string, string>, pairs: Pair[])
       return classified("positive", "KPC or other class A carbapenemase (presumptive)", "Boronic acid inhibits class A carbapenemases, although data beyond KPC are scarce (section 2.4.2).");
     if (apba === true && clx === null)
       return classified("indeterminate", "KPC or AmpC + porin loss", "Synergy with boronic acid only: test meropenem + cloxacillin to separate KPC (no cloxacillin synergy) from AmpC with porin loss (Table 2).");
-    if (mbl === false && apba === false && dual !== true && clx !== true) {
+    if (mbl === false && apba === false && clx !== true) {
       notes.push("No synergy with any inhibitor (Figure 1). A combination of several carbapenemases (e.g. MBL and KPC) can also give no synergy: molecular testing is usually necessary (Figure 1 footnote 1).");
       if (temHigh === true)
         return classified("positive", "OXA-48-like carbapenemase (presumptive)",
@@ -392,14 +410,6 @@ function carbapenemase(r: Results, tests: Record<string, string>, pairs: Pair[])
       missing.length ? `Test also ${missing.join(" and ")} (Table 2).` : "The synergy pattern is not in Table 2: use molecular methods.");
   }
 
-  if (recorded && recorded !== "negative") {
-    const type = { KPC: "KPC / class A carbapenemase", MBL: "Metallo-β-lactamase", "OXA-48": "OXA-48-like carbapenemase", positive: "Carbapenemase (type not known)" }[recorded] ?? recorded;
-    return { ...base, status: "positive", stage: "recorded", evidence, notes: [...notes, PRESUMPTIVE], result: `${type} (recorded test)` };
-  }
-  if (recorded === "negative") {
-    if (screen === "positive") notes.push("Reduced carbapenem susceptibility without carbapenemase: most often ESBL or AmpC with porin loss (sections 2.3, 2.4.2).");
-    return { ...base, status: "negative", stage: "recorded", evidence, notes, result: "Carbapenemase not detected (recorded test)" };
-  }
   if (screen === "positive") {
     if (!inhib.length) notes.push("Investigate carbapenemase production: combination disks (meropenem ± dipicolinic acid/EDTA, boronic acid, cloxacillin; temocillin), " +
       "colorimetric, CIM, MALDI-TOF, lateral flow or molecular tests (section 2.4).");
@@ -410,6 +420,15 @@ function carbapenemase(r: Results, tests: Record<string, string>, pairs: Pair[])
   if (screen === "borderline") return { ...base, status: "indeterminate", stage: "screening", evidence, notes, result: "Carbapenemase screening borderline (meropenem 25-27 mm)" };
   if (inhib.length) return { ...base, status: "indeterminate", stage: "confirmation", evidence, notes, result: "Carbapenemase classification pending" };
   return { ...base, status: "negative", stage: "screening", evidence, notes, result: "Carbapenemase screening negative" };
+}
+
+function carbapenemase(r: Results, tests: Record<string, string>, pairs: Pair[]): Phenotype | null {
+  const p = classifyCarbapenemase(r, tests, pairs);
+  // Recorded positive of unknown type: the disks may give the type but do not make the result negative or pending
+  if (p && tests.carbapenemase === "positive" && p.status !== "positive")
+    return { ...p, status: "positive", stage: "recorded", result: "Carbapenemase (type not known) (recorded test)",
+      notes: [`The recorded test takes precedence over the combination disks (${p.result}): check that they agree.`, ...p.notes] };
+  return p;
 }
 
 // ---- MRSA (GUIDE chapter 7)

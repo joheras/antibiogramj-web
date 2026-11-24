@@ -9,8 +9,8 @@
     "section 3.4.2 Tables 2-3 (cephalosporin +/- clavulanic acid 10 ug), and EUCAST technical guidance on the",
     "combination disk test for confirmation of ESBL (12 February 2019): cefotaxime 5 ug and ceftazidime 10 ug +/-",
     "clavulanic acid 10 ug. Inhibitor amounts of the meropenem combinations depend on the manufacturer.",
-    "Codes: catalogue labels (MRPxx in the style of Rosco tablet codes, not verified; CTXCV/CAZCV/FEPCV for the CDT disks), read by the OCR like any",
-    "catalogue code. Other manufacturers' codes can be added to seed/disk_codes.json (none added: not verified)."
+    "Codes: catalogue labels (MRPxx and CTXCV/CAZCV/FEPCV for the CDT disks), not verified against any",
+    "manufacturer. Manufacturers' codes can be added to seed/disk_codes.json (none added: not verified)."
   ],
   "drug_class": "Resistance mechanism tests",
   "disks": [

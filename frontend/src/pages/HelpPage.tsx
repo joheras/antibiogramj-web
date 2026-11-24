@@ -346,7 +346,7 @@ export default function HelpPage() {
                     <i>Providencia</i>, <i>Serratia</i>, <i>H. alvei</i>) and cefoxitin-resistant isolates need cefepime 30 µg ±
                     clavulanic acid. A double-disk synergy test is recorded under <b>Supplementary tests</b>.</li>
                   <li>Carbapenemases: meropenem 10 µg ± dipicolinic acid or EDTA (metallo-β-lactamase), ± boronic acid
-                    (KPC/class A), ± cloxacillin (AmpC + porin loss) and temocillin 30 µg (no synergy and zone &lt; 11 mm:
+                    (KPC/class A), ± cloxacillin (AmpC + porin loss), a double inhibitor (with no cloxacillin synergy: MBL + KPC) and temocillin 30 µg (no synergy and zone &lt; 11 mm:
                     OXA-48-like; ≥ 11 mm: ESBL + porin loss), as in Table 2 of the guideline. EUCAST leaves the definition
                     of synergy to the package insert of each product: choose its cut-off under <b>Supplementary tests</b>
                     (<i>Synergy cut-off of the meropenem inhibitor disks</i>); until then the increases are shown but not classified.</li>
@@ -355,7 +355,7 @@ export default function HelpPage() {
               <li><b>Indeterminate</b> means that the tests done do not allow a conclusion (a required combination disk is
                 missing, no clear synergy, synergy with several inhibitors); the panel says which test to add. Results of
                 other methods (gradient, colorimetric, immunochromatographic, molecular) are recorded under Supplementary tests and
-                take precedence.</li>
+                take precedence (a carbapenemase of unknown type takes its type from the disks when they give one).</li>
             </ul>
             <p><b>Worked example.</b> An <i>E. coli</i> with cefotaxime 5 µg 15 mm and ceftazidime 10 µg 18 mm is <i>ESBL screening
               positive</i>. Adding cefotaxime-clavulanic acid 5-10 µg (24 mm) and ceftazidime-clavulanic acid 10-10 µg (20 mm)

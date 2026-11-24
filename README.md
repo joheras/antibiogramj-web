@@ -168,17 +168,18 @@ confirmed (genotypically for carbapenemases and whenever unclear).
 |---|---|---|
 | ESBL, Enterobacterales (chapter 3) | cefotaxime 5 µg <21, ceftriaxone 30 µg <23, ceftazidime 10 µg <22, cefpodoxime 10 µg <21 mm (Table 1) | combination disks ± clavulanic acid 10 µg: increase ≥5 mm (3.4.2 A; CDT 2019). Cefotaxime 5 + ceftazidime 10 µg (group 1); cefepime 30 µg for species with chromosomal AmpC and cefoxitin <19 mm (3.4.1 B, 3.4.3); DDST recorded by the user. False positives (K1 of *K. oxytoca*, ...) and masking by MBL/KPC are noted |
 | AmpC, *E. coli*, *K. pneumoniae*, *P. mirabilis*, *Salmonella*, *Shigella* (chapter 4) | cefoxitin 30 µg <19 mm with cefotaxime/ceftazidime R; without cefoxitin, cefepime S (less specific) (4.4) | cloxacillin/boronic acid synergy recorded by the user; *E. coli*/*Shigella* need PCR to tell acquired from chromosomal AmpC |
-| Carbapenemases, Enterobacterales (chapter 2) | meropenem 10 µg <28 mm; 25-27 mm only with piperacillin-tazobactam and/or temocillin R; ertapenem <25 mm as an alternative (2.4.1, Table 1) | meropenem 10 µg ± dipicolinic acid/EDTA (MBL), boronic acid (KPC), both (MBL + KPC), cloxacillin (AmpC + porin loss); no synergy + temocillin 30 µg <11 mm → OXA-48-like, ≥11 mm → ESBL + porin loss (2.4.2, Figure 1, Table 2). The synergy cut-off comes from the package insert and is chosen per antibiogram (EUCAST does not define it) |
+| Carbapenemases, Enterobacterales (chapter 2) | meropenem 10 µg <28 mm; 25-27 mm only with piperacillin-tazobactam and/or temocillin R; ertapenem <25 mm as an alternative (2.4.1, Table 1) | meropenem 10 µg ± dipicolinic acid/EDTA (MBL), boronic acid (KPC), double inhibitor without cloxacillin synergy (MBL + KPC, whatever the single inhibitors), cloxacillin (AmpC + porin loss); no synergy + temocillin 30 µg <11 mm → OXA-48-like, ≥11 mm → ESBL + porin loss (2.4.2, Figure 1, Table 2). The synergy cut-off comes from the package insert and is chosen per antibiogram (EUCAST does not define it) |
 | MRSA, *S. aureus* (chapter 7) | cefoxitin 30 µg <22 mm (7.4.1 B) | mecA/mecC or PBP2a recorded by the user |
 
 The combination disks are appended to the catalogue (`backend/seed/supplementary_disks.json`, class *Resistance
 mechanism tests*, ids 89-96, no breakpoints) after the seed standards, so existing ids never change; their codes
-(e.g. `CTXCV`, `MRPDP`) are in the OCR lexicon. Each one is paired with its plain disk of the same content on the
+(e.g. `CTXCV`, `MRPDP`) are catalogue labels in the OCR lexicon, not verified against manufacturers' disks or photos. Each one is paired with its plain disk of the same content on the
 same plate, or on another plate of the antibiogram. Outcomes are *detected*, *not detected*, *screening positive*
 (confirmation needed) or *indeterminate* (the panel names the missing test). The results of other methods are
-recorded under Supplementary tests and take precedence. The phenotypes are computed from the stored measurements
+recorded under Supplementary tests and take precedence. A carbapenemase recorded as positive of
+unknown type takes its type from the disks when they give one. The phenotypes are computed from the stored measurements
 and supplementary tests, so backups and Drive copies carry them without format changes.
-`npm run test:phenotypes` runs 59 synthetic cases (positive, negative and indeterminate outcomes of each phenotype).
+`npm run test:phenotypes` runs synthetic cases (positive, negative and indeterminate outcomes of each phenotype).
 
 ### Algorithms
 
